@@ -1,4 +1,4 @@
 # min     hour    day     month   dayweek command
-  0       */2     *       *       *       autoval_ExpressCosmics.sh > autoval_ExpressCosmics.log
-  30      */2     *       *       *       autoval_ExpressCosmics_merge.sh > autoval_ExpressCosmics_merge.log
+  0       */2     *       *       *       /afs/cern.ch/cms/CAF/CMSCOMM/COMM_CSC/CSCVAL/AUTOVAL/CMSSW_7_3_5/src/CSCValidationRunning/AutoValidation/autoval_ExpressCosmics.sh > /afs/cern.ch/cms/CAF/CMSCOMM/COMM_CSC/CSCVAL/AUTOVAL/CMSSW_7_3_5/src/CSCValidationRunning/AutoValidation/autoval_ExpressCosmics.log
+  30      */2     *       *       *       /afs/cern.ch/cms/CAF/CMSCOMM/COMM_CSC/CSCVAL/AUTOVAL/CMSSW_7_3_5/src/CSCValidationRunning/AutoValidation/autoval_ExpressCosmics_merge.sh > /afs/cern.ch/cms/CAF/CMSCOMM/COMM_CSC/CSCVAL/AUTOVAL/CMSSW_7_3_5/src/CSCValidationRunning/AutoValidation/autoval_ExpressCosmics_merge.log
 
