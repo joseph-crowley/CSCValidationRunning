@@ -28,7 +28,7 @@ To run a cron job on afs you must use acrontab. The current version crontab scri
 [AutoValidation/autoval.cron](AutoValidation/autoval.cron). Make certain you consult with others to make 
 sure we don't have multiple cron jobs running (Devin Taylor and Benjamin Knapp).
 ```
-acrontab autoval.cron
+acrontab <autoval.cron
 acrontab -l
 ```
 
