@@ -387,7 +387,7 @@ def process_dataset(dataset,globalTag,**kwargs):
         # query DAS and get list of runs
         newruns = subprocess.Popen("./das_client.py --query='run dataset="+dataset+"' --limit=0", shell=True, stdout=pipe).communicate()[0].splitlines()
         for rn in newruns:
-            if int(rn)<237956: continue # start from here
+            if int(rn)<238445: continue # start of craft
             if rn in procRuns: continue # already processed
             with open(procFile, 'a') as file:
                 file.write(rn+'\n')
