@@ -328,15 +328,14 @@ def process_output(dataset,globalTag,**kwargs):
         print("Waiting on run %s" % run)
         while "Job <"+run+"merge> is not found" not in subprocess.Popen("unbuffer bjobs -J "+run+"merge", shell=True,stdout=pipe).communicate()[0].splitlines():
             time.sleep(20)
-            print('.'),
+            print('.')
         else:
             print('.')
             print("Run %s merged" % run) 
             subprocess.check_call('cmsStage -f /store/group/dpg_csc/comm_csc/cscval/batch_output/%s/run%s_%s/%s %s' % (stream, run, eventContent, tpeOut, tpeOut), shell=True)
             subprocess.check_call('cmsStage -f /store/group/dpg_csc/comm_csc/cscval/batch_output/%s/run%s_%s/%s %s' % (stream, run, eventContent, valOut, valOut), shell=True)
             os.system("./secondStep.py")
-            subprocess.check_call('rm %s' %tpeOut)
-            subprocess.check_call('rm %s' %valOut)
+            subprocess.call('rm *.root', shell=True)
 
         os.chdir('../')
         
