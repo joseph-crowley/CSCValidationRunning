@@ -213,7 +213,7 @@ def run_validation(dataset,globalTag,run,stream,eventContent):
             sh.close()
 
             print "Submitting job %i of %i" % (j+1, numJobs)
-            subprocess.check_call("bsub -q 8nh -J %s_%i < run_%i.sh" % (run, j, j), shell=True)
+            subprocess.check_call("bsub -q 8nh -J %s_%s_%i < run_%i.sh" % (run, stream, j, j), shell=True)
 
     os.chdir('../')
 
@@ -239,7 +239,7 @@ def process_output(dataset,globalTag,**kwargs):
         run = runStr[3:]
 
         # some job still running. skip.
-        if "Job <"+run+"*> is not found" not in subprocess.Popen("unbuffer bjobs -J "+run+"*", shell=True,stdout=pipe).communicate()[0].splitlines():
+        if "Job <"+run+"*> is not found" not in subprocess.Popen("unbuffer bjobs -J %s_%s*" % (run,stream), shell=True,stdout=pipe).communicate()[0].splitlines():
             print 'Run %s not finished' % run
             continue
 
@@ -308,7 +308,7 @@ def process_output(dataset,globalTag,**kwargs):
         sh.write('cmsStage -f %s /store/group/dpg_csc/comm_csc/cscval/batch_output/%s/run%s_%s/%s\n' % (tpeOut, stream, run, eventContent, tpeOut))
         sh.write('cmsStage -f %s /store/group/dpg_csc/comm_csc/cscval/batch_output/%s/run%s_%s/%s\n' % (valOut, stream, run, eventContent, valOut))
         sh.close()
-        subprocess.check_call("bsub -q 8nh -J "+run+"merge"+" < merge.sh", shell=True)
+        subprocess.check_call("bsub -q 8nh -J %s_%smerge < merge.sh" % (run,stream), shell=True)
 
         runsToPlot += [[run,job]]
 
@@ -326,7 +326,7 @@ def process_output(dataset,globalTag,**kwargs):
 
         # wait for job to finish then copy over
         print("Waiting on run %s" % run)
-        while "Job <"+run+"merge> is not found" not in subprocess.Popen("unbuffer bjobs -J "+run+"merge", shell=True,stdout=pipe).communicate()[0].splitlines():
+        while "Job <"+run+"merge> is not found" not in subprocess.Popen("unbuffer bjobs -J %s_%smerge" % (run,stream), shell=True,stdout=pipe).communicate()[0].splitlines():
             time.sleep(20)
             print('.')
         else:
