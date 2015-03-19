@@ -335,6 +335,8 @@ def process_output(dataset,globalTag,**kwargs):
             subprocess.check_call('cmsStage -f /store/group/dpg_csc/comm_csc/cscval/batch_output/%s/run%s_%s/%s %s' % (stream, run, eventContent, tpeOut, tpeOut), shell=True)
             subprocess.check_call('cmsStage -f /store/group/dpg_csc/comm_csc/cscval/batch_output/%s/run%s_%s/%s %s' % (stream, run, eventContent, valOut, valOut), shell=True)
             os.system("./secondStep.py")
+            subprocess.check_call('rm %s' %tpeOut)
+            subprocess.check_call('rm %s' %valOut)
 
         os.chdir('../')
         

@@ -1,4 +1,4 @@
-!/bin/bash
+#!/bin/bash
 aklog
 
 source /afs/cern.ch/cms/cmsset_default.sh

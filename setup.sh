@@ -13,7 +13,7 @@ echo "Detected CMSSW version: $MAJOR_VERSION $MINOR_VERSION"
 
 pushd $CMSSW_BASE/src
 
-ln -s RecoLocalMuon CSCValidationRunning/RecoLocalMuon
+ln -s CSCValidationRunning/RecoLocalMuon RecoLocalMuon
 
 scram b -j 8
 

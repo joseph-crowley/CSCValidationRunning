@@ -52,3 +52,9 @@ docs/_build/
 
 # PyBuilder
 target/
+
+# Output Directories
+AutoValidation/ExpressCosmics/
+AutoValidation/Cosmics/
+AutoValidation/SingleMu/
+AutoValidation/DoubleMu/
