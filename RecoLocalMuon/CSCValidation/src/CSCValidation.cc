@@ -100,7 +100,7 @@ CSCValidation::CSCValidation(const ParameterSet& pset){
   hRHEff = new TH1F("hRHEff","recHit Efficiency",20,0.5,20.5);
 
   const int nChambers = 36; 
-  const int nTypes = 18;
+  const int nTypes = 20;
   float nCH_min = 0.5;
   float nCh_max = float(nChambers) + 0.5;
   float nT_min = 0.5;
@@ -1496,6 +1496,7 @@ void CSCValidation::doEfficiencies(edm::Handle<CSCWireDigiCollection> wires, edm
   chamberTypes["ME3/1"] = 6.5;
   chamberTypes["ME3/2"] = 7.5;
   chamberTypes["ME4/1"] = 8.5;
+  chamberTypes["ME4/2"] = 9.5;
 
   if(theSeg.size()){
     std::map <int , GlobalPoint> extrapolatedPoint;
@@ -1566,7 +1567,7 @@ void CSCValidation::doEfficiencies(edm::Handle<CSCWireDigiCollection> wires, edm
 	  if(cscchamberCenter.z()<0){
 	    verticalScale = - verticalScale;
 	  } 
-	  verticalScale +=9.5;
+	  verticalScale +=10.5;
 	  hSensitiveAreaEvt->Fill(float(cscchamber->id().chamber()),verticalScale);
 	  if(nRHLayers>1){// this chamber contains a reliable signal
 	    //chamberTypes[cscchamber->specs()->chamberTypeName()];
