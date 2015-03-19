@@ -188,6 +188,8 @@ def run_validation(dataset,globalTag,run,stream,eventContent):
             outFileName='valHists_run%s_%s_%i.root' % (run, stream, j)
 
             fileListString = ''
+            numLumis = 0
+            numEvents = 0
             for f in input_files[j*10:j*10+10]:
                 if fileListString: fileListString += ',\n'
                 fileListString += "    '%s'" % f
@@ -211,7 +213,7 @@ def run_validation(dataset,globalTag,run,stream,eventContent):
             sh.close()
 
             print "Submitting job %i of %i" % (j+1, numJobs)
-            subprocess.check_call("bsub -q 1nh -J %s_%i < run_%i.sh" % (run, j, j), shell=True)
+            subprocess.check_call("bsub -q 8nh -J %s_%i < run_%i.sh" % (run, j, j), shell=True)
 
     os.chdir('../')
 
@@ -226,6 +228,7 @@ def process_output(dataset,globalTag,**kwargs):
 
     runCrab = False
 
+    runsToPlot = []
     # get available runs in eos
     for job in subprocess.Popen('/afs/cern.ch/project/eos/installation/0.3.84-aquamarine/bin/eos.select ls %s/%s' % (CRAB_PATH if runCrab else BATCH_PATH,stream), shell=True,stdout=pipe).communicate()[0].splitlines():
         # go to working area
@@ -234,6 +237,12 @@ def process_output(dataset,globalTag,**kwargs):
         else: 
             [runStr,runEventContent] = job.split('_')
         run = runStr[3:]
+
+        # some job still running. skip.
+        if "Job <"+run+"*> is not found" not in subprocess.Popen("unbuffer bjobs -J "+run+"*", shell=True,stdout=pipe).communicate()[0].splitlines():
+            print 'Run %s not finished' % run
+            continue
+
         rundir = 'run_%s' % run
         python_mkdir(rundir)
         os.chdir(rundir)
@@ -265,7 +274,9 @@ def process_output(dataset,globalTag,**kwargs):
         with open(fname,'r') as file:
             oldProcessedString = file.readline().rstrip()
 
-        if oldProcessedString == processedString: continue
+        if oldProcessedString == processedString: 
+            os.chdir('../')
+            continue
 
         print "Processing %s run %s" % (stream, run)
 
@@ -297,16 +308,33 @@ def process_output(dataset,globalTag,**kwargs):
         sh.write('cmsStage -f %s /store/group/dpg_csc/comm_csc/cscval/batch_output/%s/run%s_%s/%s\n' % (tpeOut, stream, run, eventContent, tpeOut))
         sh.write('cmsStage -f %s /store/group/dpg_csc/comm_csc/cscval/batch_output/%s/run%s_%s/%s\n' % (valOut, stream, run, eventContent, valOut))
         sh.close()
-        subprocess.check_call("bsub -q 1nh -J "+run+"merge"+" < merge.sh", shell=True)
+        subprocess.check_call("bsub -q 8nh -J "+run+"merge"+" < merge.sh", shell=True)
 
+        runsToPlot += [[run,job]]
+
+        os.chdir('../')
+
+    # now plot the merges as they finish
+    for run,job in runsToPlot:
+        # go to working area
+        rundir = 'run_%s' % run
+        python_mkdir(rundir)
+        os.chdir(rundir)
+
+        tpeOut = 'TPEHists.root'
+        valOut = 'valHists_run%s_%s.root' % (run, stream)
+
+        # wait for job to finish then copy over
+        print("Waiting on run %s" % run)
         while "Job <"+run+"merge> is not found" not in subprocess.Popen("unbuffer bjobs -J "+run+"merge", shell=True,stdout=pipe).communicate()[0].splitlines():
-            time.sleep(30)
-            print("Job not finished")
+            time.sleep(20)
+            print('.'),
         else:
+            print('.')
+            print("Run %s merged" % run) 
             subprocess.check_call('cmsStage -f /store/group/dpg_csc/comm_csc/cscval/batch_output/%s/run%s_%s/%s %s' % (stream, run, eventContent, tpeOut, tpeOut), shell=True)
             subprocess.check_call('cmsStage -f /store/group/dpg_csc/comm_csc/cscval/batch_output/%s/run%s_%s/%s %s' % (stream, run, eventContent, valOut, valOut), shell=True)
             os.system("./secondStep.py")
-
 
         os.chdir('../')
         
