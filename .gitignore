@@ -53,6 +53,8 @@ docs/_build/
 # PyBuilder
 target/
 
+*.err
+
 # Output Directories
 AutoValidation/ExpressCosmics/
 AutoValidation/Cosmics/
