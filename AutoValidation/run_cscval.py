@@ -181,7 +181,7 @@ def run_validation(dataset,globalTag,run,stream,eventContent):
         for n in subprocess.Popen("./das_client.py --query='file dataset="+dataset+" run="+run+" | grep file.name' --limit=0", shell=True,stdout=pipe).communicate()[0].splitlines():
                 #s = 'root://cms-xrd-global.cern.ch/'+n
                 input_files.append(n)
-        nf = 5
+        nf = 2
         numJobs = int(math.ceil(len(input_files)/float(nf)))
         for j in range(numJobs):
             cfgFileName='validation_%s_%i_cfg.py' % (run, j)
