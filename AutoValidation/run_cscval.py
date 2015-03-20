@@ -299,14 +299,14 @@ def process_output(dataset,globalTag,**kwargs):
             for tpe in tpeFiles:
                 tpeMergeString += ' root://eoscms.cern.ch/%s/%s' % (fileDir, tpe)
             sh.write(tpeMergeString+" \n")
+            sh.write('cmsStage -f %s /store/group/dpg_csc/comm_csc/cscval/batch_output/%s/run%s_%s/%s\n' % (tpeOut, stream, run, eventContent, tpeOut))
         if valFiles:
             print "Merging valHists"
             valMergeString = 'hadd -f %s' % valOut
             for val in valFiles:
                 valMergeString += ' root://eoscms.cern.ch/%s/%s' % (fileDir, val)
             sh.write(valMergeString+" \n")
-        sh.write('cmsStage -f %s /store/group/dpg_csc/comm_csc/cscval/batch_output/%s/run%s_%s/%s\n' % (tpeOut, stream, run, eventContent, tpeOut))
-        sh.write('cmsStage -f %s /store/group/dpg_csc/comm_csc/cscval/batch_output/%s/run%s_%s/%s\n' % (valOut, stream, run, eventContent, valOut))
+            sh.write('cmsStage -f %s /store/group/dpg_csc/comm_csc/cscval/batch_output/%s/run%s_%s/%s\n' % (valOut, stream, run, eventContent, valOut))
         sh.close()
         subprocess.check_call("bsub -q 1nh -J %s_%smerge < merge.sh" % (run,stream), shell=True)
 
