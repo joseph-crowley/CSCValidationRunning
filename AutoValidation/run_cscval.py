@@ -398,6 +398,7 @@ def process_dataset(dataset,globalTag,**kwargs):
         newruns = subprocess.Popen("./das_client.py --query='run dataset="+dataset+"' --limit=0", shell=True, stdout=pipe).communicate()[0].splitlines()
         for rn in newruns:
             if int(rn)<238445: continue # start of craft
+            print 'Checking %s' %rn
             num = subprocess.Popen("./das_client.py --limit=0 --query='summary dataset=%s run=%s | grep summary.nevents'" % (dataset,rn), shell=True,stdout=pipe).communicate()[0].rstrip()
             procString = '%s_%s' % (rn, num)
             if procString in procRuns: continue # already processed
