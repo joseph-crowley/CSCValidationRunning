@@ -385,14 +385,14 @@ def process_dataset(dataset,globalTag,**kwargs):
             with open(procFile, 'a') as file:
                 file.write(procString+'\n')
             # create a cookie with kinit and check is CSC's were in for this run
-            subprocess.call('curl -L --cookie ~/private/ssocookie.txt --cookie-jar ~/private/ssocookie.txt "https://cmswbm.web.cern.ch/cmswbm/cmsdb/servlet/RunSummary?DB=default&SUBMIT_TOP=SubmitQuery&RUN_BEGIN=%s&RUN_END=%s&STATUS_CSC=on&FORMAT=XML" -o runsummary.xml' % (str(run),str(run)), shell=True)
-            numLines = 0
-            with open('runsummary.xml', 'r') as file:
-                for line in file: numLines += 1
-            if numLines < 5:
-                print 'CSC\'s not in run'
-            else:
-                run_validation(dataset,globalTag,str(run),stream,eventContent)
+            #subprocess.call('curl -L --cookie ~/private/ssocookie.txt --cookie-jar ~/private/ssocookie.txt "https://cmswbm.web.cern.ch/cmswbm/cmsdb/servlet/RunSummary?DB=default&SUBMIT_TOP=SubmitQuery&RUN_BEGIN=%s&RUN_END=%s&STATUS_CSC=on&FORMAT=XML" -o runsummary.xml' % (str(run),str(run)), shell=True)
+            #numLines = 0
+            #with open('runsummary.xml', 'r') as file:
+            #    for line in file: numLines += 1
+            #if numLines < 5:
+            #    print 'CSC\'s not in run'
+            #else:
+            run_validation(dataset,globalTag,str(run),stream,eventContent)
     else:
         # query DAS and get list of runs
         newruns = subprocess.Popen("./das_client.py --query='run dataset="+dataset+"' --limit=0", shell=True, stdout=pipe).communicate()[0].splitlines()
@@ -407,13 +407,13 @@ def process_dataset(dataset,globalTag,**kwargs):
             if int(num) > 50000: # only care about long runs
                 print "Processing run %s" % rn
                 # create a cookie with kinit and check is CSC's were in for this run
-                subprocess.call('curl -L --cookie ~/private/ssocookie.txt --cookie-jar ~/private/ssocookie.txt "https://cmswbm.web.cern.ch/cmswbm/cmsdb/servlet/RunSummary?DB=default&SUBMIT_TOP=SubmitQuery&RUN_BEGIN=%s&RUN_END=%s&STATUS_CSC=on&FORMAT=XML" -o runsummary.xml' % (rn,rn), shell=True)
-                numLines = 0
-                with open('runsummary.xml', 'r') as file:
-                    for line in file: numLines += 1
-                if numLines < 5:
-                    print 'CSC\'s not in run'
-                    continue
+                #subprocess.call('curl -L --cookie ~/private/ssocookie.txt --cookie-jar ~/private/ssocookie.txt "https://cmswbm.web.cern.ch/cmswbm/cmsdb/servlet/RunSummary?DB=default&SUBMIT_TOP=SubmitQuery&RUN_BEGIN=%s&RUN_END=%s&STATUS_CSC=on&FORMAT=XML" -o runsummary.xml' % (rn,rn), shell=True)
+                #numLines = 0
+                #with open('runsummary.xml', 'r') as file:
+                #    for line in file: numLines += 1
+                #if numLines < 5:
+                #    print 'CSC\'s not in run'
+                #    continue
                 run_validation(dataset,globalTag,str(rn),stream,eventContent)
 
     os.chdir('../')
