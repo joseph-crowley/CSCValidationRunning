@@ -385,7 +385,7 @@ def process_dataset(dataset,globalTag,**kwargs):
             with open(procFile, 'a') as file:
                 file.write(procString+'\n')
             # create a cookie with kinit and check is CSC's were in for this run
-            subprocess.call('curl -L --cookie ~/private/ssocookie.txt --cookie-jar ~/private/socookie.txt "https://cmswbm.web.cern.ch/cmswbm/cmsdb/servlet/RunSummary?DB=default&SUBMIT_TOP=SubmitQuery&RUN_BEGIN=%s&RUN_END=%s&STATUS_CSC=on&FORMAT=XML" -o runsummary.xml' % (str(run),str(run)), shell=True)
+            subprocess.call('curl -L --cookie ~/private/ssocookie.txt --cookie-jar ~/private/ssocookie.txt "https://cmswbm.web.cern.ch/cmswbm/cmsdb/servlet/RunSummary?DB=default&SUBMIT_TOP=SubmitQuery&RUN_BEGIN=%s&RUN_END=%s&STATUS_CSC=on&FORMAT=XML" -o runsummary.xml' % (str(run),str(run)), shell=True)
             numLines = 0
             with open('runsummary.xml', 'r') as file:
                 for line in file: numLines += 1
