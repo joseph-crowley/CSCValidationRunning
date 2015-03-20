@@ -239,8 +239,8 @@ def process_output(dataset,globalTag,**kwargs):
         run = runStr[3:]
 
         # some job still running. skip.
-        if "Job <"+run+"*> is not found" not in subprocess.Popen("unbuffer bjobs -J %s_%s*" % (run,stream), shell=True,stdout=pipe).communicate()[0].splitlines():
-            print 'Run %s not finished' % run
+        if "Job <%s_%s*> is not found" % (run,stream) not in subprocess.Popen("unbuffer bjobs -J %s_%s*" % (run,stream), shell=True,stdout=pipe).communicate()[0].splitlines():
+            print 'Run %s %s not finished' % (run,stream)
             continue
 
         rundir = 'run_%s' % run
