@@ -326,7 +326,7 @@ def process_output(dataset,globalTag,**kwargs):
 
         # wait for job to finish then copy over
         print("Waiting on run %s" % run)
-        while "Job <"+run+"merge> is not found" not in subprocess.Popen("unbuffer bjobs -J %s_%smerge" % (run,stream), shell=True,stdout=pipe).communicate()[0].splitlines():
+        while "Job <%s_%smerge> is not found" % (run,stream) not in subprocess.Popen("unbuffer bjobs -J %s_%smerge" % (run,stream), shell=True,stdout=pipe).communicate()[0].splitlines():
             time.sleep(20)
             print('.')
         else:
