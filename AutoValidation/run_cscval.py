@@ -181,8 +181,8 @@ def run_validation(dataset,globalTag,run,stream,eventContent):
         for n in subprocess.Popen("./das_client.py --query='file dataset="+dataset+" run="+run+" | grep file.name' --limit=0", shell=True,stdout=pipe).communicate()[0].splitlines():
                 #s = 'root://cms-xrd-global.cern.ch/'+n
                 input_files.append(n)
-        numFilesPerJob = float(10)
-        numJobs = int(math.ceil(len(input_files)/numFilesPerJob))
+        nf = 5
+        numJobs = int(math.ceil(len(input_files)/float(nf)))
         for j in range(numJobs):
             cfgFileName='validation_%s_%i_cfg.py' % (run, j)
             outFileName='valHists_run%s_%s_%i.root' % (run, stream, j)
@@ -190,7 +190,7 @@ def run_validation(dataset,globalTag,run,stream,eventContent):
             fileListString = ''
             numLumis = 0
             numEvents = 0
-            for f in input_files[j*10:j*10+10]:
+            for f in input_files[j*nf:j*nf+nf]:
                 if fileListString: fileListString += ',\n'
                 fileListString += "    '%s'" % f
 
@@ -208,12 +208,12 @@ def run_validation(dataset,globalTag,run,stream,eventContent):
             sh.write("eval `scramv1 runtime -sh` \n")
             sh.write("cd - \n")
             sh.write('cmsRun %s/%s\n' % (rundir, cfgFileName))
-            sh.write('cmsStage %s /store/group/dpg_csc/comm_csc/cscval/batch_output/%s/run%s_%s/%s\n' % (outFileName, stream, run, eventContent, outFileName))
-            sh.write('cmsStage TPEHists_%i.root /store/group/dpg_csc/comm_csc/cscval/batch_output/%s/run%s_%s/TPEHists_%i.root\n' % (j, stream, run, eventContent, j))
+            sh.write('cmsStage -f %s /store/group/dpg_csc/comm_csc/cscval/batch_output/%s/run%s_%s/%s\n' % (outFileName, stream, run, eventContent, outFileName))
+            sh.write('cmsStage -f TPEHists_%i.root /store/group/dpg_csc/comm_csc/cscval/batch_output/%s/run%s_%s/TPEHists_%i.root\n' % (j, stream, run, eventContent, j))
             sh.close()
 
             print "Submitting job %i of %i" % (j+1, numJobs)
-            subprocess.check_call("bsub -q 8nh -J %s_%s_%i < run_%i.sh" % (run, stream, j, j), shell=True)
+            subprocess.check_call("bsub -q 1nh -J %s_%s_%i < run_%i.sh" % (run, stream, j, j), shell=True)
 
     os.chdir('../')
 
@@ -221,7 +221,7 @@ def run_validation(dataset,globalTag,run,stream,eventContent):
 
 def process_output(dataset,globalTag,**kwargs):
     '''
-    Script to retrieve the crab output from EOS, merge the histograms, and create the images.
+    Script to retrieve the output from EOS, merge the histograms, and create the images.
     '''
     [filler, stream, version, eventContent] = dataset.split('/')
     os.chdir(stream)
@@ -374,34 +374,30 @@ def process_dataset(dataset,globalTag,**kwargs):
     open(procFile, 'a').close()
     with open(procFile, 'r') as file:
         procRuns = file.readlines()
-    procRuns = [x.rstrip() for x in procRuns]
+    procRuns = [x.rstrip() for x in procRuns] # format: RUNUM_NUMEVTS
 
     # run each individual validation
     if run:
-        if str(run) not in procRuns:
+        num = subprocess.Popen("./das_client.py --limit=0 --query='summary dataset=%s run=%s | grep summary.nevents'" % (dataset,str(run)), shell=True,stdout=pipe).communicate()[0].rstrip()
+        procString = '%s_%s' % (str(run),num)
+        if procString not in procRuns:
             print "Processing run %s" % str(run)
             with open(procFile, 'a') as file:
-                file.write(str(run)+'\n')
+                file.write(procString+'\n')
             run_validation(dataset,globalTag,str(run),stream,eventContent)
     else:
         # query DAS and get list of runs
         newruns = subprocess.Popen("./das_client.py --query='run dataset="+dataset+"' --limit=0", shell=True, stdout=pipe).communicate()[0].splitlines()
         for rn in newruns:
             if int(rn)<238445: continue # start of craft
-            if rn in procRuns: continue # already processed
+            num = subprocess.Popen("./das_client.py --limit=0 --query='summary dataset=%s run=%s | grep summary.nevents'" % (dataset,rn), shell=True,stdout=pipe).communicate()[0].rstrip()
+            procString = '%s_%s' % (rn, num)
+            if procString in procRuns: continue # already processed
             with open(procFile, 'a') as file:
-                file.write(rn+'\n')
-            processRun = True
-            if 'run_'+rn in os.listdir('.'):
-                processRun = False # we already created the crab job
-            if 'run'+rn in os.listdir(RESULT_PATH):
-                if stream in os.listdir('%s/%s' %(RESULT_PATH,'run'+rn)):
-                    processRun = False # someone else already processed this stream
-            if processRun:
+                file.write(procString+'\n')
+            if int(num) > 50000: # only care about long runs
                 print "Processing run %s" % rn
-                num = subprocess.Popen("./das_client.py --limit=0 --query='summary dataset=%s run=%s | grep summary.nevents'" % (dataset,rn), shell=True,stdout=pipe).communicate()[0].rstrip()
-                if int(num) > 50000: # only care about long runs
-                    run_validation(dataset,globalTag,str(rn),stream,eventContent)
+                run_validation(dataset,globalTag,str(rn),stream,eventContent)
 
     os.chdir('../')
 
