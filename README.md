@@ -40,15 +40,14 @@ For documentation on the script run:
 ./run_cscval.py -h
 ```
 
-This script can run over multiple event content types (FEVT and RAW(TODO)). You must simply pass it the 
+This script can run over multiple event content types (FEVT and RAW). You must simply pass it the 
 dataset name and global tag. The script can be run in single run mode (`-rn RUNNUMBER`) or all runs mode. 
-It will then check whether a run has been processed yet and submit the job to the CAF LSF batch queues.
-After the job is finished, the outputs are stored on EOS. You can then produce the images and pass the 
-output to the website with the `--retrieveOutput` option.
+It will then check whether a run has been processed yet and whether CSCs were in the run and submit the 
+job to the CAF LSF batch queues. After the job is finished, the outputs are stored on EOS. You can then 
+produce the images and pass the output to the website with the `--retrieveOutput` option.
 
 The script checks the local folder for what runs have been processed: `AutoValidation/STREAMNAME`. The 
-`STREAMNAME` option can include `ExpressCosmics`, `Cosmics`, `SingleMu`, and `DoubleMu`. (NOTE: if you move
-to a new working directory, you must copy over these directories.)
+`STREAMNAME` option can include `ExpressCosmics`, `Cosmics`, `SingleMu`, and `DoubleMu`.
 
 ## Templates
 
