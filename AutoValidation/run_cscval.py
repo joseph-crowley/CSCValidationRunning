@@ -332,9 +332,9 @@ def process_output(dataset,globalTag,**kwargs):
         else:
             print('.')
             print("Run %s merged" % run) 
-            subprocess.check_call('cmsStage -f /store/group/dpg_csc/comm_csc/cscval/batch_output/%s/run%s_%s/%s %s' % (stream, run, eventContent, tpeOut, tpeOut), shell=True)
-            subprocess.check_call('cmsStage -f /store/group/dpg_csc/comm_csc/cscval/batch_output/%s/run%s_%s/%s %s' % (stream, run, eventContent, valOut, valOut), shell=True)
-            os.system("./secondStep.py")
+            subprocess.call('cmsStage -f /store/group/dpg_csc/comm_csc/cscval/batch_output/%s/run%s_%s/%s %s' % (stream, run, eventContent, tpeOut, tpeOut), shell=True)
+            valRet = subprocess.call('cmsStage -f /store/group/dpg_csc/comm_csc/cscval/batch_output/%s/run%s_%s/%s %s' % (stream, run, eventContent, valOut, valOut), shell=True)
+            if not valRet: os.system("./secondStep.py")
             subprocess.call('rm *.root', shell=True)
 
         os.chdir('../')
