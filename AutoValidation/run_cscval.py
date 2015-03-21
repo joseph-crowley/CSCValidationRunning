@@ -369,7 +369,7 @@ def build_runlist():
     os.system('bash /afs/cern.ch/cms/CAF/CMSCOMM/COMM_CSC/CSCVAL/results/scripts/generateRunList.sh > runlist.json; mv runlist.json /afs/cern.ch/cms/CAF/CMSCOMM/COMM_CSC/CSCVAL/results/js/')
     # create last run json
     Time=time.strftime("%Y/%m/%d %H:%M:%S", time.localtime())
-    with open('lastrun.json') as file:
+    with open('lastrun.json','w') as file:
         file.write('var lastrun = {\n  "lastrun" : "%s"\n}\n' % Time)
     os.system('mv lastrun.json /afs/cern.ch/cms/CAF/CMSCOMM/COMM_CSC/CSCVAL/results/js/')
     return 0
