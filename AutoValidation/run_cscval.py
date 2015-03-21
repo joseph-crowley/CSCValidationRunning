@@ -187,6 +187,23 @@ def run_validation(dataset,globalTag,run,stream,eventContent):
             cfgFileName='validation_%s_%i_cfg.py' % (run, j)
             outFileName='valHists_run%s_%s_%i.root' % (run, stream, j)
 
+            # check files already run over
+            fname = 'processedFiles.txt'
+            open(fname, 'a').close()
+            with open(fname, 'r') as file:
+                procFiles = file.readlines()
+            procFiles = [x.rstrip() for x in procFiles]
+
+            doJob = False
+            for f in input_files[j*nf:j*nf+nf]:
+                if f not in procFiles:
+                    doJob = True
+                    with open(fname, 'a') as file:
+                        file.write('%s\n'%f)
+
+            if not doJob: continue
+
+            # create the config file
             fileListString = ''
             numLumis = 0
             numEvents = 0
@@ -223,6 +240,7 @@ def process_output(dataset,globalTag,**kwargs):
     '''
     Script to retrieve the output from EOS, merge the histograms, and create the images.
     '''
+    force = kwargs.pop('force',False)
     [filler, stream, version, eventContent] = dataset.split('/')
     os.chdir(stream)
 
@@ -274,9 +292,10 @@ def process_output(dataset,globalTag,**kwargs):
         with open(fname,'r') as file:
             oldProcessedString = file.readline().rstrip()
 
-        if oldProcessedString == processedString: 
-            os.chdir('../')
-            continue
+        if not force:
+            if oldProcessedString == processedString: 
+                os.chdir('../')
+                continue
 
         print "Processing %s run %s" % (stream, run)
 
@@ -384,14 +403,6 @@ def process_dataset(dataset,globalTag,**kwargs):
             print "Processing run %s" % str(run)
             with open(procFile, 'a') as file:
                 file.write(procString+'\n')
-            # create a cookie with kinit and check is CSC's were in for this run
-            #subprocess.call('curl -L --cookie ~/private/ssocookie.txt --cookie-jar ~/private/ssocookie.txt "https://cmswbm.web.cern.ch/cmswbm/cmsdb/servlet/RunSummary?DB=default&SUBMIT_TOP=SubmitQuery&RUN_BEGIN=%s&RUN_END=%s&STATUS_CSC=on&FORMAT=XML" -o runsummary.xml' % (str(run),str(run)), shell=True)
-            #numLines = 0
-            #with open('runsummary.xml', 'r') as file:
-            #    for line in file: numLines += 1
-            #if numLines < 5:
-            #    print 'CSC\'s not in run'
-            #else:
             run_validation(dataset,globalTag,str(run),stream,eventContent)
     else:
         # query DAS and get list of runs
@@ -406,14 +417,6 @@ def process_dataset(dataset,globalTag,**kwargs):
                 file.write(procString+'\n')
             if int(num) > 50000: # only care about long runs
                 print "Processing run %s" % rn
-                # create a cookie with kinit and check is CSC's were in for this run
-                #subprocess.call('curl -L --cookie ~/private/ssocookie.txt --cookie-jar ~/private/ssocookie.txt "https://cmswbm.web.cern.ch/cmswbm/cmsdb/servlet/RunSummary?DB=default&SUBMIT_TOP=SubmitQuery&RUN_BEGIN=%s&RUN_END=%s&STATUS_CSC=on&FORMAT=XML" -o runsummary.xml' % (rn,rn), shell=True)
-                #numLines = 0
-                #with open('runsummary.xml', 'r') as file:
-                #    for line in file: numLines += 1
-                #if numLines < 5:
-                #    print 'CSC\'s not in run'
-                #    continue
                 run_validation(dataset,globalTag,str(rn),stream,eventContent)
 
     os.chdir('../')
@@ -433,6 +436,7 @@ def parse_command_line(argv):
     parser.add_argument('-ro', '--retrieveOutput', action='store_true',help='Retrieve the output of a previous run and produce the HTML.')
     #parser.add_argument('-rh', '--reprocessHistograms', action='store_true',help='Reprocess histograms (in case of changes to template, rather than CSCValidation.cc).')
     parser.add_argument('-br', '--buildRunlist', action='store_true',help='Build the runlist.json file for the website.')
+    parser.add_argument('-f','--force', action='store_true', help='Force a recipe (even if already processed).')
 
     args = parser.parse_args(argv)
     return args
@@ -452,7 +456,7 @@ def main(argv=None):
         return 0
 
     if args.retrieveOutput:
-        process_output(args.dataset, args.globalTag)
+        process_output(args.dataset, args.globalTag, force=args.force)
         return 0
 
     #if args.reprocessHistograms:
