@@ -230,7 +230,8 @@ def run_validation(dataset,globalTag,run,stream,eventContent):
             sh.close()
 
             print "Submitting job %i of %i" % (j+1, numJobs)
-            subprocess.check_call("bsub -q 1nh -J %s_%s_%i < run_%i.sh" % (run, stream, j, j), shell=True)
+            queue = '1nh' if 'Express' in stream else '8nh'
+            subprocess.check_call("bsub -q %s -J %s_%s_%i < run_%i.sh" % (queue, run, stream, j, j), shell=True)
 
     os.chdir('../')
 
