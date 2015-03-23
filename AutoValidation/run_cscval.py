@@ -158,6 +158,18 @@ def run_validation(dataset,globalTag,run,stream,eventContent,**kwargs):
 
     os.system("chmod 755 secondStep.py")
 
+    jsonStr = 'var runParams = {\n' \
+            + '  "release" : "%s",\n' % Release \
+            + '  "datasetname" : "%s",\n' % dataset \
+            + '  "runnum" : "%s",\n' % run \
+            + '  "events" : "%s",\n' % num \
+            + '  "globaltag" : "%s",\n' % globalTag \
+            + '  "rundate" : "%s"\n' % Time \
+            + '}'
+
+    with open('runParams.json','w') as file:
+        file.write(jsonStr)
+
     if runCrab:
         # create a submission script
         sh = open("run.sh", "w")
