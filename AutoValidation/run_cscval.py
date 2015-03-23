@@ -258,7 +258,11 @@ def process_output(dataset,globalTag,**kwargs):
         run = runStr[3:]
 
         # some job still running. skip.
-        if "Job <%s_%s*> is not found" % (run,stream) not in subprocess.Popen("unbuffer bjobs -J %s_%s*" % (run,stream), shell=True,stdout=pipe).communicate()[0].splitlines():
+        #if "Job <%s_%s*> is not found" % (run,stream) not in subprocess.Popen("unbuffer bjobs -J %s_%s*" % (run,stream), shell=True,stdout=pipe).communicate()[0].splitlines():
+        #    print 'Run %s %s not finished' % (run,stream)
+        #    continue
+        # dont rerun if current merge
+        if "Job <%s_%smerge> is not found" % (run,stream) not in subprocess.Popen("unbuffer bjobs -J %s_%smerge" % (run,stream), shell=True,stdout=pipe).communicate()[0].splitlines():
             print 'Run %s %s not finished' % (run,stream)
             continue
 
