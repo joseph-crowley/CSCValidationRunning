@@ -255,12 +255,15 @@ def process_output(dataset,globalTag,**kwargs):
     Script to retrieve the output from EOS, merge the histograms, and create the images.
     '''
     force = kwargs.pop('force',False)
+    run = kwargs.pop('run',0)
     [filler, stream, version, eventContent] = dataset.split('/')
     os.chdir(stream)
 
     runCrab = False
 
     runsToPlot = []
+
+    if force: print 'Forcing remerging'
     # get available runs in eos
     for job in subprocess.Popen('/afs/cern.ch/project/eos/installation/0.3.84-aquamarine/bin/eos.select ls %s/%s' % (CRAB_PATH if runCrab else BATCH_PATH,stream), shell=True,stdout=pipe).communicate()[0].splitlines():
         # go to working area
@@ -269,6 +272,8 @@ def process_output(dataset,globalTag,**kwargs):
         else: 
             [runStr,runEventContent] = job.split('_')
         run = runStr[3:]
+        if run:
+            if str(run) != run: continue
 
         # some job still running. skip.
         #if "Job <%s_%s*> is not found" % (run,stream) not in subprocess.Popen("unbuffer bjobs -J %s_%s*" % (run,stream), shell=True,stdout=pipe).communicate()[0].splitlines():
@@ -483,7 +488,7 @@ def main(argv=None):
         return 0
 
     if args.retrieveOutput:
-        process_output(args.dataset, args.globalTag, force=args.force)
+        process_output(args.dataset, args.globalTag, force=args.force, run=args.runNumber)
         return 0
 
     #if args.reprocessHistograms:
