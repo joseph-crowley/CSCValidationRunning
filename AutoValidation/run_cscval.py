@@ -83,10 +83,11 @@ def replace(map, fileInName, fileOutName):
 ################################
 ##### Validation functions #####
 ################################
-def run_validation(dataset,globalTag,run,stream,eventContent):
+def run_validation(dataset,globalTag,run,stream,eventContent,**kwargs):
     '''
     The primary validation routine. Creates working directories and submits jobs to crab.
     '''
+    force = kwargs.pop('force',False)
     runCrab = False
     # create run working directory
     rundir = 'run_%s' % run
@@ -194,7 +195,7 @@ def run_validation(dataset,globalTag,run,stream,eventContent):
                 procFiles = file.readlines()
             procFiles = [x.rstrip() for x in procFiles]
 
-            doJob = False
+            doJob = force
             for f in input_files[j*nf:j*nf+nf]:
                 if f not in procFiles:
                     doJob = True
@@ -388,6 +389,7 @@ def process_dataset(dataset,globalTag,**kwargs):
         run         int     0          if nonzero, will process a single run, else, process all available
     '''
     run = kwargs.pop('run',0)
+    force = kwargs.pop('force',False)
 
     # get stream info
     [filler, stream, version, eventContent] = dataset.split('/')
@@ -411,11 +413,12 @@ def process_dataset(dataset,globalTag,**kwargs):
     if run:
         num = subprocess.Popen("./das_client.py --limit=0 --query='summary dataset=%s run=%s | grep summary.nevents'" % (dataset,str(run)), shell=True,stdout=pipe).communicate()[0].rstrip()
         procString = '%s_%s' % (str(run),num)
-        if procString not in procRuns:
+        if procString not in procRuns or force:
+            if force: print "Forcing reprocessing"
             print "Processing run %s" % str(run)
             with open(procFile, 'a') as file:
                 file.write(procString+'\n')
-            run_validation(dataset,globalTag,str(run),stream,eventContent)
+            run_validation(dataset,globalTag,str(run),stream,eventContent,force=force)
     else:
         # query DAS and get list of runs
         newruns = subprocess.Popen("./das_client.py --query='run dataset="+dataset+"' --limit=0", shell=True, stdout=pipe).communicate()[0].splitlines()
@@ -474,7 +477,7 @@ def main(argv=None):
     #if args.reprocessHistograms:
     #    return 0
 
-    process_dataset(args.dataset, args.globalTag, run=args.runNumber)
+    process_dataset(args.dataset, args.globalTag, run=args.runNumber, force=args.force)
     
     return 0
 
