@@ -255,7 +255,7 @@ def process_output(dataset,globalTag,**kwargs):
     Script to retrieve the output from EOS, merge the histograms, and create the images.
     '''
     force = kwargs.pop('force',False)
-    run = kwargs.pop('run',0)
+    runN = kwargs.pop('run',0)
     [filler, stream, version, eventContent] = dataset.split('/')
     os.chdir(stream)
 
@@ -272,8 +272,8 @@ def process_output(dataset,globalTag,**kwargs):
         else: 
             [runStr,runEventContent] = job.split('_')
         run = runStr[3:]
-        if run:
-            if str(run) != run: continue
+        if runN:
+            if str(runN) != run: continue
 
         # some job still running. skip.
         #if "Job <%s_%s*> is not found" % (run,stream) not in subprocess.Popen("unbuffer bjobs -J %s_%s*" % (run,stream), shell=True,stdout=pipe).communicate()[0].splitlines():
