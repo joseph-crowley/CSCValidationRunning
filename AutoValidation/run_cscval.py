@@ -10,6 +10,9 @@
 
 # Change Log
 #
+#   2015-04-09 - Devin Taylor
+#    - moving to self-contained templates (no external dependencies)
+#
 #   2015-03-18 - Devin Taylor
 #    - crab won't submit to CAF, back to batch
 #
@@ -48,8 +51,8 @@ Release = Release.rstrip("\n")
 
 ########## Directories #############
 
-TEMPLATE_PATH = '/afs/cern.ch/cms/CAF/CMSCOMM/COMM_CSC/CSCVAL/AUTOVAL/TEMPLATES_batch/'
-RESULT_PATH = '/afs/cern.ch/cms/CAF/CMSCOMM/COMM_CSC/CSCVAL/results/results/'
+TEMPLATE_PATH = '%s/src/CSCValidationRunning/Templates' % os.environ['CMSSW_BASE']
+RESULT_PATH = '/afs/cern.ch/cms/CAF/CMSCOMM/COMM_CSC/CSCVAL/results/results'
 WWW_PATH = '/afs/cern.ch/cms/CAF/CMSCOMM/COMM_CSC/CSCVAL/results'
 CRAB_PATH = '/eos/cms/store/group/dpg_csc/comm_csc/cscval/crab_output'
 BATCH_PATH = '/eos/cms/store/group/dpg_csc/comm_csc/cscval/batch_output'
@@ -122,11 +125,11 @@ def run_validation(dataset,globalTag,run,stream,eventContent,**kwargs):
 
     print "Will run with options: digis: %r standalone: %r" % (paramMap[eventContent]['digis'], paramMap[eventContent]['standalone'])
 
-    templatecfgFilePath = TEMPLATE_PATH+cfg
-    templatecrabFilePath = TEMPLATE_PATH+crab
-    templateHTMLFilePath = TEMPLATE_PATH+"html_template"
-    templateRootMacroPath = TEMPLATE_PATH+"makePlots.C"
-    templateSecondStepPath = TEMPLATE_PATH+proc
+    templatecfgFilePath = '%s/%s' %(TEMPLATE_PATH, cfg)
+    templatecrabFilePath = '%s/%s' % (TEMPLATE_PATH, crab)
+    templateHTMLFilePath = '%s/html_template' % TEMPLATE_PATH
+    templateRootMacroPath = '%s/makePlots.C' % TEMPLATE_PATH
+    templateSecondStepPath = '%s/%s' % (TEMPLATE_PATH, proc)
 
     # get number of events in run
     num = subprocess.Popen("./das_client.py --limit=0 --query='summary dataset=%s run=%s | grep summary.nevents'" % (dataset,run), shell=True,stdout=pipe).communicate()[0].rstrip()
@@ -136,17 +139,17 @@ def run_validation(dataset,globalTag,run,stream,eventContent,**kwargs):
     print "Processing %s files, %s lumis, and %s events" % (nfiles, nlumis, num)
 
     # old HTML stuff, kept for backwards compatibility
-    cfgFileName='validation_'+run+'_cfg.py'
-    crabFileName='crab_'+run+'_cfg.py'
+    cfgFileName='validation_%s_cfg.py' % run
+    crabFileName='crab_%s_cfg.py' % run
     htmlFileName = "Summary.html"
     macroFileName = "makePlots.C"
     procFileName = "secondStep.py"
-    outFileName='valHists_run'+run+'_'+stream+'.root'
+    outFileName='valHists_run%s_%s.root' % (run, stream)
     Time=time.strftime("%Y/%m/%d %H:%M:%S", time.localtime())
 
     symbol_map_html = { 'RUNNUMBER':run, 'NEVENT':num, "DATASET":dataset, "CMSSWVERSION":Release, "GLOBALTAG":globalTag, "DATE":Time }
-    symbol_map_macro = { 'FILENAME':outFileName }
-    symbol_map_proc = { 'OUTPUTFILE':outFileName, 'RUNNUMBER':run, 'NEWDIR':rundir, 'CFGFILE':cfgFileName, 'STREAM':stream }
+    symbol_map_macro = { 'FILENAME':outFileName, 'TEMPLATEDIR':TEMPLATE_PATH }
+    symbol_map_proc = { 'TEMPLATEDIR':TEMPLATE_PATH, 'OUTPUTFILE':outFileName, 'RUNNUMBER':run, 'NEWDIR':rundir, 'CFGFILE':cfgFileName, 'STREAM':stream }
     symbol_map_cfg = { 'NEVENT':num, 'GLOBALTAG':globalTag, "OUTFILE":outFileName, 'DATASET':dataset, 'RUNNUMBER':run}
     symbol_map_crab = { 'GLOBALTAG':globalTag, "OUTFILE":outFileName, 'DATASET':dataset, 'RUNNUMBER':run, 'STREAM':stream, 'EVENTCONTENT':eventContent}
 

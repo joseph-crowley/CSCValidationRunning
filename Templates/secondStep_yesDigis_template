@@ -1,0 +1,31 @@
+#! /usr/bin/env python
+
+import os
+import sys
+import fileinput
+import string
+import ROOT
+from ROOT import TFile
+
+
+
+#make the plots
+os.system("root -l -q -b makePlots.C")
+#os.system("root -l -q -b TPEHists.root ../../templates/makePlots_emulator2.C")
+#os.system("root -l -q -b TPEHists.root ../../templates/plot_new.C >bad_TPE_chambers.txt") 
+#os.system("root -l -q -b TPEHists.root ../../templates/plot_badwires.C+ >hot_wires.txt")
+
+print "made plots"
+
+#make the web page
+os.system("mkdir -p /afs/cern.ch/cms/CAF/CMSCOMM/COMM_CSC/CSCVAL/results/results/runRUNNUMBER/STREAM/Site")
+os.system("cp -r TEMPLATEDIR/web/* /afs/cern.ch/cms/CAF/CMSCOMM/COMM_CSC/CSCVAL/results/results/runRUNNUMBER/STREAM")
+os.system("mv Summary.html /afs/cern.ch/cms/CAF/CMSCOMM/COMM_CSC/CSCVAL/results/results/runRUNNUMBER/STREAM/Site")
+os.system("mv hot_wires.txt /afs/cern.ch/cms/CAF/CMSCOMM/COMM_CSC/CSCVAL/results/results/runRUNNUMBER/STREAM/Site/PNGS")
+os.system("mv bad_TPE_chambers.txt /afs/cern.ch/cms/CAF/CMSCOMM/COMM_CSC/CSCVAL/results/results/runRUNNUMBER/STREAM/Site/PNGS")
+os.system("mv TPEHists.root /afs/cern.ch/cms/CAF/CMSCOMM/COMM_CSC/CSCVAL/results/results/runRUNNUMBER/STREAM/Site/PNGS")
+os.system("mv deadchamberlist.txt /afs/cern.ch/cms/CAF/CMSCOMM/COMM_CSC/CSCVAL/results/results/runRUNNUMBER/STREAM/Site/PNGS")
+os.system("cp CFGFILE /afs/cern.ch/cms/CAF/CMSCOMM/COMM_CSC/CSCVAL/results/results/runRUNNUMBER/STREAM/Site/PNGS/config.py")
+os.system("mv *.png /afs/cern.ch/cms/CAF/CMSCOMM/COMM_CSC/CSCVAL/results/results/runRUNNUMBER/STREAM/Site/PNGS")
+
+print "make webpage"

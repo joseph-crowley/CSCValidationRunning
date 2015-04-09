@@ -1,0 +1,144 @@
+import FWCore.ParameterSet.Config as cms
+import subprocess
+
+process = cms.Process("TEST")
+
+process.load("Configuration/StandardSequences/Geometry_cff")
+process.load("Configuration/StandardSequences/MagneticField_cff")
+process.load("Configuration/StandardSequences/FrontierConditions_GlobalTag_cff")
+process.load("Configuration/StandardSequences/RawToDigi_Data_cff")
+process.load("Configuration.StandardSequences.Reconstruction_cff")
+
+process.GlobalTag.globaltag = 'GLOBALTAG::All'
+
+inputFiles = cms.untracked.vstring(
+FILELIST
+)
+
+
+process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(NEVENT) )
+process.options = cms.untracked.PSet( SkipEvent =
+cms.untracked.vstring('ProductNotFound') )
+readFiles = cms.untracked.vstring(
+
+)
+secFiles = cms.untracked.vstring()
+process.source = cms.Source ("PoolSource",
+    fileNames = inputFiles
+)
+process.MessageLogger = cms.Service("MessageLogger",
+    cout = cms.untracked.PSet(
+        default = cms.untracked.PSet( limit = cms.untracked.int32(0) ),
+        FwkJob = cms.untracked.PSet( limit = cms.untracked.int32(0) )
+    ),
+    categories = cms.untracked.vstring('FwkJob'),
+    destinations = cms.untracked.vstring('cout')
+)
+
+
+
+
+#This begins the modifications present in Tim Cox's codes
+
+"""Customise digi/reco geometry to use unganged ME1/a channels"""
+process.CSCGeometryESModule.useGangedStripsInME1a = False
+process.idealForDigiCSCGeometry.useGangedStripsInME1a = False
+
+"""Settings for the upgrade raw vs offline condition channel translation"""
+process.CSCIndexerESProducer.AlgoName=cms.string("CSCIndexerPostls1")
+process.CSCChannelMapperESProducer.AlgoName=cms.string("CSCChannelMapperPostls1")
+
+process.csc2DRecHits.readBadChannels = cms.bool(False)
+process.csc2DRecHits.CSCUseGasGainCorrection = cms.bool(False)
+
+
+""" Pick up upgrade condions data directly from DB tags using ESPrefer's.
+Might be useful when dealing with a global tag that doesn't include
+'unganged' CSC conditions.
+"""
+myconds = [
+        ('CSCDBGainsRcd', 'CSCDBGains_ungangedME11A_mc'),
+        ('CSCDBNoiseMatrixRcd', 'CSCDBNoiseMatrix_ungangedME11A_mc'),
+        ('CSCDBCrosstalkRcd', 'CSCDBCrosstalk_ungangedME11A_mc'),
+        ('CSCDBPedestalsRcd', 'CSCDBPedestals_ungangedME11A_mc'),
+        ('CSCDBGasGainCorrectionRcd', 'CSCDBGasGainCorrection_ungangedME11A_mc'),
+        ('CSCDBChipSpeedCorrectionRcd', 'CSCDBChipSpeedCorrection_ungangedME11A_mc')
+]
+
+from CalibMuon.Configuration.getCSCConditions_frontier_cff import cscConditions
+for (classname, tag) in myconds:
+      print classname, tag
+      sourcename = 'unganged_' + classname
+      process.__setattr__(sourcename, cscConditions.clone())
+      process.__getattribute__(sourcename).toGet = cms.VPSet( cms.PSet( record = cms.string(classname), tag = cms.string(tag)) )
+      process.__getattribute__(sourcename).connect = cms.string('frontier://FrontierProd/CMS_COND_CSC_000')
+      process.__setattr__('esp_' + classname, cms.ESPrefer("PoolDBESSource", sourcename) )
+
+del cscConditions
+
+#This ends the detector modification section
+
+
+
+
+
+
+
+
+
+process.cscValidation = cms.EDAnalyzer("CSCValidation",
+    rootFileName = cms.untracked.string('OUTFILE'),
+    isSimulation = cms.untracked.bool(False),
+    writeTreeToFile = cms.untracked.bool(True),
+    useDigis = cms.untracked.bool(True),
+    detailedAnalysis = cms.untracked.bool(False),
+    useTriggerFilter = cms.untracked.bool(False),
+    useQualityFilter = cms.untracked.bool(False),
+    makeStandalonePlots = cms.untracked.bool(True),
+    makeTimeMonitorPlots = cms.untracked.bool(True),
+    rawDataTag = cms.InputTag("rawDataCollector"),# FOR RAW RUNS
+    alctDigiTag = cms.InputTag("muonCSCDigis","MuonCSCALCTDigi"),
+    clctDigiTag = cms.InputTag("muonCSCDigis","MuonCSCCLCTDigi"),
+    corrlctDigiTag = cms.InputTag("muonCSCDigis","MuonCSCCorrelatedLCTDigi"),
+    stripDigiTag = cms.InputTag("muonCSCDigis","MuonCSCStripDigi"),
+    wireDigiTag = cms.InputTag("muonCSCDigis","MuonCSCWireDigi"),
+    compDigiTag = cms.InputTag("muonCSCDigis","MuonCSCComparatorDigi"),
+    cscRecHitTag = cms.InputTag("csc2DRecHits"),
+    cscSegTag = cms.InputTag("cscSegments"),
+    saMuonTag = cms.InputTag("standAloneMuons"),
+    l1aTag = cms.InputTag("gtDigis"),
+    hltTag = cms.InputTag("TriggerResults::HLT"),
+    makeHLTPlots = cms.untracked.bool(True),
+    simHitTag = cms.InputTag("g4SimHits", "MuonCSCHits")
+)
+
+process.load("L1Trigger.CSCTriggerPrimitives.cscTriggerPrimitiveDigis_cfi")
+process.cscTriggerPrimitiveDigis.CSCComparatorDigiProducer = "muonCSCDigis:MuonCSCComparatorDigi"
+process.cscTriggerPrimitiveDigis.CSCWireDigiProducer = "muonCSCDigis:MuonCSCWireDigi"
+process.cscTriggerPrimitiveDigis.tmbParam.mpcBlockMe1a = 0
+process.load("L1TriggerConfig.L1CSCTPConfigProducers.L1CSCTriggerPrimitivesConfig_cff")
+process.l1csctpconf.alctParamMTCC2.alctNplanesHitPretrig = 3
+process.l1csctpconf.alctParamMTCC2.alctNplanesHitAccelPretrig = 3
+process.l1csctpconf.clctParam.clctNplanesHitPretrig = 3
+process.l1csctpconf.clctParam.clctHitPersist = 4
+
+process.lctreader = cms.EDAnalyzer("CSCTriggerPrimitivesReader",
+    debug = cms.untracked.bool(False),
+    dataLctsIn = cms.bool(True),
+    emulLctsIn = cms.bool(True),
+    isMTCCData = cms.bool(False),
+    printps = cms.bool(False),
+    CSCLCTProducerData = cms.untracked.string("muonCSCDigis"),
+    CSCLCTProducerEmul = cms.untracked.string("cscTriggerPrimitiveDigis"),
+    CSCSimHitProducer = cms.InputTag("g4SimHits", "MuonCSCHits"),  # Full sim.
+    CSCComparatorDigiProducer = cms.InputTag("simMuonCSCDigis","MuonCSCComparatorDigi"),
+    CSCWireDigiProducer = cms.InputTag("simMuonCSCDigis","MuonCSCWireDigi")
+)
+
+process.TFileService = cms.Service("TFileService",
+                                   fileName = cms.string('TPEHists_VERSION.root')
+                                   )
+
+process.p = cms.Path(process.muonCSCDigis * process.csc2DRecHits * process.cscSegments * process.cscTriggerPrimitiveDigis * process.cscValidation)
+
+

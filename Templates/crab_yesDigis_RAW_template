@@ -1,0 +1,21 @@
+from CRABClient.UserUtilities import config
+config = config()
+
+config.General.requestName = 'runRUNNUMBER_EVENTCONTENT'
+config.General.workArea = 'crab_STREAM'
+
+config.JobType.pluginName = 'Analysis'
+config.JobType.psetName = 'validation_RUNNUMBER_cfg.py'
+config.JobType.outputFiles = ['valHists_runRUNNUMBER_STREAM.root']
+
+config.Data.inputDataset = 'DATASET'
+config.Data.inputDBS = 'global'
+config.Data.splitting = 'LumiBased'
+config.Data.unitsPerJob = 20
+config.Data.runRange = 'RUNNUMBER'
+config.Data.outLFN = '/store/group/dpg_csc/comm_csc/cscval/crab_output'
+config.Data.publication = False
+config.Data.ignoreLocality = True
+
+config.Site.whitelist = ["T2_US*","T2_CH_CERN"]
+config.Site.storageSite = 'T2_CH_CERN'
