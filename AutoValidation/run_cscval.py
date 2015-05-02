@@ -400,6 +400,8 @@ def process_output(dataset,globalTag,**kwargs):
 
         tpeOut = 'TPEHists.root'
         valOut = 'valHists_run%s_%s.root' % (run, stream)
+        SingleMuOpen_valOut = 'SingleMuOpen_valHists_run%s_%s.root' % (run, stream)
+        SingleMuBeamHalo_valOut = 'SingleMuBeamHalo_valHists_run%s_%s.root' % (run, stream)
 
         # wait for job to finish then copy over
         print("Waiting on run %s" % run)
