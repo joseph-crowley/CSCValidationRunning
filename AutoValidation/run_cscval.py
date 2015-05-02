@@ -10,6 +10,9 @@
 
 # Change Log
 #
+#   2015-05-02 - Devin Taylor
+#    - Adding trigger options
+#
 #   2015-04-09 - Devin Taylor
 #    - moving to self-contained templates (no external dependencies)
 #
@@ -478,12 +481,12 @@ def process_dataset(dataset,globalTag,**kwargs):
             print 'Checking %s' %rn
             num = subprocess.Popen("./das_client.py --limit=0 --query='summary dataset=%s run=%s | grep summary.nevents'" % (dataset,rn), shell=True,stdout=pipe).communicate()[0].rstrip()
             procString = '%s_%s' % (rn, num)
-            if procString in procRuns: continue # already processed
+            if procString in procRuns and not force: continue # already processed
             with open(procFile, 'a') as file:
                 file.write(procString+'\n')
             if int(num) > 50000: # only care about long runs
                 print "Processing run %s" % rn
-                run_validation(dataset,globalTag,str(rn),stream,eventContent)
+                run_validation(dataset,globalTag,str(rn),stream,eventContent,force=force)
 
     os.chdir('../')
 
