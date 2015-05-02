@@ -82,8 +82,8 @@ process.cscValidation = cms.EDAnalyzer("CSCValidation",
     makeHLTPlots = cms.untracked.bool(True),
     simHitTag = cms.InputTag("g4SimHits", "MuonCSCHits")
 )
-process.cscValidationSingleMuBeamHalo = process.cscValidation.clone(rootFileName=cms.untracked.string('SingleMuBeamHalo_OUTPUT'))
-process.cscValidationSingleMuOpen = process.cscValidation.clone(rootFileName=cms.untracked.string('SingleMuOpen_OUTPUT'))
+process.cscValidationSingleMuBeamHalo = process.cscValidation.clone(rootFileName=cms.untracked.string('SingleMuBeamHalo_OUTFILE'))
+process.cscValidationSingleMuOpen = process.cscValidation.clone(rootFileName=cms.untracked.string('SingleMuOpen_OUTFILE'))
 
 process.load("L1Trigger.CSCTriggerPrimitives.cscTriggerPrimitiveDigis_cfi")
 process.cscTriggerPrimitiveDigis.CSCComparatorDigiProducer = "muonCSCDigis:MuonCSCComparatorDigi"

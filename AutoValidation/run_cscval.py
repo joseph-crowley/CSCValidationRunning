@@ -143,18 +143,24 @@ def run_validation(dataset,globalTag,run,stream,eventContent,**kwargs):
     crabFileName='crab_%s_cfg.py' % run
     htmlFileName = "Summary.html"
     macroFileName = "makePlots.C"
+    SingleMuOpen_macroFileName = "SingleMuOpen_makePlots.C"
+    SingleMuBeamHalo_macroFileName = "SingleMuBeamHalo_makePlots.C"
     procFileName = "secondStep.py"
     outFileName='valHists_run%s_%s.root' % (run, stream)
     Time=time.strftime("%Y/%m/%d %H:%M:%S", time.localtime())
 
     symbol_map_html = { 'RUNNUMBER':run, 'NEVENT':num, "DATASET":dataset, "CMSSWVERSION":Release, "GLOBALTAG":globalTag, "DATE":Time }
     symbol_map_macro = { 'FILENAME':outFileName, 'TEMPLATEDIR':TEMPLATE_PATH }
+    symbol_map_macro_SingleMuOpen = { 'FILENAME':'SingleMuOpen_'+outFileName, 'TEMPLATEDIR':TEMPLATE_PATH }
+    symbol_map_macro_SingleMuBeamHalo = { 'FILENAME':'SingleMuBeamHalo_'+outFileName, 'TEMPLATEDIR':TEMPLATE_PATH }
     symbol_map_proc = { 'TEMPLATEDIR':TEMPLATE_PATH, 'OUTPUTFILE':outFileName, 'RUNNUMBER':run, 'NEWDIR':rundir, 'CFGFILE':cfgFileName, 'STREAM':stream }
     symbol_map_cfg = { 'NEVENT':num, 'GLOBALTAG':globalTag, "OUTFILE":outFileName, 'DATASET':dataset, 'RUNNUMBER':run}
     symbol_map_crab = { 'GLOBALTAG':globalTag, "OUTFILE":outFileName, 'DATASET':dataset, 'RUNNUMBER':run, 'STREAM':stream, 'EVENTCONTENT':eventContent}
 
     replace(symbol_map_html,templateHTMLFilePath, htmlFileName)
     replace(symbol_map_macro,templateRootMacroPath, macroFileName)
+    replace(symbol_map_macro_SingleMuOpen,templateRootMacroPath, SingleMuOpen_macroFileName)
+    replace(symbol_map_macro_SingleMuBeamHalo,templateRootMacroPath, SingleMuBeamHalo_macroFileName)
     replace(symbol_map_proc,templateSecondStepPath, procFileName)
     replace(symbol_map_cfg,templatecfgFilePath, cfgFileName)
     replace(symbol_map_crab,templatecrabFilePath, crabFileName)
@@ -197,7 +203,7 @@ def run_validation(dataset,globalTag,run,stream,eventContent,**kwargs):
         for n in subprocess.Popen("./das_client.py --query='file dataset="+dataset+" run="+run+" | grep file.name' --limit=0", shell=True,stdout=pipe).communicate()[0].splitlines():
                 #s = 'root://cms-xrd-global.cern.ch/'+n
                 input_files.append(n)
-        nf = 2
+        nf = 1
         numJobs = int(math.ceil(len(input_files)/float(nf)))
         for j in range(numJobs):
             cfgFileName='validation_%s_%i_cfg.py' % (run, j)
@@ -242,6 +248,8 @@ def run_validation(dataset,globalTag,run,stream,eventContent,**kwargs):
             sh.write("cd - \n")
             sh.write('cmsRun %s/%s\n' % (rundir, cfgFileName))
             sh.write('cmsStage -f %s /store/group/dpg_csc/comm_csc/cscval/batch_output/%s/run%s_%s/%s\n' % (outFileName, stream, run, eventContent, outFileName))
+            sh.write('cmsStage -f SingleMuOpen_%s /store/group/dpg_csc/comm_csc/cscval/batch_output/%s/run%s_%s/SingleMuOpen_%s\n' % (outFileName, stream, run, eventContent, outFileName))
+            sh.write('cmsStage -f SingleMuBeamHalo_%s /store/group/dpg_csc/comm_csc/cscval/batch_output/%s/run%s_%s/SingleMuBeamHalo_%s\n' % (outFileName, stream, run, eventContent, outFileName))
             sh.write('cmsStage -f TPEHists_%i.root /store/group/dpg_csc/comm_csc/cscval/batch_output/%s/run%s_%s/TPEHists_%i.root\n' % (j, stream, run, eventContent, j))
             sh.close()
 
@@ -293,6 +301,8 @@ def process_output(dataset,globalTag,**kwargs):
 
         tpeOut = 'TPEHists.root'
         valOut = 'valHists_run%s_%s.root' % (run, stream)
+        SingleMuOpen_valOut = 'SingleMuOpen_valHists_run%s_%s.root' % (run, stream)
+        SingleMuBeamHalo_valOut = 'SingleMuBeamHalo_valHists_run%s_%s.root' % (run, stream)
 
         if runCrab:
             # get last job (in case we reprocessed)
@@ -305,10 +315,14 @@ def process_output(dataset,globalTag,**kwargs):
             fileDir = '%s/%s/%s' % (BATCH_PATH,stream,job)
         tpeFiles = []
         valFiles = []
+        SingleMuOpen_valFiles = []
+        SingleMuBeamHalo_valFiles = []
         for file in subprocess.Popen('/afs/cern.ch/project/eos/installation/0.3.84-aquamarine/bin/eos.select ls %s' % (fileDir), shell=True,stdout=pipe).communicate()[0].splitlines():
             if file==tpeOut or file==valOut: continue
             if file[0:3]=='TPE': tpeFiles += [file]
             if file[0:3]=='val': valFiles += [file]
+            if file[0:16]=='SingleMuOpen_val': SingleMuOpen_valFiles += [file]
+            if file[0:20]=='SingleMuBeamHalo_val': SingleMuBeamHalo_valFiles += [file]
         nFiles = len(valFiles)
 
         # see if we need to remerge things
@@ -352,6 +366,20 @@ def process_output(dataset,globalTag,**kwargs):
                 valMergeString += ' root://eoscms.cern.ch/%s/%s' % (fileDir, val)
             sh.write(valMergeString+" \n")
             sh.write('cmsStage -f %s /store/group/dpg_csc/comm_csc/cscval/batch_output/%s/run%s_%s/%s\n' % (valOut, stream, run, eventContent, valOut))
+        if SingleMuOpen_valFiles:
+            print "Merging SingleMuOpen_valHists"
+            valMergeString = 'hadd -f %s' % SingleMuOpen_valOut
+            for val in SingleMuOpen_valFiles:
+                valMergeString += ' root://eoscms.cern.ch/%s/%s' % (fileDir, val)
+            sh.write(valMergeString+" \n")
+            sh.write('cmsStage -f %s /store/group/dpg_csc/comm_csc/cscval/batch_output/%s/run%s_%s/%s\n' % (SingleMuOpen_valOut, stream, run, eventContent, SingleMuOpen_valOut))
+        if SingleMuBeamHalo_valFiles:
+            print "Merging SingleMuBeamHalo_valHists"
+            valMergeString = 'hadd -f %s' % SingleMuBeamHalo_valOut
+            for val in SingleMuBeamHalo_valFiles:
+                valMergeString += ' root://eoscms.cern.ch/%s/%s' % (fileDir, val)
+            sh.write(valMergeString+" \n")
+            sh.write('cmsStage -f %s /store/group/dpg_csc/comm_csc/cscval/batch_output/%s/run%s_%s/%s\n' % (SingleMuBeamHalo_valOut, stream, run, eventContent, SingleMuBeamHalo_valOut))
         sh.close()
         subprocess.check_call("bsub -q 1nh -J %s_%smerge < merge.sh" % (run,stream), shell=True)
 
@@ -379,6 +407,8 @@ def process_output(dataset,globalTag,**kwargs):
             print("Run %s merged" % run) 
             subprocess.call('cmsStage -f /store/group/dpg_csc/comm_csc/cscval/batch_output/%s/run%s_%s/%s %s' % (stream, run, eventContent, tpeOut, tpeOut), shell=True)
             valRet = subprocess.call('cmsStage -f /store/group/dpg_csc/comm_csc/cscval/batch_output/%s/run%s_%s/%s %s' % (stream, run, eventContent, valOut, valOut), shell=True)
+            SingleMuOpen_valRet = subprocess.call('cmsStage -f /store/group/dpg_csc/comm_csc/cscval/batch_output/%s/run%s_%s/%s %s' % (stream, run, eventContent, SingleMuOpen_valOut, SingleMuOpen_valOut), shell=True)
+            SingleMuBeamHalo_valRet = subprocess.call('cmsStage -f /store/group/dpg_csc/comm_csc/cscval/batch_output/%s/run%s_%s/%s %s' % (stream, run, eventContent, SingleMuBeamHalo_valOut, SingleMuBeamHalo_valOut), shell=True)
             if not valRet: os.system("./secondStep.py")
             subprocess.call('rm *.root', shell=True)
 
@@ -407,6 +437,7 @@ def process_dataset(dataset,globalTag,**kwargs):
       kwargs:
         argument    type    default    comment
         run         int     0          if nonzero, will process a single run, else, process all available
+        force       bool    False      do a run regardless if processed already or number of events
     '''
     run = kwargs.pop('run',0)
     force = kwargs.pop('force',False)
