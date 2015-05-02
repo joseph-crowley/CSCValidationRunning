@@ -38,52 +38,23 @@ process.MessageLogger = cms.Service("MessageLogger",
 
 
 
-#This begins the modifications present in Tim Cox's codes
-
 """Customise digi/reco geometry to use unganged ME1/a channels"""
 process.CSCGeometryESModule.useGangedStripsInME1a = False
 process.idealForDigiCSCGeometry.useGangedStripsInME1a = False
 
-"""Settings for the upgrade raw vs offline condition channel translation"""
-process.CSCIndexerESProducer.AlgoName=cms.string("CSCIndexerPostls1")
-process.CSCChannelMapperESProducer.AlgoName=cms.string("CSCChannelMapperPostls1")
-
-process.csc2DRecHits.readBadChannels = cms.bool(False)
-process.csc2DRecHits.CSCUseGasGainCorrection = cms.bool(False)
-
-
-""" Pick up upgrade condions data directly from DB tags using ESPrefer's.
-Might be useful when dealing with a global tag that doesn't include
-'unganged' CSC conditions.
-"""
-myconds = [
-        ('CSCDBGainsRcd', 'CSCDBGains_ungangedME11A_mc'),
-        ('CSCDBNoiseMatrixRcd', 'CSCDBNoiseMatrix_ungangedME11A_mc'),
-        ('CSCDBCrosstalkRcd', 'CSCDBCrosstalk_ungangedME11A_mc'),
-        ('CSCDBPedestalsRcd', 'CSCDBPedestals_ungangedME11A_mc'),
-        ('CSCDBGasGainCorrectionRcd', 'CSCDBGasGainCorrection_ungangedME11A_mc'),
-        ('CSCDBChipSpeedCorrectionRcd', 'CSCDBChipSpeedCorrection_ungangedME11A_mc')
-]
-
-from CalibMuon.Configuration.getCSCConditions_frontier_cff import cscConditions
-for (classname, tag) in myconds:
-      print classname, tag
-      sourcename = 'unganged_' + classname
-      process.__setattr__(sourcename, cscConditions.clone())
-      process.__getattribute__(sourcename).toGet = cms.VPSet( cms.PSet( record = cms.string(classname), tag = cms.string(tag)) )
-      process.__getattribute__(sourcename).connect = cms.string('frontier://FrontierProd/CMS_COND_CSC_000')
-      process.__setattr__('esp_' + classname, cms.ESPrefer("PoolDBESSource", sourcename) )
-
-del cscConditions
-
-#This ends the detector modification section
-
-
-
-
-
-
-
+# filter on trigger path
+process.triggerSelection = cms.EDFilter( "TriggerResultsFilter",
+    #triggerConditions = cms.vstring('HLT_L1SingleMuOpen_v*'),
+    triggerConditions = cms.vstring(''),
+    hltResults = cms.InputTag( "TriggerResults", "", "HLT" ),
+    l1tResults = cms.InputTag( "gtDigis" ),
+    l1tIgnoreMask = cms.bool( False ),
+    l1techIgnorePrescales = cms.bool( False ),
+    daqPartitions = cms.uint32( 1 ),
+    throw = cms.bool( True )
+)
+process.triggerSelectionSingleMuBeamHalo = process.triggerSelection.clone(triggerConditions=cms.vstring('HLT_L1SingleMuBeamHalo_v*'))
+process.triggerSelectionSingleMuOpen = process.triggerSelection.clone(triggerConditions=cms.vstring('HLT_L1SingleMuOpen_v*'))
 
 
 process.cscValidation = cms.EDAnalyzer("CSCValidation",
@@ -111,6 +82,8 @@ process.cscValidation = cms.EDAnalyzer("CSCValidation",
     makeHLTPlots = cms.untracked.bool(True),
     simHitTag = cms.InputTag("g4SimHits", "MuonCSCHits")
 )
+process.cscValidationSingleMuBeamHalo = process.cscValidation.clone(rootFileName=cms.untracked.string('SingleMuBeamHalo_OUTPUT'))
+process.cscValidationSingleMuOpen = process.cscValidation.clone(rootFileName=cms.untracked.string('SingleMuOpen_OUTPUT'))
 
 process.load("L1Trigger.CSCTriggerPrimitives.cscTriggerPrimitiveDigis_cfi")
 process.cscTriggerPrimitiveDigis.CSCComparatorDigiProducer = "muonCSCDigis:MuonCSCComparatorDigi"
@@ -140,5 +113,6 @@ process.TFileService = cms.Service("TFileService",
                                    )
 
 process.p = cms.Path(process.muonCSCDigis * process.csc2DRecHits * process.cscSegments * process.cscTriggerPrimitiveDigis * process.cscValidation)
-
+process.pSingleMuBeamHalo = cms.Path(process.triggerSelectionSingleMuBeamHalo * process.muonCSCDigis * process.csc2DRecHits * process.cscSegments * process.cscValidationSingleMuBeamHalo)
+process.pSingleMuOpen = cms.Path(process.triggerSelectionSingleMuOpen * process.muonCSCDigis * process.csc2DRecHits * process.cscSegments * process.cscValidationSingleMuOpen)
 
