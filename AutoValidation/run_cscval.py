@@ -385,7 +385,7 @@ def process_output(dataset,globalTag,**kwargs):
             sh.write(valMergeString+" \n")
             sh.write('cmsStage -f %s /store/group/dpg_csc/comm_csc/cscval/batch_output/%s/run%s_%s/%s\n' % (SingleMuBeamHalo_valOut, stream, run, eventContent, SingleMuBeamHalo_valOut))
         sh.close()
-        subprocess.check_call("bsub -q 1nh -J %s_%smerge < merge.sh" % (run,stream), shell=True)
+        subprocess.check_call("bsub -q 8nh -J %s_%smerge < merge.sh" % (run,stream), shell=True)
 
         runsToPlot += [[run,job]]
 
