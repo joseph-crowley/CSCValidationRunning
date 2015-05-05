@@ -57,6 +57,7 @@ target/
 
 # Output Directories
 AutoValidation/ExpressCosmics/
+AutoValidation/ExpressPhysics/
 AutoValidation/Cosmics/
 AutoValidation/SingleMu/
 AutoValidation/DoubleMu/
