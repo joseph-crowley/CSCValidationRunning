@@ -407,7 +407,7 @@ def process_output(dataset,globalTag,**kwargs):
                 for val in valFiles[trigger]:
                     valMergeString += ' root://eoscms.cern.ch/%s/%s' % (fileDir, val)
                 sh.write(valMergeString+" \n")
-                sh.write('cmsStage -f %s /store/group/dpg_csc/comm_csc/cscval/batch_output/%s/run%s_%s/%s\n' % (valOut[trigger], stream, run, eventContent, SingleMuOpen[trigger]))
+                sh.write('cmsStage -f %s /store/group/dpg_csc/comm_csc/cscval/batch_output/%s/run%s_%s/%s\n' % (valOut[trigger], stream, run, eventContent, valOut[trigger]))
         sh.close()
         if not dryRun: subprocess.check_call("bsub -q 8nh -J %s_%smerge < merge.sh" % (run,stream), shell=True)
 
