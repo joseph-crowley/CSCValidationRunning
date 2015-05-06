@@ -53,8 +53,6 @@ process.triggerSelection = cms.EDFilter( "TriggerResultsFilter",
     daqPartitions = cms.uint32( 1 ),
     throw = cms.bool( True )
 )
-process.triggerSelectionSingleMuBeamHalo = process.triggerSelection.clone(triggerConditions=cms.vstring('HLT_L1SingleMuBeamHalo_v*'))
-process.triggerSelectionSingleMuOpen = process.triggerSelection.clone(triggerConditions=cms.vstring('HLT_L1SingleMuOpen_v*'))
 
 
 process.cscValidation = cms.EDAnalyzer("CSCValidation",
@@ -82,8 +80,6 @@ process.cscValidation = cms.EDAnalyzer("CSCValidation",
     makeHLTPlots = cms.untracked.bool(True),
     simHitTag = cms.InputTag("g4SimHits", "MuonCSCHits")
 )
-process.cscValidationSingleMuBeamHalo = process.cscValidation.clone(rootFileName=cms.untracked.string('SingleMuBeamHalo_OUTFILE'))
-process.cscValidationSingleMuOpen = process.cscValidation.clone(rootFileName=cms.untracked.string('SingleMuOpen_OUTFILE'))
 
 process.load("L1Trigger.CSCTriggerPrimitives.cscTriggerPrimitiveDigis_cfi")
 process.cscTriggerPrimitiveDigis.CSCComparatorDigiProducer = "muonCSCDigis:MuonCSCComparatorDigi"
@@ -113,6 +109,5 @@ process.TFileService = cms.Service("TFileService",
                                    )
 
 process.p = cms.Path(process.muonCSCDigis * process.csc2DRecHits * process.cscSegments * process.cscTriggerPrimitiveDigis * process.cscValidation)
-process.pSingleMuBeamHalo = cms.Path(process.triggerSelectionSingleMuBeamHalo * process.muonCSCDigis * process.csc2DRecHits * process.cscSegments * process.cscValidationSingleMuBeamHalo)
-process.pSingleMuOpen = cms.Path(process.triggerSelectionSingleMuOpen * process.muonCSCDigis * process.csc2DRecHits * process.cscSegments * process.cscValidationSingleMuOpen)
+
 

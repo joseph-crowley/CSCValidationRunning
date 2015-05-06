@@ -30,14 +30,3 @@ os.system("mv *.png /afs/cern.ch/cms/CAF/CMSCOMM/COMM_CSC/CSCVAL/results/results
 
 print "individual triggers"
 
-print "SingleMuOpen"
-os.system("root -l -q -b SingleMuOpen_makePlots.C")
-os.system("mkdir -p /afs/cern.ch/cms/CAF/CMSCOMM/COMM_CSC/CSCVAL/results/results/runRUNNUMBER/STREAM/Site/PNGS/SingleMuOpen")
-os.system("mv *.png /afs/cern.ch/cms/CAF/CMSCOMM/COMM_CSC/CSCVAL/results/results/runRUNNUMBER/STREAM/Site/PNGS/SingleMuOpen")
-
-print "SingleMuBeamHalo"
-os.system("root -l -q -b SingleMuBeamHalo_makePlots.C")
-os.system("mkdir -p /afs/cern.ch/cms/CAF/CMSCOMM/COMM_CSC/CSCVAL/results/results/runRUNNUMBER/STREAM/Site/PNGS/SingleMuBeamHalo")
-os.system("mv *.png /afs/cern.ch/cms/CAF/CMSCOMM/COMM_CSC/CSCVAL/results/results/runRUNNUMBER/STREAM/Site/PNGS/SingleMuBeamHalo")
-
-print "make webpage"
