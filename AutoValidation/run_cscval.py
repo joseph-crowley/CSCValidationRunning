@@ -513,7 +513,7 @@ def process_dataset(dataset,globalTag,**kwargs):
             if procString in procRuns and not force: continue # already processed
             with open(procFile, 'a') as file:
                 file.write(procString+'\n')
-            if int(num) > 50000: # only care about long runs
+            if int(num) > 25000: # only care about long runs
                 print "Processing run %s" % rn
                 run_validation(dataset,globalTag,str(rn),stream,eventContent,force=force,**kwargs)
 
