@@ -316,7 +316,7 @@ def process_output(dataset,globalTag,**kwargs):
         if runN:
             if str(runN) != run: continue
         else:
-            if int(run)<243479: continue # start of non-stable collisions
+            if int(run)<244000: continue
 
         # some job still running. skip.
         #if "Job <%s_%s*> is not found" % (run,stream) not in subprocess.Popen("unbuffer bjobs -J %s_%s*" % (run,stream), shell=True,stdout=pipe).communicate()[0].splitlines():
@@ -506,7 +506,7 @@ def process_dataset(dataset,globalTag,**kwargs):
         # query DAS and get list of runs
         newruns = subprocess.Popen("./das_client.py --query='run dataset="+dataset+"' --limit=0", shell=True, stdout=pipe).communicate()[0].splitlines()
         for rn in newruns:
-            if int(rn)<243479: continue # start of non-stable collisions
+            if int(rn)<244000: continue # start of non-stable collisions
             print 'Checking %s' %rn
             num = subprocess.Popen("./das_client.py --limit=0 --query='summary dataset=%s run=%s | grep summary.nevents'" % (dataset,rn), shell=True,stdout=pipe).communicate()[0].rstrip()
             procString = '%s_%s' % (rn, num)
