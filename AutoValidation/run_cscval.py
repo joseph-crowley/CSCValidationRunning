@@ -8,31 +8,6 @@
 #   Ben Knapp, Northeastern University
 #   Devin Taylor, UW-Madison
 
-# Change Log
-#
-#   2015-05-02 - Devin Taylor
-#    - Adding trigger options
-#
-#   2015-04-09 - Devin Taylor
-#    - moving to self-contained templates (no external dependencies)
-#
-#   2015-03-18 - Devin Taylor
-#    - crab won't submit to CAF, back to batch
-#
-#   2015-03-17 - Devin Taylor
-#    - Moving to crab submission (break batch submission)
-#    - Adding argparse module
-#    - Adding FEVT for ExpressCosmics
-#
-#   2014-06-24 - Ben Knapp
-#    - DAS queries
-#    - Generate runlist from 'results' directory
-#    - Retrieve 'nEvents' from DAS piping
-#    - Options for local+batch (copy locally) or crab submission (later)
-#    - Options for localruns, including whether '.raw' needs to be processed (to be added later)
-#    - Modify directories to be hardcoded, along with more transparency
-
-
 ######################################################
 ###############   Configuration   ####################
 ######################################################
@@ -234,9 +209,6 @@ def run_validation(dataset,globalTag,run,stream,eventContent,**kwargs):
         nf = 1
         numJobs = int(math.ceil(len(input_files)/float(nf)))
         for j in range(numJobs):
-            cfgFileName='validation_%s_%i_cfg.py' % (run, j)
-            outFileName='valHists_run%s_%s_%i.root' % (run, stream, j)
-
             # check files already run over
             fname = 'processedFiles.txt'
             open(fname, 'a').close()
@@ -248,10 +220,16 @@ def run_validation(dataset,globalTag,run,stream,eventContent,**kwargs):
             for f in input_files[j*nf:j*nf+nf]:
                 if f not in procFiles:
                     doJob = True
-                    with open(fname, 'a') as file:
-                        file.write('%s\n'%f)
+                    if not dryrun:
+                        with open(fname, 'a') as file:
+                            file.write('%s\n'%f)
 
             if not doJob: continue
+
+            # rename the file to unique
+            fn = input_files[j*nf].split('/')[-1].split('.')[0]
+            cfgFileName='validation_%s_%s_cfg.py' % (run, fn)
+            outFileName='valHists_run%s_%s_%s.root' % (run, stream, fn)
 
             # create the config file
             fileListString = ''
@@ -282,7 +260,8 @@ def run_validation(dataset,globalTag,run,stream,eventContent,**kwargs):
             sh.close()
 
             print "Submitting job %i of %i" % (j+1, numJobs)
-            queue = '1nh' if 'Express' in stream else '8nh'
+            #queue = '1nh' if 'Express' in stream else '8nh'
+            queue = '8nh'
             if not dryRun: subprocess.check_call("bsub -q %s -J %s_%s_%i < run_%i.sh" % (queue, run, stream, j, j), shell=True)
 
     os.chdir('../')
@@ -316,7 +295,7 @@ def process_output(dataset,globalTag,**kwargs):
         if runN:
             if str(runN) != run: continue
         else:
-            if int(run)<244000: continue
+            if int(run)<244516: continue
 
         # some job still running. skip.
         #if "Job <%s_%s*> is not found" % (run,stream) not in subprocess.Popen("unbuffer bjobs -J %s_%s*" % (run,stream), shell=True,stdout=pipe).communicate()[0].splitlines():
@@ -506,7 +485,7 @@ def process_dataset(dataset,globalTag,**kwargs):
         # query DAS and get list of runs
         newruns = subprocess.Popen("./das_client.py --query='run dataset="+dataset+"' --limit=0", shell=True, stdout=pipe).communicate()[0].splitlines()
         for rn in newruns:
-            if int(rn)<244000: continue # start of non-stable collisions
+            if int(rn)<244516: continue # start of non-stable collisions
             print 'Checking %s' %rn
             num = subprocess.Popen("./das_client.py --limit=0 --query='summary dataset=%s run=%s | grep summary.nevents'" % (dataset,rn), shell=True,stdout=pipe).communicate()[0].rstrip()
             procString = '%s_%s' % (rn, num)

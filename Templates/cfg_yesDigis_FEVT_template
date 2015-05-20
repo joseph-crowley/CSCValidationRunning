@@ -38,10 +38,6 @@ process.MessageLogger = cms.Service("MessageLogger",
 
 
 
-"""Customise digi/reco geometry to use unganged ME1/a channels"""
-process.CSCGeometryESModule.useGangedStripsInME1a = False
-process.idealForDigiCSCGeometry.useGangedStripsInME1a = False
-
 # filter on trigger path
 process.triggerSelection = cms.EDFilter( "TriggerResultsFilter",
     #triggerConditions = cms.vstring('HLT_L1SingleMuOpen_v*'),
