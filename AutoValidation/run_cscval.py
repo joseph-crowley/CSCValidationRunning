@@ -220,7 +220,7 @@ def run_validation(dataset,globalTag,run,stream,eventContent,**kwargs):
             for f in input_files[j*nf:j*nf+nf]:
                 if f not in procFiles:
                     doJob = True
-                    if not dryrun:
+                    if not dryRun:
                         with open(fname, 'a') as file:
                             file.write('%s\n'%f)
 
@@ -295,7 +295,7 @@ def process_output(dataset,globalTag,**kwargs):
         if runN:
             if str(runN) != run: continue
         else:
-            if int(run)<244516: continue
+            if int(run)<245000: continue
 
         # some job still running. skip.
         #if "Job <%s_%s*> is not found" % (run,stream) not in subprocess.Popen("unbuffer bjobs -J %s_%s*" % (run,stream), shell=True,stdout=pipe).communicate()[0].splitlines():
@@ -485,7 +485,7 @@ def process_dataset(dataset,globalTag,**kwargs):
         # query DAS and get list of runs
         newruns = subprocess.Popen("./das_client.py --query='run dataset="+dataset+"' --limit=0", shell=True, stdout=pipe).communicate()[0].splitlines()
         for rn in newruns:
-            if int(rn)<244516: continue # start of non-stable collisions
+            if int(rn)<245000: continue # start of non-stable collisions
             print 'Checking %s' %rn
             num = subprocess.Popen("./das_client.py --limit=0 --query='summary dataset=%s run=%s | grep summary.nevents'" % (dataset,rn), shell=True,stdout=pipe).communicate()[0].rstrip()
             procString = '%s_%s' % (rn, num)
