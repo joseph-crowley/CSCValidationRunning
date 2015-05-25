@@ -1,3 +1,6 @@
+void drawColoredChamberLines(int station, int nchamber1[4][36]);
+
+
 TFile* OpenFiles(std::string path){
 
   TFile *f;
@@ -367,7 +370,7 @@ void make1DPlot2(std::string histoname1, std::string histoname2, int statoption,
     gStyle->SetHistFillColor(72);
     b1->UseCurrentStyle();
 
-    t2 = t2 + " (run " + run + ")";
+    //t2 = t2 + " (run " + run + ")";
     b1->SetTitle(t2.c_str());
     b1->GetXaxis()->SetLabelSize(0.06);
     b1->GetYaxis()->SetLabelSize(0.06);
@@ -464,7 +467,7 @@ void makeEffGif(std::string histoname, TFile* f1, std::string histotitle, std::s
 
 void Draw2DProfile(std::string histoname, TFile* f1, std::string title, std::string option, std::string savename){
 
-  TProfile2D *test = f1->Get(histoname.c_str());
+  TProfile2D *test = (TProfile2D*)f1->Get(histoname.c_str());
   TH2D *plot = test->ProjectionXY("test2",option.c_str());
   
   if (plot){
@@ -832,7 +835,7 @@ void GlobalPosfromTree(std::string graphname, TFile* f1, int endcap, int station
 
 } // end GlobalPosfromTree
 
-drawChamberLines(int station){
+void drawChamberLines(int station){
 
   gStyle->SetLineWidth(2);
   float pi = 3.14159;
@@ -915,7 +918,7 @@ drawChamberLines(int station){
     TVector3 r1(511.99,31.7,0);
     TVector3 r2(511.99,-31.7,0);
     TVector3 r3(676.15,-46.05,0);
-    TVector3 r4(676.15,46.05.6,0);
+    TVector3 r4(676.15,46.05,0);
 
     for (int i = 0; i < 36; i++){
 
@@ -1100,7 +1103,7 @@ drawChamberLines(int station){
 
   if (station == 4){
 
-    TVector3 p1(186.99,34.505.15,0);
+    TVector3 p1(186.99,34.505,0);
     TVector3 p2(186.99,-34.505,0);
     TVector3 p3(336.41,-62.825,0);
     TVector3 p4(336.41,62.825,0);
@@ -1223,8 +1226,8 @@ void compareEffGif(std::string histoname, TFile* f1, TFile* f2, std::string hist
       hn1->SetBinError(i+1, EffE);
     }
 
-    float Num = 1;
-    float Den = 1;
+    Num = 1;
+    Den = 1;
     for (int i=0;i<20;i++){
       Num = h2->GetBinContent(i+1);
       Den = h2->GetBinContent(i+21);
@@ -1402,6 +1405,7 @@ void GlobalPosfromTreeCompare(std::string graphname, TFile* f1, TFile* f2, int e
 }
 
 
+/*
 void NikolaiPlots(TFile *f_in, int flag){
  
 gROOT->SetStyle("Plain"); // to get rid of gray color of pad and have it white
@@ -1674,7 +1678,8 @@ for(Int_t jesr=0;jesr<18;jesr++) {
    delete hb;
    delete c1;
 }
-drawColoredChamberLines(int station, int nchamber1[4][36]){
+*/
+void drawColoredChamberLines(int station, int nchamber1[4][36]){
  // thanks to Luca Sabbatini for this coe
  const int maxRingIdxOfRelevance = 2;
  const int maxChamberIdxOfRelevance = 35;
@@ -1893,7 +1898,7 @@ drawColoredChamberLines(int station, int nchamber1[4][36]){
    TVector3 r1(511.99,31.7,0);
    TVector3 r2(511.99,-31.7,0);
    TVector3 r3(676.15,-46.05,0);
-   TVector3 r4(676.15,46.05.6,0);
+   TVector3 r4(676.15,46.05,0);
 
    thisRingNchamber1Avg = 0.;
    thisRingNchamber1Max = 0.;
@@ -2298,7 +2303,7 @@ drawColoredChamberLines(int station, int nchamber1[4][36]){
    // station 4, ring 1 (the only ring on station 4... so far)
    thisRingIdx = 0;
    numChambersInRing = 18;
-   TVector3 p1(186.99,34.505.15,0);
+   TVector3 p1(186.99,34.505,0);
    TVector3 p2(186.99,-34.505,0);
    TVector3 p3(336.41,-62.825,0);
    TVector3 p4(336.41,62.825,0);
