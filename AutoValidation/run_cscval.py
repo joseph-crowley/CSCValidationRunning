@@ -23,7 +23,7 @@ import re
 import errno
 import math
 
-MINRUN = 246000
+MINRUN = 246865 # start of Run2015A
 
 pipe = subprocess.PIPE
 Release = subprocess.Popen('echo $CMSSW_VERSION', shell=True, stdout=pipe).communicate()[0]
@@ -434,7 +434,8 @@ def process_output(dataset,globalTag,**kwargs):
 
 def build_runlist():
     print "Building runlist"
-    os.system('bash /afs/cern.ch/cms/CAF/CMSCOMM/COMM_CSC/CSCVAL/results/scripts/generateRunList.sh > runlist.json; mv runlist.json /afs/cern.ch/cms/CAF/CMSCOMM/COMM_CSC/CSCVAL/results/js/')
+    curTime = time.strftime("%Y_%m_%d_%H_%M_%S", time.localtime())
+    os.system('bash /afs/cern.ch/cms/CAF/CMSCOMM/COMM_CSC/CSCVAL/results/scripts/generateRunList.sh > %s_runlist.json; mv %s_runlist.json /afs/cern.ch/cms/CAF/CMSCOMM/COMM_CSC/CSCVAL/results/js/runlist.json' % (curTime,curTime))
     # create last run json
     Time=time.strftime("%Y/%m/%d %H:%M:%S", time.localtime())
     with open('lastrun.json','w') as file:
