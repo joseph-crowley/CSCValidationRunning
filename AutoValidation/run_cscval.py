@@ -22,8 +22,9 @@ import argparse
 import re
 import errno
 import math
+from das_client import get_data, DASOptionParser
 
-MINRUN = 246865 # start of Run2015A
+MINRUN = 246965 # new HLT menu
 
 pipe = subprocess.PIPE
 Release = subprocess.Popen('echo $CMSSW_VERSION', shell=True, stdout=pipe).communicate()[0]
@@ -465,9 +466,10 @@ def process_dataset(dataset,globalTag,**kwargs):
 
     # begin running
     start=time.strftime("%Y/%m/%d %H:%M:%S", time.localtime())
-    print "CSCVal job inititiated at "+start
+    print "CSCVal job initiated at "+start
     os.chdir(stream)
 
+    print "Reading previously processed runs"
     procFile = 'processedRuns.txt'
     open(procFile, 'a').close()
     with open(procFile, 'r') as file:
@@ -486,11 +488,16 @@ def process_dataset(dataset,globalTag,**kwargs):
             run_validation(dataset,globalTag,str(run),stream,eventContent,force=force,**kwargs)
     else:
         # query DAS and get list of runs
+        print "Querying DAS"
         newruns = subprocess.Popen("./das_client.py --query='run dataset="+dataset+"' --limit=0", shell=True, stdout=pipe).communicate()[0].splitlines()
+        #newruns = get_data('https://cmsweb.cern.ch', "run dataset="+dataset, 0, 0, 0, 300, '', '')
+        print "Available runs"
+        print newruns
         for rn in newruns:
-            if int(rn)<MINRUN: continue # start of non-stable collisions
+            if int(rn)<MINRUN: continue
             print 'Checking %s' %rn
             num = subprocess.Popen("./das_client.py --limit=0 --query='summary dataset=%s run=%s | grep summary.nevents'" % (dataset,rn), shell=True,stdout=pipe).communicate()[0].rstrip()
+            print 'Num events: %s' % num
             procString = '%s_%s' % (rn, num)
             if procString in procRuns and not force: continue # already processed
             with open(procFile, 'a') as file:
