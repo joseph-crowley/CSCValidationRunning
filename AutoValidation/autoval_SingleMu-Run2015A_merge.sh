@@ -13,4 +13,4 @@ scram b
 echo "Initiate validation script"
 
 #cern-get-sso-cookie --krb -r -u https://cmswbm.web.cern.ch/cmswbm/cmsdb/servlet/RunSummary -o ~/private/ssocookie.txt
-./run_cscval.py /SingleMu/Run2015A-v1/RAW GR_P_V54 -ro -t HLT_L1SingleMuOpen_v1
+./run_cscval.py /SingleMu/Run2015A-v1/RAW GR_P_V54 -ro

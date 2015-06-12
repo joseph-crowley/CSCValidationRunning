@@ -240,7 +240,7 @@ def run_validation(dataset,globalTag,run,stream,eventContent,**kwargs):
             numEvents = 0
             for f in input_files[j*nf:j*nf+nf]:
                 if fileListString: fileListString += ',\n'
-                fileListString += "    '%s'" % f
+                fileListString += "    %s" % f
 
             symbol_map_cfg = { 'NEVENT':num, 'GLOBALTAG':globalTag, "OUTFILE":outFileName, 'DATASET':dataset, 'RUNNUMBER':run, 'FILELIST': fileListString, 'VERSION': str(j)}
             replace(symbol_map_cfg,templatecfgFilePath, cfgFileName, trigger_cfg)
@@ -494,9 +494,18 @@ def process_dataset(dataset,globalTag,**kwargs):
         print "Available runs"
         print newruns
         for rn in newruns:
+            try:
+                _ = int(rn)
+            except:
+                print 'Not an int: %s' % rn
+                continue
             if int(rn)<MINRUN: continue
             print 'Checking %s' %rn
             num = subprocess.Popen("./das_client.py --limit=0 --query='summary dataset=%s run=%s | grep summary.nevents'" % (dataset,rn), shell=True,stdout=pipe).communicate()[0].rstrip()
+            try:
+                _ = int(num)
+            except:
+                print 'Not an int: %s' % num
             print 'Num events: %s' % num
             procString = '%s_%s' % (rn, num)
             if procString in procRuns and not force: continue # already processed
