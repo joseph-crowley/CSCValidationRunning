@@ -10,4 +10,4 @@ eval `scramv1 runtime -sh`
 scram b
 
 echo "Initiate merge script"
-./run_cscval.py /Cosmics/Run2015A-v1/RAW GR_P_V54 -ro -t HLT_L1SingleMuOpen_v6 HLT_L1SingleMuBeamHalo_v1
+./run_cscval.py /Cosmics/Run2015A-v1/RAW GR_P_V54 -ro
