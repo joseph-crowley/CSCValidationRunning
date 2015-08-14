@@ -5,8 +5,8 @@ Repository to setup the latest version of CSCValidation to be run automatically 
 
 Setup a new release
 ```
-cmsrel CMSSW_7_4_2 # or current CMSSW version
-cd CMSSW_7_4_2/src
+cmsrel CMSSW_7_4_9 # or current CMSSW version
+cd CMSSW_7_4_9/src
 cmsenv
 git cms-init
 ```
@@ -28,6 +28,7 @@ To run a cron job on afs you must use acrontab. The current version crontab scri
 [AutoValidation/autoval.cron](AutoValidation/autoval.cron). Make certain you consult with others to make 
 sure we don't have multiple cron jobs running (Devin Taylor and Benjamin Knapp).
 ```
+python generateCron.py
 acrontab <autoval.cron
 acrontab -l
 ```

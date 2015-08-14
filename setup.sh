@@ -13,6 +13,7 @@ echo "Detected CMSSW version: $MAJOR_VERSION $MINOR_VERSION"
 
 pushd $CMSSW_BASE/src
 
+git cms-addpkg DQM/L1TMonitor
 ln -s CSCValidationRunning/RecoLocalMuon RecoLocalMuon
 
 scram b -j 8

@@ -5,11 +5,11 @@ process = cms.Process("TEST")
 
 process.load("Configuration/StandardSequences/Geometry_cff")
 process.load("Configuration/StandardSequences/MagneticField_cff")
-process.load("Configuration/StandardSequences/FrontierConditions_GlobalTag_cff")
+process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_condDBv2_cff')
 process.load("Configuration/StandardSequences/RawToDigi_Data_cff")
 process.load("Configuration.StandardSequences.Reconstruction_cff")
 
-process.GlobalTag.globaltag = 'GLOBALTAG::All'
+process.GlobalTag.globaltag = cms.string('GLOBALTAG')
 
 inputFiles = cms.untracked.vstring(
 FILELIST
@@ -116,7 +116,7 @@ process.dqmSaver.producer = 'DQM'
 process.dqmSaver.saveByLumiSection = -1
 process.dqmSaver.saveByRun = 1
 process.dqmSaver.saveAtJobEnd = True
-process.load("DQM.Integration.test.dqmPythonTypes")
+process.load("DQM.Integration.config.dqmPythonTypes")
 es_prefer_GlobalTag = cms.ESPrefer('GlobalTag')
 process.load("DQM.L1TMonitor.L1TMonitor_cff")
 process.load("DQM.L1TMonitor.L1TSync_cff")
