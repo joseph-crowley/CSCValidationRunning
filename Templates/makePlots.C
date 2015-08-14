@@ -6,7 +6,7 @@
   // define the functions from the external file
   extern TFile* OpenFiles(std::string path);
   extern void makeCSCOccupancy(std::string histoname, TFile* f1, std::string histotitle, std::string savename);
-  extern void Draw2DTempPlot(std::string histo, TFile* f1, bool includeME11, std::string savename);
+  extern void Draw2DTempPlot(std::string histo, TFile* f1, bool includeME11, std::string savename, bool hasLabels = false);
   extern void make1DPlot(std::string histoname, TFile* f1, std::string histotitle, int statoption, std::string savename);
   extern void make1DPlot(std::string histoname, TFile* f1, std::string histotitle, std::string xtitle, std::string ytitle, int statoption, std::string savename);
   extern void printEmptyChambers(std::string histoname, std::string oname, TFile* f);

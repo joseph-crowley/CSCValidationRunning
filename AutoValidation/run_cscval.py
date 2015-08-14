@@ -117,6 +117,7 @@ def run_validation(dataset,globalTag,run,stream,eventContent,**kwargs):
     templatecrabFilePath = '%s/%s' % (TEMPLATE_PATH, crab)
     templateHTMLFilePath = '%s/html_template' % TEMPLATE_PATH
     templateRootMacroPath = '%s/makePlots.C' % TEMPLATE_PATH
+    templateRootMacroCSCTFPath = '%s/makePlots_csctf.C' % TEMPLATE_PATH
     templateSecondStepPath = '%s/%s' % (TEMPLATE_PATH, proc)
 
     # get number of events in run
@@ -134,8 +135,10 @@ def run_validation(dataset,globalTag,run,stream,eventContent,**kwargs):
     macroFileName['All'] = "makePlots.C"
     for trigger in triggers:
         macroFileName[trigger] = "%s_makePlots.C" % trigger
+    macroFileNameCSCTF = "makePlots_csctf.C"
     procFileName = "secondStep.py"
     outFileName='valHists_run%s_%s.root' % (run, stream)
+    outCSCTFName='csctfHist_run%s_%s.root' % (run, stream)
     Time=time.strftime("%Y/%m/%d %H:%M:%S", time.localtime())
 
     symbol_map_html = { 'RUNNUMBER':run, 'NEVENT':num, "DATASET":dataset, "CMSSWVERSION":Release, "GLOBALTAG":globalTag, "DATE":Time }
@@ -143,6 +146,7 @@ def run_validation(dataset,globalTag,run,stream,eventContent,**kwargs):
     symbol_map_macro['All'] = { 'FILENAME':outFileName, 'TEMPLATEDIR':TEMPLATE_PATH }
     for trigger in triggers:
         symbol_map_macro[trigger] = { 'FILENAME':trigger+'_'+outFileName, 'TEMPLATEDIR':TEMPLATE_PATH }
+    symbol_map_csctf = {'FILENAME': outCSCTFName, 'TEMPLATEDIR':TEMPLATE_PATH, 'RUNNUMBER':run}
     symbol_map_proc = { 'TEMPLATEDIR':TEMPLATE_PATH, 'OUTPUTFILE':outFileName, 'RUNNUMBER':run, 'NEWDIR':rundir, 'CFGFILE':cfgFileName, 'STREAM':stream }
     symbol_map_cfg = { 'NEVENT':num, 'GLOBALTAG':globalTag, "OUTFILE":outFileName, 'DATASET':dataset, 'RUNNUMBER':run}
     symbol_map_crab = { 'GLOBALTAG':globalTag, "OUTFILE":outFileName, 'DATASET':dataset, 'RUNNUMBER':run, 'STREAM':stream, 'EVENTCONTENT':eventContent}
@@ -163,6 +167,7 @@ def run_validation(dataset,globalTag,run,stream,eventContent,**kwargs):
     replace(symbol_map_macro['All'],templateRootMacroPath, macroFileName['All'])
     for trigger in triggers:
         replace(symbol_map_macro[trigger],templateRootMacroPath, macroFileName[trigger])
+    replace(symbol_map_csctf,templateRootMacroCSCTFPath, macroFileNameCSCTF)
     replace(symbol_map_proc,templateSecondStepPath, procFileName, trigger_proc)
     replace(symbol_map_cfg,templatecfgFilePath, cfgFileName, trigger_cfg)
     replace(symbol_map_crab,templatecrabFilePath, crabFileName)
@@ -422,6 +427,7 @@ def process_output(dataset,globalTag,**kwargs):
         valOut['All'] = 'valHists_run%s_%s.root' % (run, stream)
         for trigger in triggers:
             valOut[trigger] = '%s_valHists_run%s_%s.root' % (trigger, run, stream)
+        csctfOut = 'csctfHist_run%s_%s.root' % (run, stream)
 
         # wait for job to finish then copy over
         print("Waiting on run %s" % run)
@@ -435,6 +441,7 @@ def process_output(dataset,globalTag,**kwargs):
             valRet = subprocess.call('cmsStage -f /store/group/dpg_csc/comm_csc/cscval/batch_output/%s/run%s_%s/%s %s' % (stream, run, eventContent, valOut['All'], valOut['All']), shell=True)
             for trigger in triggers:
                 trigRet = subprocess.call('cmsStage -f /store/group/dpg_csc/comm_csc/cscval/batch_output/%s/run%s_%s/%s %s' % (stream, run, eventContent, valOut[trigger], valOut[trigger]), shell=True)
+            subprocess.call('cmsStage -f /store/group/dpg_csc/comm_csc/cscval/batch_output/%s/run%s_%s/%s %s' % (stream, run, eventContent, csctfOut, csctfOut), shell=True)
             if not valRet and not dryRun: os.system("./secondStep.py")
             subprocess.call('rm *.root', shell=True)
 

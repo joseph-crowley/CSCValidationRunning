@@ -586,7 +586,7 @@ void Draw2DEfficiency(std::string histo, TFile* f1, std::string title, std::stri
 }
 
 
-void Draw2DTempPlot(std::string histo, TFile* f1, bool includeME11, std::string savename){
+void Draw2DTempPlot(std::string histo, TFile* f1, bool includeME11, std::string savename, bool hasLabels = false){
 
   TCanvas *c = new TCanvas("c","my canvas",1);
   gStyle->SetPalette(1,0);
@@ -599,65 +599,67 @@ void Draw2DTempPlot(std::string histo, TFile* f1, bool includeME11, std::string 
 
   plot->SetStats(kFALSE);
   
-  if (includeME11){
-    plot->GetYaxis()->SetBinLabel(1,"ME- 4/2");
-    plot->GetYaxis()->SetBinLabel(2,"ME- 4/1");
-    plot->GetYaxis()->SetBinLabel(3,"ME- 3/2");
-    plot->GetYaxis()->SetBinLabel(4,"ME- 3/1");
-    plot->GetYaxis()->SetBinLabel(5,"ME- 2/2");
-    plot->GetYaxis()->SetBinLabel(6,"ME- 2/1");
-    plot->GetYaxis()->SetBinLabel(10,"ME- 1/1a");
-    plot->GetYaxis()->SetBinLabel(7,"ME- 1/3");
-    plot->GetYaxis()->SetBinLabel(8,"ME- 1/2");
-    plot->GetYaxis()->SetBinLabel(9,"ME- 1/1b");
-    plot->GetYaxis()->SetBinLabel(12,"ME+ 1/1b");
-    plot->GetYaxis()->SetBinLabel(13,"ME+ 1/2");
-    plot->GetYaxis()->SetBinLabel(14,"ME+ 1/3");
-    plot->GetYaxis()->SetBinLabel(11,"ME+ 1/1a");
-    plot->GetYaxis()->SetBinLabel(15,"ME+ 2/1");
-    plot->GetYaxis()->SetBinLabel(16,"ME+ 2/2");
-    plot->GetYaxis()->SetBinLabel(17,"ME+ 3/1");
-    plot->GetYaxis()->SetBinLabel(18,"ME+ 3/2");
-    plot->GetYaxis()->SetBinLabel(19,"ME+ 4/1");
-    plot->GetYaxis()->SetBinLabel(20,"ME+ 4/2");
-  }
-  else {
-    plot->GetYaxis()->SetBinLabel(1,"ME- 4/1");
-    plot->GetYaxis()->SetBinLabel(2,"ME- 3/2");
-    plot->GetYaxis()->SetBinLabel(3,"ME- 3/1");
-    plot->GetYaxis()->SetBinLabel(4,"ME- 2/2");
-    plot->GetYaxis()->SetBinLabel(5,"ME- 2/1");
-    plot->GetYaxis()->SetBinLabel(6,"ME- 1/3");
-    plot->GetYaxis()->SetBinLabel(7,"ME- 1/2");
-    plot->GetYaxis()->SetBinLabel(8,"ME- 1/1b");
-    plot->GetYaxis()->SetBinLabel(9,"ME- 1/1a");
-    plot->GetYaxis()->SetBinLabel(10,"ME+ 1/1a");
-    plot->GetYaxis()->SetBinLabel(11,"ME+ 1/1b");
-    plot->GetYaxis()->SetBinLabel(12,"ME+ 1/2");
-    plot->GetYaxis()->SetBinLabel(13,"ME+ 1/3");
-    plot->GetYaxis()->SetBinLabel(14,"ME+ 2/1");
-    plot->GetYaxis()->SetBinLabel(15,"ME+ 2/2");
-    plot->GetYaxis()->SetBinLabel(16,"ME+ 3/1");
-    plot->GetYaxis()->SetBinLabel(17,"ME+ 3/2");
-    plot->GetYaxis()->SetBinLabel(18,"ME+ 4/1");
-  }
+  if (!hasLabels) {
+    if (includeME11){
+      plot->GetYaxis()->SetBinLabel(1,"ME- 4/2");
+      plot->GetYaxis()->SetBinLabel(2,"ME- 4/1");
+      plot->GetYaxis()->SetBinLabel(3,"ME- 3/2");
+      plot->GetYaxis()->SetBinLabel(4,"ME- 3/1");
+      plot->GetYaxis()->SetBinLabel(5,"ME- 2/2");
+      plot->GetYaxis()->SetBinLabel(6,"ME- 2/1");
+      plot->GetYaxis()->SetBinLabel(10,"ME- 1/1a");
+      plot->GetYaxis()->SetBinLabel(7,"ME- 1/3");
+      plot->GetYaxis()->SetBinLabel(8,"ME- 1/2");
+      plot->GetYaxis()->SetBinLabel(9,"ME- 1/1b");
+      plot->GetYaxis()->SetBinLabel(12,"ME+ 1/1b");
+      plot->GetYaxis()->SetBinLabel(13,"ME+ 1/2");
+      plot->GetYaxis()->SetBinLabel(14,"ME+ 1/3");
+      plot->GetYaxis()->SetBinLabel(11,"ME+ 1/1a");
+      plot->GetYaxis()->SetBinLabel(15,"ME+ 2/1");
+      plot->GetYaxis()->SetBinLabel(16,"ME+ 2/2");
+      plot->GetYaxis()->SetBinLabel(17,"ME+ 3/1");
+      plot->GetYaxis()->SetBinLabel(18,"ME+ 3/2");
+      plot->GetYaxis()->SetBinLabel(19,"ME+ 4/1");
+      plot->GetYaxis()->SetBinLabel(20,"ME+ 4/2");
+    }
+    else {
+      plot->GetYaxis()->SetBinLabel(1,"ME- 4/1");
+      plot->GetYaxis()->SetBinLabel(2,"ME- 3/2");
+      plot->GetYaxis()->SetBinLabel(3,"ME- 3/1");
+      plot->GetYaxis()->SetBinLabel(4,"ME- 2/2");
+      plot->GetYaxis()->SetBinLabel(5,"ME- 2/1");
+      plot->GetYaxis()->SetBinLabel(6,"ME- 1/3");
+      plot->GetYaxis()->SetBinLabel(7,"ME- 1/2");
+      plot->GetYaxis()->SetBinLabel(8,"ME- 1/1b");
+      plot->GetYaxis()->SetBinLabel(9,"ME- 1/1a");
+      plot->GetYaxis()->SetBinLabel(10,"ME+ 1/1a");
+      plot->GetYaxis()->SetBinLabel(11,"ME+ 1/1b");
+      plot->GetYaxis()->SetBinLabel(12,"ME+ 1/2");
+      plot->GetYaxis()->SetBinLabel(13,"ME+ 1/3");
+      plot->GetYaxis()->SetBinLabel(14,"ME+ 2/1");
+      plot->GetYaxis()->SetBinLabel(15,"ME+ 2/2");
+      plot->GetYaxis()->SetBinLabel(16,"ME+ 3/1");
+      plot->GetYaxis()->SetBinLabel(17,"ME+ 3/2");
+      plot->GetYaxis()->SetBinLabel(18,"ME+ 4/1");
+    }
 
-  for (int i = 1; i < 37; i++){
-    ostringstream oss1;
-    oss1 << i;
-    string ch = oss1.str();
-    plot->GetXaxis()->SetBinLabel(i,ch.c_str());
+    for (int i = 1; i < 37; i++){
+      ostringstream oss1;
+      oss1 << i;
+      string ch = oss1.str();
+      plot->GetXaxis()->SetBinLabel(i,ch.c_str());
+    }
+
+
+      plot->GetYaxis()->SetNdivisions(20,kFALSE);
+      plot->GetXaxis()->SetNdivisions(36,kFALSE);
+
+      plot->GetXaxis()->SetTitle("Chamber #");
+
+      c->SetGrid();
   }
 
   c->SetRightMargin(0.12);
-
-  plot->GetYaxis()->SetNdivisions(20,kFALSE);
-  plot->GetXaxis()->SetNdivisions(36,kFALSE);
-
-  plot->GetXaxis()->SetTitle("Chamber #");
-
-  c->SetGrid();
-
   plot->Draw("COLZ");
 
   c->Update();
