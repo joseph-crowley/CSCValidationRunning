@@ -103,10 +103,71 @@ process.lctreader = cms.EDAnalyzer("CSCTriggerPrimitivesReader",
     CSCWireDigiProducer = cms.InputTag("simMuonCSCDigis","MuonCSCWireDigi")
 )
 
+# CSCTF stuff
+process.load("DQMServices.Components.DQMEnvironment_cfi")
+
+#process.load("DQM.L1TMonitor.environment_file_cff")
+process.load("DQMServices.Core.DQM_cfg")
+process.load("DQMServices.Components.DQMEnvironment_cfi")
+process.dqmSaver.convention = 'Online'
+process.dqmSaver.referenceHandling = 'all'
+process.dqmSaver.dirName = '.'
+process.dqmSaver.producer = 'DQM'
+process.dqmSaver.saveByLumiSection = -1
+process.dqmSaver.saveByRun = 1
+process.dqmSaver.saveAtJobEnd = True
+process.load("DQM.Integration.test.dqmPythonTypes")
+es_prefer_GlobalTag = cms.ESPrefer('GlobalTag')
+process.load("DQM.L1TMonitor.L1TMonitor_cff")
+process.load("DQM.L1TMonitor.L1TSync_cff")
+process.load("DQM.L1TMonitorClient.L1TMonitorClient_cff")
+process.l1tSync.oracleDB = cms.string("oracle://cms_orcon_adg/CMS_COND_31X_L1T")
+process.l1tSync.pathCondDB = cms.string("/afs/cern.ch/cms/DB/conddb/ADG")
+process.l1tRate.oracleDB = cms.string("oracle://cms_orcon_adg/CMS_COND_31X_L1T")
+process.l1tRate.pathCondDB = cms.string("/afs/cern.ch/cms/DB/conddb/ADG")
+process.l1tMonitorPath = cms.Path(process.l1tMonitorOnline)
+process.l1tMonitorClientPath = cms.Path(process.l1tMonitorClient)
+process.l1tSyncPath = cms.Path(process.l1tSyncHltFilter+process.l1tSync)
+process.l1tMonitorEndPath = cms.EndPath(process.l1tMonitorEndPathSeq)
+process.l1tMonitorClientEndPath = cms.EndPath(process.l1tMonitorClientEndPathSeq)
+process.l1tMonitorPath = cms.Path(process.csctfDigis * process.l1tCsctf)
+process.dqmEndPath = cms.EndPath(
+                                 process.dqmEnv *
+                                 process.dqmSaver
+                                 )
+process.schedule = cms.Schedule(#process.rawToDigiPath,
+                                process.l1tMonitorPath,
+                                process.l1tSyncPath,
+                                process.l1tMonitorClientPath,
+                                process.l1tMonitorEndPath,
+                                process.l1tMonitorClientEndPath,
+                                process.dqmEndPath
+                                )
+process.l1tMonitorOnline.remove(process.bxTiming)
+process.l1tMonitorOnline.remove(process.l1tBPTX)
+process.l1tMonitorOnline.remove(process.l1tDttf)
+#process.l1tMonitorOnline.remove(process.l1tCsctf)
+process.l1tMonitorOnline.remove(process.l1tRpctf)
+process.l1tMonitorOnline.remove(process.l1tGmt)
+process.l1tMonitorOnline.remove(process.l1tGt)
+process.l1tMonitorOnline.remove(process.l1ExtraDqmSeq)
+process.l1tMonitorOnline.remove(process.l1tRate)
+process.l1tMonitorOnline.remove(process.l1tRctSeq)
+process.l1tMonitorOnline.remove(process.l1tGctSeq)
+#process.l1tMonitorEndPathSeq.remove(process.l1s)
+#process.l1tMonitorEndPathSeq.remove(process.l1tscalers)
+process.schedule.remove(process.l1tSyncPath)
+
+process.l1tCsctf.gmtProducer = "null"
+process.l1tCsctf.gangedME11a = False
+
+from Configuration.StandardSequences.Eras import eras
+eras.run2_common.toModify( process.l1tCsctf, gangedME11a = False )
+
 process.TFileService = cms.Service("TFileService",
                                    fileName = cms.string('TPEHists_VERSION.root')
                                    )
 
 process.p = cms.Path(process.muonCSCDigis * process.cscSegments * process.cscTriggerPrimitiveDigis * process.cscValidation)
 
-
+process.schedule.append(process.p)

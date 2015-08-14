@@ -233,6 +233,8 @@ def run_validation(dataset,globalTag,run,stream,eventContent,**kwargs):
             fn = input_files[j*nf].split('/')[-1].split('.')[0]
             cfgFileName='validation_%s_%s_cfg.py' % (run, fn)
             outFileName='valHists_run%s_%s_%s.root' % (run, stream, fn)
+            inCSCTFName='DQM_V0001_YourSubsystem_R000%s.root' % run
+            outCSCTFName='csctfHist_run%s_%s_%s.root' % (run, stream, fn)
 
             # create the config file
             fileListString = ''
@@ -259,6 +261,7 @@ def run_validation(dataset,globalTag,run,stream,eventContent,**kwargs):
             sh.write('cmsStage -f %s /store/group/dpg_csc/comm_csc/cscval/batch_output/%s/run%s_%s/%s\n' % (outFileName, stream, run, eventContent, outFileName))
             for trigger in triggers:
                 sh.write('cmsStage -f %s_%s /store/group/dpg_csc/comm_csc/cscval/batch_output/%s/run%s_%s/%s_%s\n' % (trigger, outFileName, stream, run, eventContent, trigger, outFileName))
+            sh.write('cmsStage -f %s /store/group/dpg_csc/comm_csc/cscval/batch_output/%s/run%s_%s/%s\n' % (inCSCTFName, stream, run, eventContent, outCSCTFName))
             sh.write('cmsStage -f TPEHists_%i.root /store/group/dpg_csc/comm_csc/cscval/batch_output/%s/run%s_%s/TPEHists_%i.root\n' % (j, stream, run, eventContent, j))
             sh.close()
 
@@ -316,6 +319,7 @@ def process_output(dataset,globalTag,**kwargs):
         tpeOut = 'TPEHists.root'
         valOut = {}
         valOut['All'] = 'valHists_run%s_%s.root' % (run, stream)
+        csctfOut = 'csctfHist_run%s_%s.root' % (run, stream)
         for trigger in triggers:
             valOut[trigger] = '%s_valHists_run%s_%s.root' % (trigger, run, stream)
 
@@ -331,14 +335,16 @@ def process_output(dataset,globalTag,**kwargs):
         tpeFiles = []
         valFiles = {}
         valFiles['All'] = []
+        csctfFiles = []
         for trigger in triggers:
             valFiles[trigger] = []
         for file in subprocess.Popen('/afs/cern.ch/project/eos/installation/0.3.84-aquamarine/bin/eos.select ls %s' % (fileDir), shell=True,stdout=pipe).communicate()[0].splitlines():
-            if file==tpeOut or file==valOut: continue
+            if file==tpeOut or file==valOut or file==csctfOut: continue
             if file[0:3]=='TPE': tpeFiles += [file]
             if file[0:3]=='val': valFiles['All'] += [file]
             for trigger in triggers:
                 if file.startswith('%s_val' % trigger): valFiles[trigger] += [file]
+            if file[0:5]=='csctf': csctfFiles += [file]
         nFiles = len(valFiles['All'])
 
         # see if we need to remerge things
@@ -390,6 +396,13 @@ def process_output(dataset,globalTag,**kwargs):
                     valMergeString += ' root://eoscms.cern.ch/%s/%s' % (fileDir, val)
                 sh.write(valMergeString+" \n")
                 sh.write('cmsStage -f %s /store/group/dpg_csc/comm_csc/cscval/batch_output/%s/run%s_%s/%s\n' % (valOut[trigger], stream, run, eventContent, valOut[trigger]))
+        if csctfFiles:
+            print "Merging csctfHists"
+            csctfMergeString = 'hadd -f %s' % csctfOut
+            for csctf in csctfFiles:
+                csctfMergeString += ' root://eoscms.cern.ch/%s/%s' % (fileDir, csctf)
+            sh.write(csctfMergeString+" \n")
+            sh.write('cmsStage -f %s /store/group/dpg_csc/comm_csc/cscval/batch_output/%s/run%s_%s/%s\n' % (csctfOut, stream, run, eventContent, csctfOut))
         sh.close()
         if not dryRun: subprocess.check_call("bsub -q 8nh -J %s_%smerge < merge.sh" % (run,stream), shell=True)
 
