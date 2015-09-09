@@ -55,10 +55,18 @@ target/
 
 *.err
 
+AutoValidation/*.cron
+AutoValidation/*.sh
+
 # Output Directories
 AutoValidation/ExpressCosmics/
+AutoValidation/ExpressCosmics_0T/
 AutoValidation/ExpressPhysics/
+AutoValidation/ExpressPhysics_0T/
 AutoValidation/Cosmics/
+AutoValidation/Cosmics_0T/
 AutoValidation/SingleMu/
+AutoValidation/SingleMuon/
+AutoValidation/SingleMuon_0T/
 AutoValidation/DoubleMu/
 AutoValidation/MinimumBias/
