@@ -24,7 +24,7 @@ import errno
 import math
 from das_client import get_data, DASOptionParser
 
-MINRUN = 256587 # start Run2015D
+MINRUN = 256942 # when express broke for a couple days
 
 pipe = subprocess.PIPE
 Release = subprocess.Popen('echo $CMSSW_VERSION', shell=True, stdout=pipe).communicate()[0]

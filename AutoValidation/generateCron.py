@@ -12,24 +12,6 @@ def chmodX(filename):
 def generate():
     cronName = 'autoval'
     datasets = {
-        '/ExpressPhysics/Run2015C-Express-v3/FEVT' : {
-            'globaltag' : '74X_dataRun2_Express_v1',
-        },
-        '/ExpressPhysics_0T/Run2015C-Express-v3/FEVT' : {
-            'globaltag' : '74X_dataRun2_Express_v1',
-        },
-        '/ExpressCosmics/Run2015C-Express-v3/FEVT' : {
-            'globaltag' : '74X_dataRun2_Express_v1',
-        },
-        '/SingleMuon/Run2015C-v1/RAW' : {
-            'globaltag' : '74X_dataRun2_Prompt_v1',
-        },
-        '/SingleMuon_0T/Run2015C-v1/RAW' : {
-            'globaltag' : '74X_dataRun2_Prompt_v1',
-        },
-        '/Cosmics/Run2015C-v1/RAW' : {
-            'globaltag' : '74X_dataRun2_Prompt_v1',
-        },
         '/ExpressPhysics/Run2015D-Express-v3/FEVT' : {
             'globaltag' : '74X_dataRun2_Express_v1',
         },
