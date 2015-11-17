@@ -12,22 +12,54 @@ def chmodX(filename):
 def generate():
     cronName = 'autoval'
     datasets = {
-        '/ExpressPhysics/Run2015D-Express-v3/FEVT' : {
+        # Run2015D Express v3
+        #'/ExpressPhysics/Run2015D-Express-v3/FEVT' : {
+        #    'globaltag' : '74X_dataRun2_Express_v1',
+        #},
+        #'/ExpressPhysics_0T/Run2015D-Express-v3/FEVT' : {
+        #    'globaltag' : '74X_dataRun2_Express_v1',
+        #},
+        #'/ExpressCosmics/Run2015D-Express-v3/FEVT' : {
+        #    'globaltag' : '74X_dataRun2_Express_v1',
+        #},
+        # Run2015D Express v4
+        #'/ExpressPhysics/Run2015D-Express-v4/FEVT' : {
+        #    'globaltag' : '74X_dataRun2_Express_v1',
+        #},
+        #'/ExpressPhysics_0T/Run2015D-Express-v4/FEVT' : {
+        #    'globaltag' : '74X_dataRun2_Express_v1',
+        #},
+        #'/ExpressCosmics/Run2015D-Express-v4/FEVT' : {
+        #    'globaltag' : '74X_dataRun2_Express_v1',
+        #},
+        # Run2015E Express v1
+        '/ExpressPhysics/Run2015E-Express-v1/FEVT' : {
             'globaltag' : '74X_dataRun2_Express_v1',
         },
-        '/ExpressPhysics_0T/Run2015D-Express-v3/FEVT' : {
+        '/ExpressPhysics_0T/Run2015E-Express-v1/FEVT' : {
             'globaltag' : '74X_dataRun2_Express_v1',
         },
-        '/ExpressCosmics/Run2015D-Express-v3/FEVT' : {
+        '/ExpressCosmics/Run2015E-Express-v1/FEVT' : {
             'globaltag' : '74X_dataRun2_Express_v1',
         },
-        '/SingleMuon/Run2015D-v1/RAW' : {
+        # Run2015D RAW
+        #'/SingleMuon/Run2015D-v1/RAW' : {
+        #    'globaltag' : '74X_dataRun2_Prompt_v1',
+        #},
+        #'/SingleMuon_0T/Run2015D-v1/RAW' : {
+        #    'globaltag' : '74X_dataRun2_Prompt_v1',
+        #},
+        #'/Cosmics/Run2015D-v1/RAW' : {
+        #    'globaltag' : '74X_dataRun2_Prompt_v1',
+        #},
+        # Run2015E RAW
+        '/SingleMuon/Run2015E-v1/RAW' : {
             'globaltag' : '74X_dataRun2_Prompt_v1',
         },
-        '/SingleMuon_0T/Run2015D-v1/RAW' : {
+        '/SingleMuon_0T/Run2015E-v1/RAW' : {
             'globaltag' : '74X_dataRun2_Prompt_v1',
         },
-        '/Cosmics/Run2015D-v1/RAW' : {
+        '/Cosmics/Run2015E-v1/RAW' : {
             'globaltag' : '74X_dataRun2_Prompt_v1',
         },
     }
