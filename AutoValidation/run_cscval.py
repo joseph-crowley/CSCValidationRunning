@@ -106,6 +106,7 @@ def run_validation(dataset,globalTag,run,stream,eventContent,**kwargs):
         cfg  = 'cfg_yesDigis_%s_template' % eventContent
         crab = 'crab_yesDigis_%s_template' % eventContent
         proc = 'secondStep_yesDigis_template'
+        if eventContent=='FEVT' and 'HI' in dataset: cfg += '_HI'
     else:
         cfg  = 'cfg_noDigis_%s_template' % eventContent
         crab = 'crab_noDigis_%s_template' % eventContent
@@ -273,7 +274,7 @@ def run_validation(dataset,globalTag,run,stream,eventContent,**kwargs):
             print "Submitting job %i of %i" % (j+1, numJobs)
             #queue = '1nh' if 'Express' in stream else '8nh'
             queue = '8nh'
-            if not dryRun: subprocess.check_call("bsub -q %s -J %s_%s_%i < run_%i.sh" % (queue, run, stream, j, j), shell=True)
+            if not dryRun: subprocess.check_call("LSB_JOB_REPORT_MAIL=N bsub -q %s -J %s_%s_%i < run_%i.sh" % (queue, run, stream, j, j), shell=True)
 
     os.chdir('../')
 
@@ -409,7 +410,7 @@ def process_output(dataset,globalTag,**kwargs):
             sh.write(csctfMergeString+" \n")
             sh.write('cmsStage -f %s /store/group/dpg_csc/comm_csc/cscval/batch_output/%s/run%s_%s/%s\n' % (csctfOut, stream, run, eventContent, csctfOut))
         sh.close()
-        if not dryRun: subprocess.check_call("bsub -q 8nh -J %s_%smerge < merge.sh" % (run,stream), shell=True)
+        if not dryRun: subprocess.check_call("LSB_JOB_REPORT_MAIL=N bsub -q 8nh -J %s_%smerge < merge.sh" % (run,stream), shell=True)
 
         runsToPlot += [[run,job]]
 

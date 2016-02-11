@@ -36,12 +36,35 @@ def generate():
         '/ExpressPhysics/Run2015E-Express-v1/FEVT' : {
             'globaltag' : '74X_dataRun2_Express_v1',
         },
+        '/HIExpressPhysics/Run2015E-Express-v1/FEVT' : {
+            'globaltag' : '74X_dataRun2_Express_v1',
+        },
         '/ExpressPhysics_0T/Run2015E-Express-v1/FEVT' : {
+            'globaltag' : '74X_dataRun2_Express_v1',
+        },
+        '/HIExpressPhysics_0T/Run2015E-Express-v1/FEVT' : {
             'globaltag' : '74X_dataRun2_Express_v1',
         },
         '/ExpressCosmics/Run2015E-Express-v1/FEVT' : {
             'globaltag' : '74X_dataRun2_Express_v1',
         },
+        # HIRun2015
+        '/ExpressPhysics/HIRun2015-Express-v1/FEVT' : {
+            'globaltag' : '74X_dataRun2_Express_v1',
+        },
+        '/HIExpressPhysics/HIRun2015-Express-v1/FEVT' : {
+            'globaltag' : '74X_dataRun2_Express_v1',
+        },
+        '/ExpressPhysics_0T/HIRun2015-Express-v1/FEVT' : {
+            'globaltag' : '74X_dataRun2_Express_v1',
+        },
+        '/HIExpressPhysics_0T/HIRun2015-Express-v1/FEVT' : {
+            'globaltag' : '74X_dataRun2_Express_v1',
+        },
+        '/ExpressCosmics/HIRun2015-Express-v1/FEVT' : {
+            'globaltag' : '74X_dataRun2_Express_v1',
+        },
+
         # Run2015D RAW
         #'/SingleMuon/Run2015D-v1/RAW' : {
         #    'globaltag' : '74X_dataRun2_Prompt_v1',
@@ -56,10 +79,50 @@ def generate():
         '/SingleMuon/Run2015E-v1/RAW' : {
             'globaltag' : '74X_dataRun2_Prompt_v1',
         },
+        '/DoubleMuon/Run2015E-v1/RAW' : {
+            'globaltag' : '74X_dataRun2_Prompt_v1',
+        },
         '/SingleMuon_0T/Run2015E-v1/RAW' : {
             'globaltag' : '74X_dataRun2_Prompt_v1',
         },
+        '/SingleMuLowPt/Run2015E-v1/RAW' : {
+            'globaltag' : '74X_dataRun2_Prompt_v1',
+        },
+        '/SingleMuHighPt/Run2015E-v1/RAW' : {
+            'globaltag' : '74X_dataRun2_Prompt_v1',
+        },
+        '/DoubleMu/Run2015E-v1/RAW' : {
+            'globaltag' : '74X_dataRun2_Prompt_v1',
+        },
+        '/HIPhysicsMuon/Run2015E-v1/RAW' : {
+            'globaltag' : '74X_dataRun2_Prompt_v1',
+        },
         '/Cosmics/Run2015E-v1/RAW' : {
+            'globaltag' : '74X_dataRun2_Prompt_v1',
+        },
+        # HIRun2015
+        '/SingleMuon/HIRun2015-v1/RAW' : {
+            'globaltag' : '74X_dataRun2_Prompt_v1',
+        },
+        '/DoubleMuon/HIRun2015-v1/RAW' : {
+            'globaltag' : '74X_dataRun2_Prompt_v1',
+        },
+        '/SingleMuon_0T/HIRun2015-v1/RAW' : {
+            'globaltag' : '74X_dataRun2_Prompt_v1',
+        },
+        '/SingleMuLowPt/HIRun2015-v1/RAW' : {
+            'globaltag' : '74X_dataRun2_Prompt_v1',
+        },
+        '/SingleMuHighPt/HIRun2015-v1/RAW' : {
+            'globaltag' : '74X_dataRun2_Prompt_v1',
+        },
+        '/DoubleMu/HIRun2015-v1/RAW' : {
+            'globaltag' : '74X_dataRun2_Prompt_v1',
+        },
+        '/HIPhysicsMuon/HIRun2015-v1/RAW' : {
+            'globaltag' : '74X_dataRun2_Prompt_v1',
+        },
+        '/Cosmics/HIRun2015-v1/RAW' : {
             'globaltag' : '74X_dataRun2_Prompt_v1',
         },
     }
