@@ -9,7 +9,8 @@ process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_condD
 process.load("Configuration/StandardSequences/RawToDigi_Data_cff")
 process.load("Configuration.StandardSequences.Reconstruction_cff")
 
-process.GlobalTag.globaltag = cms.string('GLOBALTAG')
+from Configuration.AlCa.GlobalTag import GlobalTag
+process.GlobalTag = GlobalTag(process.GlobalTag, 'GLOBALTAG', '')
 
 inputFiles = cms.untracked.vstring(
 FILELIST
