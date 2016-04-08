@@ -24,7 +24,7 @@ import errno
 import math
 from das_client import get_data, DASOptionParser
 
-MINRUN = 264232 # Commissioning2016
+MINRUN = 265312 # Commissioning2016 MWGR2
 
 pipe = subprocess.PIPE
 Release = subprocess.Popen('echo $CMSSW_VERSION', shell=True, stdout=pipe).communicate()[0]
@@ -391,6 +391,7 @@ def process_output(dataset,globalTag,**kwargs):
             print "Merging valHists"
             valMergeString = 'hadd -f %s' % valOut['All']
             for val in valFiles['All']:
+                if val==valOut['All']: continue # skip previous merge
                 valMergeString += ' root://eoscms.cern.ch/%s/%s' % (fileDir, val)
             sh.write(valMergeString+" \n")
             sh.write('cmsStage -f %s /store/group/dpg_csc/comm_csc/cscval/batch_output/%s/run%s_%s/%s\n' % (valOut['All'], stream, run, eventContent, valOut['All']))
@@ -399,6 +400,7 @@ def process_output(dataset,globalTag,**kwargs):
                 print "Merging %s_valHists" % trigger
                 valMergeString = 'hadd -f %s' % valOut[trigger]
                 for val in valFiles[trigger]:
+                if val==valOut[trigger]: continue # skip previous merge
                     valMergeString += ' root://eoscms.cern.ch/%s/%s' % (fileDir, val)
                 sh.write(valMergeString+" \n")
                 sh.write('cmsStage -f %s /store/group/dpg_csc/comm_csc/cscval/batch_output/%s/run%s_%s/%s\n' % (valOut[trigger], stream, run, eventContent, valOut[trigger]))
@@ -406,6 +408,7 @@ def process_output(dataset,globalTag,**kwargs):
             print "Merging csctfHists"
             csctfMergeString = 'hadd -f %s' % csctfOut
             for csctf in csctfFiles:
+                if csctf==csctfOut: continue # skip previous merge
                 csctfMergeString += ' root://eoscms.cern.ch/%s/%s' % (fileDir, csctf)
             sh.write(csctfMergeString+" \n")
             sh.write('cmsStage -f %s /store/group/dpg_csc/comm_csc/cscval/batch_output/%s/run%s_%s/%s\n' % (csctfOut, stream, run, eventContent, csctfOut))

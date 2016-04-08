@@ -1,5 +1,6 @@
-{
-  gROOT->ProcessLine(".L TEMPLATEDIR/myFunctions.C");
+#include "TEMPLATEDIR/myFunctions.C"
+
+void makePlots_csctf() {
 
   std::string Path = "FILENAME";
 

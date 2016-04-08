@@ -139,7 +139,7 @@ process.schedule = cms.Schedule(#process.rawToDigiPath,
                                 process.l1tMonitorPath,
                                 process.l1tSyncPath,
                                 process.l1tMonitorClientPath,
-                                process.l1tMonitorEndPath,
+                                #process.l1tMonitorEndPath,
                                 process.l1tMonitorClientEndPath,
                                 process.dqmEndPath
                                 )

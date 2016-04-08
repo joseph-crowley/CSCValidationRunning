@@ -1,5 +1,6 @@
-{
-  gROOT->ProcessLine(".L TEMPLATEDIR/myFunctions.C");
+#include "TEMPLATEDIR/myFunctions.C"
+
+void makePlots() {
   
   std::string Path = "FILENAME";
 
