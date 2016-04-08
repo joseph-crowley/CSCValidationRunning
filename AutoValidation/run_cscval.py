@@ -400,7 +400,7 @@ def process_output(dataset,globalTag,**kwargs):
                 print "Merging %s_valHists" % trigger
                 valMergeString = 'hadd -f %s' % valOut[trigger]
                 for val in valFiles[trigger]:
-                if val==valOut[trigger]: continue # skip previous merge
+                    if val==valOut[trigger]: continue # skip previous merge
                     valMergeString += ' root://eoscms.cern.ch/%s/%s' % (fileDir, val)
                 sh.write(valMergeString+" \n")
                 sh.write('cmsStage -f %s /store/group/dpg_csc/comm_csc/cscval/batch_output/%s/run%s_%s/%s\n' % (valOut[trigger], stream, run, eventContent, valOut[trigger]))
