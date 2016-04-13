@@ -68,6 +68,9 @@ def generate():
         '/ExpressCosmics/Commissioning2016-Express-v1/FEVT' : {
             'globaltag' : 'auto:run2_data',
         },
+        '/ExpressPhysics/Commissioning2016-Express-v1/FEVT' : {
+            'globaltag' : 'auto:run2_data',
+        },
 
         # Run2015D RAW
         #'/SingleMuon/Run2015D-v1/RAW' : {
