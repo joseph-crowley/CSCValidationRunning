@@ -460,7 +460,7 @@ def process_output(dataset,globalTag,**kwargs):
 def build_runlist():
     print "Building runlist"
     curTime = time.strftime("%Y_%m_%d_%H_%M_%S", time.localtime())
-    os.system('bash /afs/cern.ch/cms/CAF/CMSCOMM/COMM_CSC/CSCVAL/results/scripts/generateRunList.sh > %s_runlist.json; mv %s_runlist.json /afs/cern.ch/cms/CAF/CMSCOMM/COMM_CSC/CSCVAL/results/js/runlist.json' % (curTime,curTime))
+    os.system('bash generateRunList.sh > %s_runlist.json; mv %s_runlist.json /afs/cern.ch/cms/CAF/CMSCOMM/COMM_CSC/CSCVAL/results/js/runlist.json' % (curTime,curTime))
     # create last run json
     Time=time.strftime("%Y/%m/%d %H:%M:%S", time.localtime())
     with open('lastrun.json','w') as file:
