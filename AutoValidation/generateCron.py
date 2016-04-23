@@ -64,11 +64,18 @@ def generate():
         #'/ExpressCosmics/HIRun2015-Express-v1/FEVT' : {
         #    'globaltag' : '74X_dataRun2_Express_v1',
         #},
-        # Commissioning2016
+        # Commissioning2016 Express
         '/ExpressCosmics/Commissioning2016-Express-v1/FEVT' : {
             'globaltag' : 'auto:run2_data',
         },
         '/ExpressPhysics/Commissioning2016-Express-v1/FEVT' : {
+            'globaltag' : 'auto:run2_data',
+        },
+        # Run2016A Express
+        '/ExpressCosmics/Run2016A-Express-v1/FEVT' : {
+            'globaltag' : 'auto:run2_data',
+        },
+        '/ExpressPhysics/Run2016A-Express-v1/FEVT' : {
             'globaltag' : 'auto:run2_data',
         },
 
