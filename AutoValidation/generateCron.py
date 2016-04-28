@@ -65,17 +65,36 @@ def generate():
         #    'globaltag' : '74X_dataRun2_Express_v1',
         #},
         # Commissioning2016 Express
-        '/ExpressCosmics/Commissioning2016-Express-v1/FEVT' : {
-            'globaltag' : 'auto:run2_data',
-        },
-        '/ExpressPhysics/Commissioning2016-Express-v1/FEVT' : {
-            'globaltag' : 'auto:run2_data',
-        },
+        #'/ExpressCosmics/Commissioning2016-Express-v1/FEVT' : {
+        #    'globaltag' : 'auto:run2_data',
+        #},
+        #'/ExpressPhysics/Commissioning2016-Express-v1/FEVT' : {
+        #    'globaltag' : 'auto:run2_data',
+        #},
         # Run2016A Express
-        '/ExpressCosmics/Run2016A-Express-v1/FEVT' : {
+        #'/ExpressCosmics/Run2016A-Express-v1/FEVT' : {
+        #    'globaltag' : 'auto:run2_data',
+        #},
+        #'/ExpressPhysics/Run2016A-Express-v1/FEVT' : {
+        #    'globaltag' : 'auto:run2_data',
+        #},
+        '/ExpressCosmics/Run2016A-Express-v2/FEVT' : {
             'globaltag' : 'auto:run2_data',
         },
-        '/ExpressPhysics/Run2016A-Express-v1/FEVT' : {
+        '/ExpressPhysics/Run2016A-Express-v2/FEVT' : {
+            'globaltag' : 'auto:run2_data',
+        },
+        # Run2016B Express
+        '/ExpressCosmics/Run2016B-Express-v1/FEVT' : {
+            'globaltag' : 'auto:run2_data',
+        },
+        '/ExpressPhysics/Run2016B-Express-v1/FEVT' : {
+            'globaltag' : 'auto:run2_data',
+        },
+        '/ExpressCosmics/Run2016B-Express-v2/FEVT' : {
+            'globaltag' : 'auto:run2_data',
+        },
+        '/ExpressPhysics/Run2016B-Express-v2/FEVT' : {
             'globaltag' : 'auto:run2_data',
         },
 
@@ -140,7 +159,15 @@ def generate():
         #    'globaltag' : '74X_dataRun2_Prompt_v1',
         #},
         # Commissioning2016
-        '/Cosmics/Commissioning2016-v1/RAW' : {
+        #'/Cosmics/Commissioning2016-v1/RAW' : {
+        #    'globaltag' : 'auto:run2_data',
+        #},
+        # Run2016A
+        '/Cosmics/Run2016A-v1/RAW' : {
+            'globaltag' : 'auto:run2_data',
+        },
+        # Run2016B
+        '/Cosmics/Run2016B-v1/RAW' : {
             'globaltag' : 'auto:run2_data',
         },
     }
