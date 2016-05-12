@@ -91,6 +91,12 @@ def generate():
         '/ExpressPhysics/Run2016B-Express-v1/FEVT' : {
             'globaltag' : 'auto:run2_data',
         },
+        '/ExpressCosmics/Run2016B-Express-v2/FEVT' : {
+            'globaltag' : 'auto:run2_data',
+        },
+        '/ExpressPhysics/Run2016B-Express-v2/FEVT' : {
+            'globaltag' : 'auto:run2_data',
+        },
 
         # Run2015D RAW
         #'/SingleMuon/Run2015D-v1/RAW' : {
@@ -165,6 +171,12 @@ def generate():
             'globaltag' : 'auto:run2_data',
         },
         '/SingleMuon/Run2016B-v1/RAW' : {
+            'globaltag' : 'auto:run2_data',
+        },
+        '/Cosmics/Run2016B-v2/RAW' : {
+            'globaltag' : 'auto:run2_data',
+        },
+        '/SingleMuon/Run2016B-v2/RAW' : {
             'globaltag' : 'auto:run2_data',
         },
     }
