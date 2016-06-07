@@ -817,7 +817,7 @@ void GlobalPosfromTree(std::string graphname, TFile* f1, int endcap, int station
  gStyle->SetTitleFillColor(0);
  gPad->SetFillColor(4000);
  c->SetFillStyle(4000);
- gStyle->SetOptStat(10);
+ gStyle->SetOptStat(0);
 
  graph1->GetXaxis()->SetLimits(-720,720);
  graph1->GetYaxis()->SetLimits(-720,720);
