@@ -1,7 +1,8 @@
 import FWCore.ParameterSet.Config as cms
 import subprocess
 
-process = cms.Process("TEST")
+from Configuration.StandardSequences.Eras import eras
+process = cms.Process("TEST",eras.Run2_2016)
 
 process.load("Configuration/StandardSequences/GeometryDB_cff")
 process.load("Configuration/StandardSequences/MagneticField_cff")
