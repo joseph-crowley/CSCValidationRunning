@@ -24,7 +24,7 @@ import errno
 import math
 from das_client import get_data, DASOptionParser
 
-MINRUN = 274516 # start TS1
+MINRUN = 275465 # start Run2016C
 
 pipe = subprocess.PIPE
 Release = subprocess.Popen('echo $CMSSW_VERSION', shell=True, stdout=pipe).communicate()[0]
