@@ -121,6 +121,12 @@ def generate():
         '/ExpressPhysics/Run2016F-Express-v1/FEVT' : {
             'globaltag' : 'auto:run2_data',
         },
+        '/ExpressCosmics/Run2016G-Express-v1/FEVT' : {
+            'globaltag' : 'auto:run2_data',
+        },
+        '/ExpressPhysics/Run2016G-Express-v1/FEVT' : {
+            'globaltag' : 'auto:run2_data',
+        },
 
         # Run2015D RAW
         #'/SingleMuon/Run2015D-v1/RAW' : {
@@ -227,6 +233,12 @@ def generate():
         '/SingleMuon/Run2016F-v1/RAW' : {
             'globaltag' : 'auto:run2_data',
         },
+        '/Cosmics/Run2016G-v1/RAW' : {
+            'globaltag' : 'auto:run2_data',
+        },
+        '/SingleMuon/Run2016G-v1/RAW' : {
+            'globaltag' : 'auto:run2_data',
+        },
     }
     
     CMSSW_BASE = os.environ.get('CMSSW_BASE')
@@ -241,7 +253,16 @@ def generate():
     commandString += 'scram b\n'
     commandString += 'echo "Initiate validation script"\n'
 
+    with open('{0}.acron'.format(cronName),'w') as f:
+        f.write('')
+
     with open('{0}.cron'.format(cronName),'w') as f:
+        f.write('')
+
+    with open('{0}.sh'.format(cronName),'w') as f:
+        f.write('')
+
+    with open('{0}_merge.sh'.format(cronName),'w') as f:
         f.write('')
 
     for dataset in datasets:
@@ -249,20 +270,33 @@ def generate():
         dummy, datasetName, periodName, eventContent = dataset.split('/')
         filename = '%s_%s-%s-%s' % (cronName, datasetName, periodName, eventContent)
         mergeFilename = '{0}_merge'.format(filename)
-        commandToWrite = commandString + './run_cscval.py %s %s\n' % (dataset, globaltag)
-        mergeCommandToWrite = commandString + './run_cscval.py %s %s -ro\n' % (dataset, globaltag)
+        runVal = './run_cscval.py %s %s\n' % (dataset, globaltag)
+        commandToWrite = commandString + runVal
+        runMerge = './run_cscval.py %s %s -ro\n' % (dataset, globaltag)
+        mergeCommandToWrite = commandString + runMerge
         acrontabString = '1 * * * * lxplus.cern.ch {0}/src/CSCValidationRunning/AutoValidation/{1}.sh >> {0}/src/CSCValidationRunning/AutoValidation/{1}.log 2>> {0}/src/CSCValidationRunning/AutoValidation/{1}.err\n'.format(CMSSW_BASE,filename)
         acrontabMergeString = '31 * * * * lxplus.cern.ch {0}/src/CSCValidationRunning/AutoValidation/{1}.sh >> {0}/src/CSCValidationRunning/AutoValidation/{1}.log 2>> {0}/src/CSCValidationRunning/AutoValidation/{1}.err\n'.format(CMSSW_BASE,mergeFilename)
+        crontabString = '1 * * * * {0}/src/CSCValidationRunning/AutoValidation/{1}.sh >> {0}/src/CSCValidationRunning/AutoValidation/{1}.log 2>> {0}/src/CSCValidationRunning/AutoValidation/{1}.err\n'.format(CMSSW_BASE,filename)
+        crontabMergeString = '31 * * * * {0}/src/CSCValidationRunning/AutoValidation/{1}.sh >> {0}/src/CSCValidationRunning/AutoValidation/{1}.log 2>> {0}/src/CSCValidationRunning/AutoValidation/{1}.err\n'.format(CMSSW_BASE,mergeFilename)
         with open('{0}.sh'.format(filename),'w') as f:
             f.write(commandToWrite)
+        with open('{0}.sh'.format(cronName),'a') as f:
+            f.write(runVal)
         chmodX('{0}.sh'.format(filename))
         with open('{0}.sh'.format(mergeFilename),'w') as f:
             f.write(mergeCommandToWrite)
+        with open('{0}_merge.sh'.format(cronName),'a') as f:
+            f.write(runMerge)
         chmodX('{0}.sh'.format(mergeFilename))
-        with open('{0}.cron'.format(cronName),'a') as f:
+        with open('{0}.acron'.format(cronName),'a') as f:
             f.write(acrontabString)
             f.write(acrontabMergeString)
+        with open('{0}.cron'.format(cronName),'a') as f:
+            f.write(crontabString)
+            f.write(crontabMergeString)
         
+    chmodX('{0}.sh'.format(cronName))
+    chmodX('{0}_merge.sh'.format(cronName))
 
 generate()
 def main(argv=None):
