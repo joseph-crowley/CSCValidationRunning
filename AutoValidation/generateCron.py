@@ -9,7 +9,8 @@ def chmodX(filename):
     st = os.stat(filename)
     os.chmod(filename, st.st_mode | stat.S_IEXEC)
 
-def generate():
+def generate(userproxy=''):
+
     cronName = 'autoval'
     datasets = {
         # Run2015D Express v3
@@ -251,6 +252,7 @@ def generate():
     commandString += 'cd %s/src/CSCValidationRunning/AutoValidation\n' % CMSSW_BASE
     commandString += 'eval `scramv1 runtime -sh`\n'
     commandString += 'scram b\n'
+    if userproxy: commandString += 'export X509_USER_PROXY={0}\n'.format(userproxy)
     commandString += 'echo "Initiate validation script"\n'
 
     with open('{0}.acron'.format(cronName),'w') as f:
@@ -298,12 +300,18 @@ def generate():
     chmodX('{0}.sh'.format(cronName))
     chmodX('{0}_merge.sh'.format(cronName))
 
-generate()
 def main(argv=None):
     if argv is None:
         argv = sys.argv[1:]
 
-    generate()
+    if not len(argv):
+        print 'Note: you will not be able to submit acrontab jobs without a userproxy'
+        generate()
+    else:
+        if not os.path.isfile(argv[0]):
+            print 'You must provide a valid user proxy file: {0} invalid'.format(userproxy)
+            return
+        generate(argv[0])
 
 
 if __name__ == "__main__":

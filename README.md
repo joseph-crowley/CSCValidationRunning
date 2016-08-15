@@ -26,10 +26,12 @@ cd CSCValidationRunning
 
 To run a cron job on afs you must use acrontab. The current version crontab script is in
 [AutoValidation/autoval.cron](AutoValidation/autoval.cron). Make certain you consult with others to make 
-sure we don't have multiple cron jobs running (Devin Taylor and Benjamin Knapp).
+sure we don't have multiple cron jobs running (Devin Taylor). Note: DAS requires authentication.
+To run with acrontab, do a voms init and copy the /tmp/x509 to a private directory on afs.
+The /tmp will not be visible on all lxplus nodes (just the one you create it on).
 ```
-python generateCron.py
-acrontab <autoval.cron
+python generateCron.py /path/to/proxy
+acrontab <autoval.acron
 acrontab -l
 ```
 
