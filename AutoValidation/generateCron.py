@@ -116,16 +116,28 @@ def generate(userproxy=''):
         #'/ExpressPhysics/Run2016E-Express-v2/FEVT' : {
         #    'globaltag' : 'auto:run2_data',
         #},
-        '/ExpressCosmics/Run2016F-Express-v1/FEVT' : {
+        #'/ExpressCosmics/Run2016F-Express-v1/FEVT' : {
+        #    'globaltag' : 'auto:run2_data',
+        #},
+        #'/ExpressPhysics/Run2016F-Express-v1/FEVT' : {
+        #    'globaltag' : 'auto:run2_data',
+        #},
+        #'/ExpressCosmics/Run2016G-Express-v1/FEVT' : {
+        #    'globaltag' : 'auto:run2_data',
+        #},
+        #'/ExpressPhysics/Run2016G-Express-v1/FEVT' : {
+        #    'globaltag' : 'auto:run2_data',
+        #},
+        #'/ExpressCosmics/Run2016H-Express-v1/FEVT' : {
+        #    'globaltag' : 'auto:run2_data',
+        #},
+        #'/ExpressPhysics/Run2016H-Express-v1/FEVT' : {
+        #    'globaltag' : 'auto:run2_data',
+        #},
+        '/ExpressCosmics/Run2016H-Express-v2/FEVT' : {
             'globaltag' : 'auto:run2_data',
         },
-        '/ExpressPhysics/Run2016F-Express-v1/FEVT' : {
-            'globaltag' : 'auto:run2_data',
-        },
-        '/ExpressCosmics/Run2016G-Express-v1/FEVT' : {
-            'globaltag' : 'auto:run2_data',
-        },
-        '/ExpressPhysics/Run2016G-Express-v1/FEVT' : {
+        '/ExpressPhysics/Run2016H-Express-v2/FEVT' : {
             'globaltag' : 'auto:run2_data',
         },
 
@@ -228,16 +240,22 @@ def generate(userproxy=''):
         #'/SingleMuon/Run2016E-v2/RAW' : {
         #    'globaltag' : 'auto:run2_data',
         #},
-        '/Cosmics/Run2016F-v1/RAW' : {
+        #'/Cosmics/Run2016F-v1/RAW' : {
+        #    'globaltag' : 'auto:run2_data',
+        #},
+        #'/SingleMuon/Run2016F-v1/RAW' : {
+        #    'globaltag' : 'auto:run2_data',
+        #},
+        #'/Cosmics/Run2016G-v1/RAW' : {
+        #    'globaltag' : 'auto:run2_data',
+        #},
+        #'/SingleMuon/Run2016G-v1/RAW' : {
+        #    'globaltag' : 'auto:run2_data',
+        #},
+        '/Cosmics/Run2016H-v1/RAW' : {
             'globaltag' : 'auto:run2_data',
         },
-        '/SingleMuon/Run2016F-v1/RAW' : {
-            'globaltag' : 'auto:run2_data',
-        },
-        '/Cosmics/Run2016G-v1/RAW' : {
-            'globaltag' : 'auto:run2_data',
-        },
-        '/SingleMuon/Run2016G-v1/RAW' : {
+        '/SingleMuon/Run2016H-v1/RAW' : {
             'globaltag' : 'auto:run2_data',
         },
     }
