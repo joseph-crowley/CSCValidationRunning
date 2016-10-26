@@ -72,7 +72,7 @@ def replace(map, fileInName, fileOutName, moreLines=[]):
 ################################
 ##### Validation functions #####
 ################################
-def run_validation(dataset,globalTag,run,stream,eventContent,**kwargs):
+def run_validation(dataset,globalTag,run,stream,eventContent,num,**kwargs):
     '''
     The primary validation routine. Creates working directories and submits jobs to crab.
     '''
@@ -122,11 +122,11 @@ def run_validation(dataset,globalTag,run,stream,eventContent,**kwargs):
     templateSecondStepPath = '%s/%s' % (TEMPLATE_PATH, proc)
 
     # get number of events in run
-    num = subprocess.Popen("./das_client.py --limit=0 --query='summary dataset=%s run=%s | grep summary.nevents'" % (dataset,run), shell=True,stdout=pipe).communicate()[0].rstrip()
-    nfiles = subprocess.Popen("./das_client.py --limit=0 --query='summary dataset=%s run=%s | grep summary.nfiles'" % (dataset,run), shell=True,stdout=pipe).communicate()[0].rstrip()
-    nlumis = subprocess.Popen("./das_client.py --limit=0 --query='summary dataset=%s run=%s | grep summary.nlumis'" % (dataset,run), shell=True,stdout=pipe).communicate()[0].rstrip()
+    #num = subprocess.Popen("./das_client.py --limit=0 --query='summary dataset=%s run=%s | grep summary.nevents'" % (dataset,run), shell=True,stdout=pipe).communicate()[0].rstrip()
+    #nfiles = subprocess.Popen("./das_client.py --limit=0 --query='summary dataset=%s run=%s | grep summary.nfiles'" % (dataset,run), shell=True,stdout=pipe).communicate()[0].rstrip()
+    #nlumis = subprocess.Popen("./das_client.py --limit=0 --query='summary dataset=%s run=%s | grep summary.nlumis'" % (dataset,run), shell=True,stdout=pipe).communicate()[0].rstrip()
 
-    print "Processing %s files, %s lumis, and %s events" % (nfiles, nlumis, num)
+    #print "Processing %s files, %s lumis, and %s events" % (nfiles, nlumis, num)
 
     # old HTML stuff, kept for backwards compatibility
     cfgFileName='validation_%s_cfg.py' % run
@@ -530,6 +530,7 @@ def process_dataset(dataset,globalTag,**kwargs):
                 _ = int(num)
             except:
                 print 'Not an int: %s' % num
+                continue
             print 'Num events: %s' % num
             procString = '%s_%s' % (rn, num)
             if procString in procRuns and not force: continue # already processed
@@ -537,7 +538,7 @@ def process_dataset(dataset,globalTag,**kwargs):
                 file.write(procString+'\n')
             if int(num) > 25000: # only care about long runs
                 print "Processing run %s" % rn
-                run_validation(dataset,globalTag,str(rn),stream,eventContent,force=force,**kwargs)
+                run_validation(dataset,globalTag,str(rn),stream,eventContent,num,force=force,**kwargs)
 
     os.chdir('../')
 
