@@ -509,7 +509,7 @@ def process_dataset(dataset,globalTag,**kwargs):
             print "Processing run %s" % str(run)
             with open(procFile, 'a') as file:
                 file.write(procString+'\n')
-            run_validation(dataset,globalTag,str(run),stream,eventContent,force=force,**kwargs)
+            run_validation(dataset,globalTag,str(run),stream,eventContent,num,force=force,**kwargs)
     else:
         # query DAS and get list of runs
         print "Querying DAS"
