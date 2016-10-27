@@ -22,9 +22,9 @@ import argparse
 import re
 import errno
 import math
-from das_client import get_data, DASOptionParser
+from dbs.apis.dbsClient import DbsApi
 
-MINRUN = 282222 # start MD4
+MINRUN = 283835 # after move to dbs
 
 pipe = subprocess.PIPE
 Release = subprocess.Popen('echo $CMSSW_VERSION', shell=True, stdout=pipe).communicate()[0]
@@ -72,7 +72,7 @@ def replace(map, fileInName, fileOutName, moreLines=[]):
 ################################
 ##### Validation functions #####
 ################################
-def run_validation(dataset,globalTag,run,stream,eventContent,num,**kwargs):
+def run_validation(dataset,globalTag,run,stream,eventContent,num,input_files,**kwargs):
     '''
     The primary validation routine. Creates working directories and submits jobs to crab.
     '''
@@ -84,7 +84,6 @@ def run_validation(dataset,globalTag,run,stream,eventContent,num,**kwargs):
     rundir = 'run_%s' % run
     python_mkdir(rundir)
     os.chdir(rundir)
-    os.system("cp ../das_client.py .")
     
     # open appropriate config and crab submit files
     paramMap = {
@@ -120,13 +119,6 @@ def run_validation(dataset,globalTag,run,stream,eventContent,num,**kwargs):
     templateRootMacroPath = '%s/makePlots.C' % TEMPLATE_PATH
     templateRootMacroCSCTFPath = '%s/makePlots_csctf.C' % TEMPLATE_PATH
     templateSecondStepPath = '%s/%s' % (TEMPLATE_PATH, proc)
-
-    # get number of events in run
-    #num = subprocess.Popen("./das_client.py --limit=0 --query='summary dataset=%s run=%s | grep summary.nevents'" % (dataset,run), shell=True,stdout=pipe).communicate()[0].rstrip()
-    #nfiles = subprocess.Popen("./das_client.py --limit=0 --query='summary dataset=%s run=%s | grep summary.nfiles'" % (dataset,run), shell=True,stdout=pipe).communicate()[0].rstrip()
-    #nlumis = subprocess.Popen("./das_client.py --limit=0 --query='summary dataset=%s run=%s | grep summary.nlumis'" % (dataset,run), shell=True,stdout=pipe).communicate()[0].rstrip()
-
-    #print "Processing %s files, %s lumis, and %s events" % (nfiles, nlumis, num)
 
     # old HTML stuff, kept for backwards compatibility
     cfgFileName='validation_%s_cfg.py' % run
@@ -211,20 +203,16 @@ def run_validation(dataset,globalTag,run,stream,eventContent,num,**kwargs):
         subprocess.check_call("bash run.sh", shell=True)
     else:
         subprocess.check_call('cmsMkdir /store/group/dpg_csc/comm_csc/cscval/batch_output/%s/run%s_%s' % (stream, run, eventContent), shell=True)
-        input_files = []
-        for n in subprocess.Popen("./das_client.py --query='file dataset="+dataset+" run="+run+" | grep file.name' --limit=0", shell=True,stdout=pipe).communicate()[0].splitlines():
-                #s = 'root://cms-xrd-global.cern.ch/'+n
-                input_files.append(n)
         nf = 1
         numJobs = int(math.ceil(len(input_files)/float(nf)))
-        for j in range(numJobs):
-            # check files already run over
-            fname = 'processedFiles.txt'
-            open(fname, 'a').close()
-            with open(fname, 'r') as file:
-                procFiles = file.readlines()
-            procFiles = [x.rstrip() for x in procFiles]
+        # check files already run over
+        fname = 'processedFiles.txt'
+        open(fname, 'a').close()
+        with open(fname, 'r') as file:
+            procFiles = file.readlines()
+        procFiles = [x.rstrip() for x in procFiles]
 
+        for j in range(numJobs):
             doJob = force
             for f in input_files[j*nf:j*nf+nf]:
                 if f not in procFiles:
@@ -248,7 +236,7 @@ def run_validation(dataset,globalTag,run,stream,eventContent,num,**kwargs):
             numEvents = 0
             for f in input_files[j*nf:j*nf+nf]:
                 if fileListString: fileListString += ',\n'
-                fileListString += "    %s" % f
+                fileListString += "    '%s'" % f
 
             symbol_map_cfg = { 'NEVENT':num, 'GLOBALTAG':globalTag, "OUTFILE":outFileName, 'DATASET':dataset, 'RUNNUMBER':run, 'FILELIST': fileListString, 'VERSION': str(j)}
             replace(symbol_map_cfg,templatecfgFilePath, cfgFileName, trigger_cfg)
@@ -420,36 +408,38 @@ def process_output(dataset,globalTag,**kwargs):
         os.chdir('../')
 
     # now plot the merges as they finish
-    for run,job in runsToPlot:
-        # go to working area
-        rundir = 'run_%s' % run
-        python_mkdir(rundir)
-        os.chdir(rundir)
+    remainingJobs = runsToPlot
+    while remainingJobs:
+        remainingJobs = []
+        for run,job in runsToPlot:
+            # go to working area
+            rundir = 'run_%s' % run
+            python_mkdir(rundir)
+            os.chdir(rundir)
 
-        tpeOut = 'TPEHists.root'
-        valOut = {}
-        valOut['All'] = 'valHists_run%s_%s.root' % (run, stream)
-        for trigger in triggers:
-            valOut[trigger] = '%s_valHists_run%s_%s.root' % (trigger, run, stream)
-        csctfOut = 'csctfHist_run%s_%s.root' % (run, stream)
-
-        # wait for job to finish then copy over
-        print("Waiting on run %s" % run)
-        while "Job <%s_%smerge> is not found" % (run,stream) not in subprocess.Popen("unbuffer bjobs -J %s_%smerge" % (run,stream), shell=True,stdout=pipe).communicate()[0].splitlines():
-            time.sleep(20)
-            print('.')
-        else:
-            print('.')
-            print("Run %s merged" % run) 
-            subprocess.call('cmsStage -f /store/group/dpg_csc/comm_csc/cscval/batch_output/%s/run%s_%s/%s %s' % (stream, run, eventContent, tpeOut, tpeOut), shell=True)
-            valRet = subprocess.call('cmsStage -f /store/group/dpg_csc/comm_csc/cscval/batch_output/%s/run%s_%s/%s %s' % (stream, run, eventContent, valOut['All'], valOut['All']), shell=True)
+            tpeOut = 'TPEHists.root'
+            valOut = {}
+            valOut['All'] = 'valHists_run%s_%s.root' % (run, stream)
             for trigger in triggers:
-                trigRet = subprocess.call('cmsStage -f /store/group/dpg_csc/comm_csc/cscval/batch_output/%s/run%s_%s/%s %s' % (stream, run, eventContent, valOut[trigger], valOut[trigger]), shell=True)
-            subprocess.call('cmsStage -f /store/group/dpg_csc/comm_csc/cscval/batch_output/%s/run%s_%s/%s %s' % (stream, run, eventContent, csctfOut, csctfOut), shell=True)
-            if not valRet and not dryRun: os.system("./secondStep.py")
-            subprocess.call('rm *.root', shell=True)
+                valOut[trigger] = '%s_valHists_run%s_%s.root' % (trigger, run, stream)
+            csctfOut = 'csctfHist_run%s_%s.root' % (run, stream)
 
-        os.chdir('../')
+            # wait for job to finish then copy over
+            print("Waiting on run %s" % run)
+            if "Job <%s_%smerge> is not found" % (run,stream) not in subprocess.Popen("unbuffer bjobs -J %s_%smerge" % (run,stream), shell=True,stdout=pipe).communicate()[0].splitlines():
+                time.sleep(20)
+                remainingJobs += [[run,job]]
+            else:
+                print("Run %s merged" % run) 
+                subprocess.call('cmsStage -f /store/group/dpg_csc/comm_csc/cscval/batch_output/%s/run%s_%s/%s %s' % (stream, run, eventContent, tpeOut, tpeOut), shell=True)
+                valRet = subprocess.call('cmsStage -f /store/group/dpg_csc/comm_csc/cscval/batch_output/%s/run%s_%s/%s %s' % (stream, run, eventContent, valOut['All'], valOut['All']), shell=True)
+                for trigger in triggers:
+                    trigRet = subprocess.call('cmsStage -f /store/group/dpg_csc/comm_csc/cscval/batch_output/%s/run%s_%s/%s %s' % (stream, run, eventContent, valOut[trigger], valOut[trigger]), shell=True)
+                subprocess.call('cmsStage -f /store/group/dpg_csc/comm_csc/cscval/batch_output/%s/run%s_%s/%s %s' % (stream, run, eventContent, csctfOut, csctfOut), shell=True)
+                if not valRet and not dryRun: os.system("./secondStep.py")
+                subprocess.call('rm *.root', shell=True)
+
+            os.chdir('../')
         
     os.chdir('../')
 
@@ -478,15 +468,19 @@ def process_dataset(dataset,globalTag,**kwargs):
         force       bool      False      do a run regardless if processed already or number of events
         triggers    list(str) []         list of additional triggers to run over
     '''
-    run = kwargs.pop('run',0)
+    singleRun = kwargs.pop('run',0)
     force = kwargs.pop('force',False)
+    dryRun = kwargs.get('dryRun',False)
+    curTime = time.time()
+
+    url = 'https://cmsweb.cern.ch/dbs/prod/global/DBSReader'
+    dbsclient = DbsApi(url)
 
     # get stream info
     [filler, stream, version, eventContent] = dataset.split('/')
 
     # setup working directory for stream
     python_mkdir(stream)
-    os.system("cp das_client.py "+stream)
 
     # begin running
     start=time.strftime("%Y/%m/%d %H:%M:%S", time.localtime())
@@ -500,45 +494,57 @@ def process_dataset(dataset,globalTag,**kwargs):
         procRuns = file.readlines()
     procRuns = [x.rstrip() for x in procRuns] # format: RUNUM_NUMEVTS
 
+    print "Reading previous process time"
+    timeFile = 'processTime.txt'
+    open(timeFile, 'a').close()
+    with open(timeFile, 'r') as file:
+        procTimes = file.readlines()
+    procTimes = [x.rstrip() for x in procTimes]
+    prevTime = int(procTimes[-1]) - 3*60*60 if procTimes else int(time.time()) - 7*24*60*60 # default to 7 days before now or 3 hours before last run
+    print prevTime
+    with open(timeFile, 'a') as file:
+        if not dryRun: file.write('{0}\n'.format(curTime))
+
     # run each individual validation
-    if run:
-        num = subprocess.Popen("./das_client.py --limit=0 --query='summary dataset=%s run=%s | grep summary.nevents'" % (dataset,str(run)), shell=True,stdout=pipe).communicate()[0].rstrip()
-        procString = '%s_%s' % (str(run),num)
-        if procString not in procRuns or force:
-            if force: print "Forcing reprocessing"
-            print "Processing run %s" % str(run)
-            with open(procFile, 'a') as file:
-                file.write(procString+'\n')
-            run_validation(dataset,globalTag,str(run),stream,eventContent,num,force=force,**kwargs)
+    if singleRun:
+        files = dbsclient.listFiles(dataset=dataset, run_num=singleRun, validFileOnly=1, detail=True)
+        num = sum([f['event_count'] for f in files])
+        input_files = [f['logical_file_name'] for f in files]
+        print "Processing run %s" % str(singleRun)
+        if force: print "Forcing reprocessing"
+        run_validation(dataset,globalTag,str(singleRun),stream,eventContent,str(num),input_files,force=force,**kwargs)
     else:
-        # query DAS and get list of runs
-        print "Querying DAS"
-        newruns = subprocess.Popen("./das_client.py --query='run dataset="+dataset+"' --limit=0", shell=True, stdout=pipe).communicate()[0].splitlines()
-        #newruns = get_data('https://cmsweb.cern.ch', "run dataset="+dataset, 0, 0, 0, 300, '', '')
-        print "Available runs"
-        print newruns
-        for rn in newruns:
-            try:
-                _ = int(rn)
-            except:
-                print 'Not an int: %s' % rn
-                continue
-            if int(rn)<MINRUN: continue
-            print 'Checking %s' %rn
-            num = subprocess.Popen("./das_client.py --limit=0 --query='summary dataset=%s run=%s | grep summary.nevents'" % (dataset,rn), shell=True,stdout=pipe).communicate()[0].rstrip()
-            try:
-                _ = int(num)
-            except:
-                print 'Not an int: %s' % num
-                continue
-            print 'Num events: %s' % num
-            procString = '%s_%s' % (rn, num)
-            if procString in procRuns and not force: continue # already processed
-            with open(procFile, 'a') as file:
-                file.write(procString+'\n')
-            if int(num) > 25000: # only care about long runs
-                print "Processing run %s" % rn
-                run_validation(dataset,globalTag,str(rn),stream,eventContent,num,force=force,**kwargs)
+        # first get new blocks since a time
+        blocks = dbsclient.listBlocks(dataset=dataset, detail=True, min_cdate=int(prevTime))
+
+        # iterate over each block
+        updatedRuns = set()
+        for block in blocks:
+            # get runs in block
+            runs = dbsclient.listRuns(dataset=dataset, block_name=block['block_name'])
+            updatedRuns.update(set(runs[0]['run_num']))
+
+
+        # iterate over runs
+        updatedRuns = sorted(updatedRuns)
+        fileRunMap = {}
+        eventRunMap = {}
+        files = dbsclient.listFiles(dataset=dataset, run_num=updatedRuns, validFileOnly=1, detail=True)
+        for run in updatedRuns:
+            eventRunMap[run] = sum([f['event_count'] for f in files if f['run_num']==run])
+            fileRunMap[run] = [f['logical_file_name'] for f in files if f['run_num']==run]
+
+
+        runsToUpdate = [run for run in updatedRuns if fileRunMap[run] and eventRunMap[run]>25000]
+
+        print 'Runs to update:'
+        for run in runsToUpdate:
+            print '    Run {0}: {1} files, {2} events'.format(run,len(fileRunMap[run]),eventRunMap[run])
+
+        for run in runsToUpdate:
+            if int(run)<MINRUN: continue
+            print "Processing run %s" % run
+            run_validation(dataset,globalTag,str(run),stream,eventContent,str(eventRunMap[run]),fileRunMap[run],force=force,**kwargs)
 
     os.chdir('../')
 

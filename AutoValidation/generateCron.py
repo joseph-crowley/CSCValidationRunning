@@ -269,7 +269,8 @@ def generate(userproxy=''):
     commandString += 'source /afs/cern.ch/cms/cmsset_default.sh\n'
     commandString += 'cd %s/src/CSCValidationRunning/AutoValidation\n' % CMSSW_BASE
     commandString += 'eval `scramv1 runtime -sh`\n'
-    commandString += 'scram b\n'
+    commandString += 'source /cvmfs/cms.cern.ch/crab3/crab.sh\n'
+    #commandString += 'scram b\n'
     if userproxy: commandString += 'export X509_USER_PROXY={0}\n'.format(userproxy)
     commandString += 'echo "Initiate validation script"\n'
 
@@ -294,10 +295,10 @@ def generate(userproxy=''):
         commandToWrite = commandString + runVal
         runMerge = './run_cscval.py %s %s -ro\n' % (dataset, globaltag)
         mergeCommandToWrite = commandString + runMerge
-        acrontabString = '1 18 * * * lxplus.cern.ch {0}/src/CSCValidationRunning/AutoValidation/{1}.sh >> {0}/src/CSCValidationRunning/AutoValidation/{1}.log 2>> {0}/src/CSCValidationRunning/AutoValidation/{1}.err\n'.format(CMSSW_BASE,filename)
-        acrontabMergeString = '31 6 * * * lxplus.cern.ch {0}/src/CSCValidationRunning/AutoValidation/{1}.sh >> {0}/src/CSCValidationRunning/AutoValidation/{1}.log 2>> {0}/src/CSCValidationRunning/AutoValidation/{1}.err\n'.format(CMSSW_BASE,mergeFilename)
-        crontabString = '1 18 * * * {0}/src/CSCValidationRunning/AutoValidation/{1}.sh >> {0}/src/CSCValidationRunning/AutoValidation/{1}.log 2>> {0}/src/CSCValidationRunning/AutoValidation/{1}.err\n'.format(CMSSW_BASE,filename)
-        crontabMergeString = '31 6 * * * {0}/src/CSCValidationRunning/AutoValidation/{1}.sh >> {0}/src/CSCValidationRunning/AutoValidation/{1}.log 2>> {0}/src/CSCValidationRunning/AutoValidation/{1}.err\n'.format(CMSSW_BASE,mergeFilename)
+        acrontabString = '1 3,15 * * * lxplus.cern.ch {0}/src/CSCValidationRunning/AutoValidation/{1}.sh >> {0}/src/CSCValidationRunning/AutoValidation/{1}.log 2>> {0}/src/CSCValidationRunning/AutoValidation/{1}.err\n'.format(CMSSW_BASE,filename)
+        acrontabMergeString = '31 6,18 * * * lxplus.cern.ch {0}/src/CSCValidationRunning/AutoValidation/{1}.sh >> {0}/src/CSCValidationRunning/AutoValidation/{1}.log 2>> {0}/src/CSCValidationRunning/AutoValidation/{1}.err\n'.format(CMSSW_BASE,mergeFilename)
+        crontabString = '1 3,15 * * * {0}/src/CSCValidationRunning/AutoValidation/{1}.sh >> {0}/src/CSCValidationRunning/AutoValidation/{1}.log 2>> {0}/src/CSCValidationRunning/AutoValidation/{1}.err\n'.format(CMSSW_BASE,filename)
+        crontabMergeString = '31 6,18 * * * {0}/src/CSCValidationRunning/AutoValidation/{1}.sh >> {0}/src/CSCValidationRunning/AutoValidation/{1}.log 2>> {0}/src/CSCValidationRunning/AutoValidation/{1}.err\n'.format(CMSSW_BASE,mergeFilename)
         with open('{0}.sh'.format(filename),'w') as f:
             f.write(commandToWrite)
         with open('{0}.sh'.format(cronName),'a') as f:
