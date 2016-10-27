@@ -516,13 +516,13 @@ def process_dataset(dataset,globalTag,**kwargs):
         run_validation(dataset,globalTag,str(singleRun),stream,eventContent,str(num),input_files,force=force,**kwargs)
     else:
         # first get new blocks since a time
-        blocks = dbsclient.listBlocks(dataset=dataset, detail=True, min_cdate=int(prevTime))
+        blocks = dbsclient.listBlocks(dataset=dataset, min_cdate=int(prevTime))
 
         # iterate over each block
         updatedRuns = set()
         for block in blocks:
             # get runs in block
-            runs = dbsclient.listRuns(dataset=dataset, block_name=block['block_name'])
+            runs = dbsclient.listRuns(block_name=block['block_name'])
             updatedRuns.update(set(runs[0]['run_num']))
 
 
