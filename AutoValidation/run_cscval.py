@@ -410,6 +410,7 @@ def process_output(dataset,globalTag,**kwargs):
     # now plot the merges as they finish
     remainingJobs = runsToPlot
     while remainingJobs:
+        runsToPlot = remainingJobs
         remainingJobs = []
         for run,job in runsToPlot:
             # go to working area
