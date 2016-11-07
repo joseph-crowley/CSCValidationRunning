@@ -134,10 +134,22 @@ def generate(userproxy=''):
         #'/ExpressPhysics/Run2016H-Express-v1/FEVT' : {
         #    'globaltag' : 'auto:run2_data',
         #},
-        '/ExpressCosmics/Run2016H-Express-v2/FEVT' : {
+        #'/ExpressCosmics/Run2016H-Express-v2/FEVT' : {
+        #    'globaltag' : 'auto:run2_data',
+        #},
+        #'/ExpressPhysics/Run2016H-Express-v2/FEVT' : {
+        #    'globaltag' : 'auto:run2_data',
+        #},
+        '/ExpressCosmics/PARun2016A-Express-v1/FEVT' : {
             'globaltag' : 'auto:run2_data',
         },
-        '/ExpressPhysics/Run2016H-Express-v2/FEVT' : {
+        '/ExpressPhysics/PARun2016A-Express-v1/FEVT' : {
+            'globaltag' : 'auto:run2_data',
+        },
+        '/ExpressCosmics/PARun2016B-Express-v1/FEVT' : {
+            'globaltag' : 'auto:run2_data',
+        },
+        '/ExpressPhysics/PARun2016B-Express-v1/FEVT' : {
             'globaltag' : 'auto:run2_data',
         },
 
@@ -252,10 +264,22 @@ def generate(userproxy=''):
         #'/SingleMuon/Run2016G-v1/RAW' : {
         #    'globaltag' : 'auto:run2_data',
         #},
-        '/Cosmics/Run2016H-v1/RAW' : {
+        #'/Cosmics/Run2016H-v1/RAW' : {
+        #    'globaltag' : 'auto:run2_data',
+        #},
+        #'/SingleMuon/Run2016H-v1/RAW' : {
+        #    'globaltag' : 'auto:run2_data',
+        #},
+        '/Cosmics/PARun2016A-v1/RAW' : {
             'globaltag' : 'auto:run2_data',
         },
-        '/SingleMuon/Run2016H-v1/RAW' : {
+        '/PASingleMuon/PARun2016A-v1/RAW' : {
+            'globaltag' : 'auto:run2_data',
+        },
+        '/Cosmics/PARun2016B-v1/RAW' : {
+            'globaltag' : 'auto:run2_data',
+        },
+        '/PASingleMuon/PARun2016B-v1/RAW' : {
             'globaltag' : 'auto:run2_data',
         },
     }

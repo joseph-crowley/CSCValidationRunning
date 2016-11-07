@@ -24,7 +24,7 @@ import errno
 import math
 from dbs.apis.dbsClient import DbsApi
 
-MINRUN = 283835 # after move to dbs
+MINRUN = 284140 # start heavy ion prep
 
 pipe = subprocess.PIPE
 Release = subprocess.Popen('echo $CMSSW_VERSION', shell=True, stdout=pipe).communicate()[0]
@@ -501,7 +501,7 @@ def process_dataset(dataset,globalTag,**kwargs):
     with open(timeFile, 'r') as file:
         procTimes = file.readlines()
     procTimes = [x.rstrip() for x in procTimes]
-    prevTime = int(procTimes[-1]) - 3*60*60 if procTimes else int(time.time()) - 7*24*60*60 # default to 7 days before now or 3 hours before last run
+    prevTime = float(procTimes[-1]) - 3*60*60 if procTimes else float(time.time()) - 7*24*60*60 # default to 7 days before now or 3 hours before last run
     print prevTime
     with open(timeFile, 'a') as file:
         if not dryRun: file.write('{0}\n'.format(curTime))
