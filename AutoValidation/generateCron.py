@@ -140,16 +140,19 @@ def generate(userproxy=''):
         #'/ExpressPhysics/Run2016H-Express-v2/FEVT' : {
         #    'globaltag' : 'auto:run2_data',
         #},
-        '/ExpressCosmics/PARun2016A-Express-v1/FEVT' : {
-            'globaltag' : 'auto:run2_data',
-        },
-        '/ExpressPhysics/PARun2016A-Express-v1/FEVT' : {
-            'globaltag' : 'auto:run2_data',
-        },
+        #'/ExpressCosmics/PARun2016A-Express-v1/FEVT' : {
+        #    'globaltag' : 'auto:run2_data',
+        #},
+        #'/ExpressPhysics/PARun2016A-Express-v1/FEVT' : {
+        #    'globaltag' : 'auto:run2_data',
+        #},
         '/ExpressCosmics/PARun2016B-Express-v1/FEVT' : {
             'globaltag' : 'auto:run2_data',
         },
         '/ExpressPhysics/PARun2016B-Express-v1/FEVT' : {
+            'globaltag' : 'auto:run2_data',
+        },
+        '/ExpressPhysicsPA/PARun2016B-Express-v1/FEVT' : {
             'globaltag' : 'auto:run2_data',
         },
 

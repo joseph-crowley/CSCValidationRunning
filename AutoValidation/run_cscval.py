@@ -501,10 +501,8 @@ def process_dataset(dataset,globalTag,**kwargs):
     with open(timeFile, 'r') as file:
         procTimes = file.readlines()
     procTimes = [x.rstrip() for x in procTimes]
-    prevTime = float(procTimes[-1]) - 3*60*60 if procTimes else float(time.time()) - 7*24*60*60 # default to 7 days before now or 3 hours before last run
+    prevTime = float(procTimes[-1]) - 12*60*60 if procTimes else float(time.time()) - 7*24*60*60 # default to 7 days before now or 12 hours before last run
     print prevTime
-    with open(timeFile, 'a') as file:
-        if not dryRun: file.write('{0}\n'.format(curTime))
 
     # run each individual validation
     if singleRun:
@@ -547,6 +545,8 @@ def process_dataset(dataset,globalTag,**kwargs):
             print "Processing run %s" % run
             run_validation(dataset,globalTag,str(run),stream,eventContent,str(eventRunMap[run]),fileRunMap[run],force=force,**kwargs)
 
+    with open(timeFile, 'a') as file:
+        if not dryRun: file.write('{0}\n'.format(curTime))
     os.chdir('../')
 
     # now finish up

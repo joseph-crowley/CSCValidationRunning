@@ -63,11 +63,13 @@ AutoValidation/*.sh
 AutoValidation/ExpressCosmics/
 AutoValidation/ExpressCosmics_0T/
 AutoValidation/ExpressPhysics/
+AutoValidation/ExpressPhysicsPA/
 AutoValidation/ExpressPhysics_0T/
 AutoValidation/Cosmics/
 AutoValidation/Cosmics_0T/
 AutoValidation/SingleMu/
 AutoValidation/SingleMuon/
+AutoValidation/PASingleMuon/
 AutoValidation/SingleMuon_0T/
 AutoValidation/DoubleMu/
 AutoValidation/MinimumBias/
