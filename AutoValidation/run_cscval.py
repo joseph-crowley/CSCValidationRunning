@@ -24,7 +24,7 @@ import errno
 import math
 from dbs.apis.dbsClient import DbsApi
 
-MINRUN = 284140 # start heavy ion prep
+MINRUN = 286591 # end of year
 
 pipe = subprocess.PIPE
 Release = subprocess.Popen('echo $CMSSW_VERSION', shell=True, stdout=pipe).communicate()[0]

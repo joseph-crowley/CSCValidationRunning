@@ -146,15 +146,27 @@ def generate(userproxy=''):
         #'/ExpressPhysics/PARun2016A-Express-v1/FEVT' : {
         #    'globaltag' : 'auto:run2_data',
         #},
-        '/ExpressCosmics/PARun2016B-Express-v1/FEVT' : {
-            'globaltag' : 'auto:run2_data',
-        },
-        '/ExpressPhysics/PARun2016B-Express-v1/FEVT' : {
-            'globaltag' : 'auto:run2_data',
-        },
-        '/ExpressPhysicsPA/PARun2016B-Express-v1/FEVT' : {
-            'globaltag' : 'auto:run2_data',
-        },
+        #'/ExpressCosmics/PARun2016B-Express-v1/FEVT' : {
+        #    'globaltag' : 'auto:run2_data',
+        #},
+        #'/ExpressPhysics/PARun2016B-Express-v1/FEVT' : {
+        #    'globaltag' : 'auto:run2_data',
+        #},
+        #'/ExpressPhysicsPA/PARun2016B-Express-v1/FEVT' : {
+        #    'globaltag' : 'auto:run2_data',
+        #},
+        #'/ExpressCosmics/PARun2016C-Express-v1/FEVT' : {
+        #    'globaltag' : 'auto:run2_data',
+        #},
+        #'/ExpressPhysicsPA/PARun2016C-Express-v1/FEVT' : {
+        #    'globaltag' : 'auto:run2_data',
+        #},
+        #'/ExpressCosmics/PARun2016D-Express-v1/FEVT' : {
+        #    'globaltag' : 'auto:run2_data',
+        #},
+        #'/ExpressPhysicsPA/PARun2016D-Express-v1/FEVT' : {
+        #    'globaltag' : 'auto:run2_data',
+        #},
 
         # Run2015D RAW
         #'/SingleMuon/Run2015D-v1/RAW' : {
@@ -273,18 +285,30 @@ def generate(userproxy=''):
         #'/SingleMuon/Run2016H-v1/RAW' : {
         #    'globaltag' : 'auto:run2_data',
         #},
-        '/Cosmics/PARun2016A-v1/RAW' : {
-            'globaltag' : 'auto:run2_data',
-        },
-        '/PASingleMuon/PARun2016A-v1/RAW' : {
-            'globaltag' : 'auto:run2_data',
-        },
-        '/Cosmics/PARun2016B-v1/RAW' : {
-            'globaltag' : 'auto:run2_data',
-        },
-        '/PASingleMuon/PARun2016B-v1/RAW' : {
-            'globaltag' : 'auto:run2_data',
-        },
+        #'/Cosmics/PARun2016A-v1/RAW' : {
+        #    'globaltag' : 'auto:run2_data',
+        #},
+        #'/PASingleMuon/PARun2016A-v1/RAW' : {
+        #    'globaltag' : 'auto:run2_data',
+        #},
+        #'/Cosmics/PARun2016B-v1/RAW' : {
+        #    'globaltag' : 'auto:run2_data',
+        #},
+        #'/PASingleMuon/PARun2016B-v1/RAW' : {
+        #    'globaltag' : 'auto:run2_data',
+        #},
+        #'/Cosmics/PARun2016C-v1/RAW' : {
+        #    'globaltag' : 'auto:run2_data',
+        #},
+        #'/PASingleMuon/PARun2016C-v1/RAW' : {
+        #    'globaltag' : 'auto:run2_data',
+        #},
+        #'/Cosmics/PARun2016D-v1/RAW' : {
+        #    'globaltag' : 'auto:run2_data',
+        #},
+        #'/PASingleMuon/PARun2016D-v1/RAW' : {
+        #    'globaltag' : 'auto:run2_data',
+        #},
     }
     
     CMSSW_BASE = os.environ.get('CMSSW_BASE')
