@@ -54,5 +54,4 @@ The script checks the local folder for what runs have been processed: `AutoValid
 
 ## Templates
 
-Templates for producing the scripts to submit to bash are still found on the CSC CAF space. These will be
-moved to this repository later.
+Templates for producing the scripts to submit to bash are found in the [Templates](Templates) directory.
