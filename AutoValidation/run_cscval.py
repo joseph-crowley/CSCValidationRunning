@@ -24,7 +24,7 @@ import errno
 import math
 from dbs.apis.dbsClient import DbsApi
 
-MINRUN = 286591 # end of year
+MINRUN = 296000 # test
 
 pipe = subprocess.PIPE
 Release = subprocess.Popen('echo $CMSSW_VERSION', shell=True, stdout=pipe).communicate()[0]
@@ -202,7 +202,7 @@ def run_validation(dataset,globalTag,run,stream,eventContent,num,input_files,**k
         print "Submitting to crab"
         subprocess.check_call("bash run.sh", shell=True)
     else:
-        subprocess.check_call('cmsMkdir /store/group/dpg_csc/comm_csc/cscval/batch_output/%s/run%s_%s' % (stream, run, eventContent), shell=True)
+        subprocess.check_call('mkdir -p /eos/cms/store/group/dpg_csc/comm_csc/cscval/batch_output/%s/run%s_%s' % (stream, run, eventContent), shell=True)
         nf = 1
         numJobs = int(math.ceil(len(input_files)/float(nf)))
         # check files already run over
@@ -252,11 +252,12 @@ def run_validation(dataset,globalTag,run,stream,eventContent,num,input_files,**k
             sh.write("eval `scramv1 runtime -sh` \n")
             sh.write("cd - \n")
             sh.write('cmsRun %s/%s\n' % (rundir, cfgFileName))
-            sh.write('cmsStage -f %s /store/group/dpg_csc/comm_csc/cscval/batch_output/%s/run%s_%s/%s\n' % (outFileName, stream, run, eventContent, outFileName))
+            sh.write('cp %s /eos/cms/store/group/dpg_csc/comm_csc/cscval/batch_output/%s/run%s_%s/%s\n' % (outFileName, stream, run, eventContent, outFileName))
             for trigger in triggers:
-                sh.write('cmsStage -f %s_%s /store/group/dpg_csc/comm_csc/cscval/batch_output/%s/run%s_%s/%s_%s\n' % (trigger, outFileName, stream, run, eventContent, trigger, outFileName))
-            sh.write('cmsStage -f %s /store/group/dpg_csc/comm_csc/cscval/batch_output/%s/run%s_%s/%s\n' % (inCSCTFName, stream, run, eventContent, outCSCTFName))
-            sh.write('cmsStage -f TPEHists_%i.root /store/group/dpg_csc/comm_csc/cscval/batch_output/%s/run%s_%s/TPEHists_%i.root\n' % (j, stream, run, eventContent, j))
+                sh.write('cp %s_%s /eos/cms/store/group/dpg_csc/comm_csc/cscval/batch_output/%s/run%s_%s/%s_%s\n' % (trigger, outFileName, stream, run, eventContent, trigger, outFileName))
+            sh.write('cp %s /eos/cms/store/group/dpg_csc/comm_csc/cscval/batch_output/%s/run%s_%s/%s\n' % (inCSCTFName, stream, run, eventContent, outCSCTFName))
+            sh.write('cp TPEHists_%i.root /eos/cms/store/group/dpg_csc/comm_csc/cscval/batch_output/%s/run%s_%s/TPEHists_%i.root\n' % (j, stream, run, eventContent, j))
+            sh.write('chmod g+w /eos/cms/store/group/dpg_csc/comm_csc/cscval/batch_output/%s/run%s_%s/\n' % (stream, run, eventContent))
             sh.close()
 
             print "Submitting job %i of %i" % (j+1, numJobs)
@@ -374,7 +375,7 @@ def process_output(dataset,globalTag,**kwargs):
             for tpe in tpeFiles:
                 tpeMergeString += ' root://eoscms.cern.ch/%s/%s' % (fileDir, tpe)
             sh.write(tpeMergeString+" \n")
-            sh.write('cmsStage -f %s /store/group/dpg_csc/comm_csc/cscval/batch_output/%s/run%s_%s/%s\n' % (tpeOut, stream, run, eventContent, tpeOut))
+            sh.write('cp %s /eos/cms/store/group/dpg_csc/comm_csc/cscval/batch_output/%s/run%s_%s/%s\n' % (tpeOut, stream, run, eventContent, tpeOut))
         if valFiles['All']:
             print "Merging valHists"
             valMergeString = 'hadd -f %s' % valOut['All']
@@ -382,7 +383,7 @@ def process_output(dataset,globalTag,**kwargs):
                 if val==valOut['All']: continue # skip previous merge
                 valMergeString += ' root://eoscms.cern.ch/%s/%s' % (fileDir, val)
             sh.write(valMergeString+" \n")
-            sh.write('cmsStage -f %s /store/group/dpg_csc/comm_csc/cscval/batch_output/%s/run%s_%s/%s\n' % (valOut['All'], stream, run, eventContent, valOut['All']))
+            sh.write('cp %s /eos/cms/store/group/dpg_csc/comm_csc/cscval/batch_output/%s/run%s_%s/%s\n' % (valOut['All'], stream, run, eventContent, valOut['All']))
         for trigger in triggers:
             if valFiles[trigger]:
                 print "Merging %s_valHists" % trigger
@@ -391,7 +392,7 @@ def process_output(dataset,globalTag,**kwargs):
                     if val==valOut[trigger]: continue # skip previous merge
                     valMergeString += ' root://eoscms.cern.ch/%s/%s' % (fileDir, val)
                 sh.write(valMergeString+" \n")
-                sh.write('cmsStage -f %s /store/group/dpg_csc/comm_csc/cscval/batch_output/%s/run%s_%s/%s\n' % (valOut[trigger], stream, run, eventContent, valOut[trigger]))
+                sh.write('cp %s /eos/cms/store/group/dpg_csc/comm_csc/cscval/batch_output/%s/run%s_%s/%s\n' % (valOut[trigger], stream, run, eventContent, valOut[trigger]))
         if csctfFiles:
             print "Merging csctfHists"
             csctfMergeString = 'hadd -f %s' % csctfOut
@@ -399,7 +400,7 @@ def process_output(dataset,globalTag,**kwargs):
                 if csctf==csctfOut: continue # skip previous merge
                 csctfMergeString += ' root://eoscms.cern.ch/%s/%s' % (fileDir, csctf)
             sh.write(csctfMergeString+" \n")
-            sh.write('cmsStage -f %s /store/group/dpg_csc/comm_csc/cscval/batch_output/%s/run%s_%s/%s\n' % (csctfOut, stream, run, eventContent, csctfOut))
+            sh.write('cp %s /eos/cms/store/group/dpg_csc/comm_csc/cscval/batch_output/%s/run%s_%s/%s\n' % (csctfOut, stream, run, eventContent, csctfOut))
         sh.close()
         if not dryRun: subprocess.check_call("LSB_JOB_REPORT_MAIL=N bsub -q 8nh -J %s_%smerge < merge.sh" % (run,stream), shell=True)
 
@@ -432,11 +433,11 @@ def process_output(dataset,globalTag,**kwargs):
                 remainingJobs += [[run,job]]
             else:
                 print("Run %s merged" % run) 
-                subprocess.call('cmsStage -f /store/group/dpg_csc/comm_csc/cscval/batch_output/%s/run%s_%s/%s %s' % (stream, run, eventContent, tpeOut, tpeOut), shell=True)
-                valRet = subprocess.call('cmsStage -f /store/group/dpg_csc/comm_csc/cscval/batch_output/%s/run%s_%s/%s %s' % (stream, run, eventContent, valOut['All'], valOut['All']), shell=True)
+                subprocess.call('cp /eos/cms/store/group/dpg_csc/comm_csc/cscval/batch_output/%s/run%s_%s/%s %s' % (stream, run, eventContent, tpeOut, tpeOut), shell=True)
+                valRet = subprocess.call('cp /eos/cms/store/group/dpg_csc/comm_csc/cscval/batch_output/%s/run%s_%s/%s %s' % (stream, run, eventContent, valOut['All'], valOut['All']), shell=True)
                 for trigger in triggers:
-                    trigRet = subprocess.call('cmsStage -f /store/group/dpg_csc/comm_csc/cscval/batch_output/%s/run%s_%s/%s %s' % (stream, run, eventContent, valOut[trigger], valOut[trigger]), shell=True)
-                subprocess.call('cmsStage -f /store/group/dpg_csc/comm_csc/cscval/batch_output/%s/run%s_%s/%s %s' % (stream, run, eventContent, csctfOut, csctfOut), shell=True)
+                    trigRet = subprocess.call('cp /eos/cms/store/group/dpg_csc/comm_csc/cscval/batch_output/%s/run%s_%s/%s %s' % (stream, run, eventContent, valOut[trigger], valOut[trigger]), shell=True)
+                subprocess.call('cp /eos/cms/store/group/dpg_csc/comm_csc/cscval/batch_output/%s/run%s_%s/%s %s' % (stream, run, eventContent, csctfOut, csctfOut), shell=True)
                 if not valRet and not dryRun: os.system("./secondStep.py")
                 subprocess.call('rm *.root', shell=True)
 
