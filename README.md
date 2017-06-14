@@ -5,15 +5,15 @@ Repository to setup the latest version of CSCValidation to be run automatically 
 
 Setup a new release
 ```
-cmsrel CMSSW_8_0_12 # or current CMSSW version
-cd CMSSW_8_0_12/src
+cmsrel CMSSW_9_2_1 # or current CMSSW version
+cd CMSSW_9_2_1/src
 cmsenv
 git cms-init
 ```
 
 Clone the repository
 ```
-git clone git@github.com:dntaylor/CSCValidationRunning.git
+git clone git@github.com:wsicheng/CSCValidationRunning.git
 ```
 
 Run the setup script
@@ -26,7 +26,8 @@ cd CSCValidationRunning
 
 To run a cron job on afs you must use acrontab. The current version crontab script is in
 [AutoValidation/autoval.cron](AutoValidation/autoval.cron). Make certain you consult with others to make 
-sure we don't have multiple cron jobs running (Devin Taylor). Note: DAS requires authentication.
+sure we don't have multiple cron jobs running. A schedule can be found at the [Twiki](https://twiki.cern.ch/twiki/bin/viewauth/CMS/CSCValidationWebsite)
+Note: DAS requires authentication.
 To run with acrontab, do a voms init and copy the /tmp/x509 to a private directory on afs.
 The /tmp will not be visible on all lxplus nodes (just the one you create it on).
 ```
