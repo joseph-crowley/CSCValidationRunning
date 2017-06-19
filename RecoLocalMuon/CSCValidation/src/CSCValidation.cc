@@ -1063,7 +1063,7 @@ void CSCValidation::doSegments(edm::Handle<CSCSegmentCollection> cscSegments, ed
 
   if (nSegments == 0) nSegments = -1;
 
-  histos->fill1DHist(nSegments,"hSnSegments","Segments per Event",31,-0.5,30.5,"Segments");
+  histos->fill1DHist(nSegments,"hSnSegments","Segments per Event",91,-0.5,90.5,"Segments");
 
 }
 
