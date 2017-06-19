@@ -14,26 +14,39 @@ def generate(userproxy=''):
     cronName = 'autoval'
     datasets = {
         # Run2017 Express, Commissioning & Cosmics
-        '/ExpressPhysics/Run2017A-Express-v1/FEVT' : {
+        # '/ExpressPhysics/Run2017A-Express-v1/FEVT' : {
+        #     'globaltag' : 'auto:run2_data',
+        # },
+        # '/ExpressPhysics/Run2017A-Express-v2/FEVT' : {
+        #     'globaltag' : 'auto:run2_data',
+        # },
+        # '/ExpressPhysics/Run2017A-Express-v3/FEVT' : {
+        #     'globaltag' : 'auto:run2_data',
+        # },
+        # '/Commissioning/Run2017A-v1/RAW' : {
+        #     'globaltag' : 'auto:run2_data',
+        # },
+        # '/CommissioningMuons/Run2017A-v1/RAW' : {
+        #     'globaltag' : 'auto:run2_data',
+        # },
+        # '/Cosmics/Run2017A-v1/RAW' : {
+        #     'globaltag' : 'auto:run2_data',
+        # },
+        '/Cosmics/Run2017B-v1/RAW' : {
             'globaltag' : 'auto:run2_data',
         },
-        '/ExpressPhysics/Run2017A-Express-v2/FEVT' : {
-            'globaltag' : 'auto:run2_data',
-        },
-        '/Commissioning/Run2017A-v1/RAW' : {
-            'globaltag' : 'auto:run2_data',
-        },
-        '/CommissioningMuons/Run2017A-v1/RAW' : {
-            'globaltag' : 'auto:run2_data',
-        },
-        '/Cosmics/Run2017A-v1/RAW' : {
-            'globaltag' : 'auto:run2_data',
-        },
+
         # Run2017 PromptReco
-        '/SingleMuon/Run2017A-v1/RAW' : {
+        # '/SingleMuon/Run2017A-v1/RAW' : {
+        #     'globaltag' : 'auto:run2_data',
+        # },
+        # '/DoubleMuon/Run2017A-v1/RAW' : {
+        #     'globaltag' : 'auto:run2_data',
+        # },
+        '/SingleMuon/Run2017B-v1/RAW' : {
             'globaltag' : 'auto:run2_data',
         },
-        '/DoubleMuon/Run2017A-v1/RAW' : {
+        '/DoubleMuon/Run2017B-v1/RAW' : {
             'globaltag' : 'auto:run2_data',
         },
 
