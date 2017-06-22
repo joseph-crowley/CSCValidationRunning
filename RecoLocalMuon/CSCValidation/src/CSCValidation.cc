@@ -739,7 +739,7 @@ void CSCValidation::doWireDigis(edm::Handle<CSCWireDigiCollection> wires){
   // this way you can zero suppress but still store info on # events with no digis
   if (nWireGroupsTotal == 0) nWireGroupsTotal = -1;
 
-  histos->fill1DHist(nWireGroupsTotal,"hWirenGroupsTotal","Wires Fired Per Event",151,-0.5,150.5,"Digis");
+  histos->fill1DHist(nWireGroupsTotal,"hWirenGroupsTotal","Wires Fired Per Event",250,0,500,"Digis");
   
 }
 
@@ -780,7 +780,7 @@ void CSCValidation::doStripDigis(edm::Handle<CSCStripDigiCollection> strips){
 
   if (nStripsFired == 0) nStripsFired = -1;
 
-  histos->fill1DHist(nStripsFired,"hStripNFired","Fired Strips per Event",251,-0.5,250.5,"Digis");
+  histos->fill1DHist(nStripsFired,"hStripNFired","Fired Strips per Event",250,0,500,"Digis");
 
 }
 
@@ -928,7 +928,7 @@ void CSCValidation::doRecHits(edm::Handle<CSCRecHit2DCollection> recHits, edm::E
 
   if (nRecHits == 0) nRecHits = -1;
 
-  histos->fill1DHist(nRecHits,"hRHnrechits","recHits per Event (all chambers)",151,-0.5,150.5,"recHits");
+  histos->fill1DHist(nRecHits,"hRHnrechits","recHits per Event (all chambers)",250,0,500,"recHits");
 
 }
 
@@ -1063,7 +1063,7 @@ void CSCValidation::doSegments(edm::Handle<CSCSegmentCollection> cscSegments, ed
 
   if (nSegments == 0) nSegments = -1;
 
-  histos->fill1DHist(nSegments,"hSnSegments","Segments per Event",31,-0.5,30.5,"Segments");
+  histos->fill1DHist(nSegments,"hSnSegments","Segments per Event",151,-0.5,150.5,"Segments");
 
 }
 

@@ -23,12 +23,15 @@ def generate(userproxy=''):
         # '/ExpressPhysics/Run2017A-Express-v3/FEVT' : {
         #     'globaltag' : 'auto:run2_data',
         # },
+        '/ExpressPhysics/Run2017B-Express-v1/FEVT' : {
+            'globaltag' : 'auto:run2_data',
+        },
         # '/Commissioning/Run2017A-v1/RAW' : {
         #     'globaltag' : 'auto:run2_data',
         # },
-        # '/CommissioningMuons/Run2017A-v1/RAW' : {
-        #     'globaltag' : 'auto:run2_data',
-        # },
+        '/CommissioningMuons/Run2017A-v1/RAW' : {
+            'globaltag' : 'auto:run2_data',
+        },
         # '/Cosmics/Run2017A-v1/RAW' : {
         #     'globaltag' : 'auto:run2_data',
         # },
