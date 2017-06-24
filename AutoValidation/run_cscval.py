@@ -152,6 +152,8 @@ def run_validation(dataset,globalTag,run,stream,eventContent,num,input_files,**k
         trigger_cfg += ["process.p%s = cms.Path(process.gtDigis * process.triggerSelection%s * process.muonCSCDigis * process.csc2DRecHits * process.cscSegments * process.cscValidation%s)\n" % (trigger, trigger, trigger)]
         trigger_proc += ["print '%s'\n" % trigger]
         trigger_proc += ['os.system("root -l -q -b %s_makePlots.C")\n' % trigger]
+        trigger_proc += ['os.system("mkdir -p /eos/cms/store/group/dpg_csc/comm_csc/cscval/www/results/runRUNNUMBER/STREAM/Site/PNGS/%s")\n' % trigger ]
+        trigger_proc += ['os.system("cp *.png /eos/cms/store/group/dpg_csc/comm_csc/cscval/www/results/runRUNNUMBER/STREAM/Site/PNGS/%s")\n' % trigger ]
         trigger_proc += ['os.system("mkdir -p /afs/cern.ch/cms/CAF/CMSCOMM/COMM_CSC/CSCVAL/results/results/runRUNNUMBER/STREAM/Site/PNGS/%s")\n' % trigger ]
         trigger_proc += ['os.system("mv *.png /afs/cern.ch/cms/CAF/CMSCOMM/COMM_CSC/CSCVAL/results/results/runRUNNUMBER/STREAM/Site/PNGS/%s")\n' % trigger ]
 
@@ -452,11 +454,14 @@ def process_output(dataset,globalTag,**kwargs):
 def build_runlist():
     print "Building runlist"
     curTime = time.strftime("%Y_%m_%d_%H_%M_%S", time.localtime())
-    os.system('bash generateRunList.sh > %s_runlist.json; mv %s_runlist.json /afs/cern.ch/cms/CAF/CMSCOMM/COMM_CSC/CSCVAL/results/js/runlist.json' % (curTime,curTime))
+    os.system('bash generateRunList.sh /afs/cern.ch/cms/CAF/CMSCOMM/COMM_CSC/CSCVAL/results/results > %s_runlist.json' % (curTime))
+    os.system('mv %s_runlist.json /afs/cern.ch/cms/CAF/CMSCOMM/COMM_CSC/CSCVAL/results/js/runlist.json' % (curTime))
+    os.system('bash generateRunList.sh > /eos/cms/store/group/dpg_csc/comm_csc/cscval/www/js/runlist.json')
     # create last run json
     Time=time.strftime("%Y/%m/%d %H:%M:%S", time.localtime())
     with open('lastrun.json','w') as file:
         file.write('var lastrun = {\n  "lastrun" : "%s"\n}\n' % Time)
+    os.system('cat lastrun.json > /eos/cms/store/group/dpg_csc/comm_csc/cscval/www/js/lastrun.json')
     os.system('mv lastrun.json /afs/cern.ch/cms/CAF/CMSCOMM/COMM_CSC/CSCVAL/results/js/')
     return 0
     

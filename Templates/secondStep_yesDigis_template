@@ -8,7 +8,6 @@ import ROOT
 from ROOT import TFile
 
 
-
 #make the plots
 os.system("root -l -q -b makePlots.C")
 os.system("root -l -q -b makePlots_csctf.C")
@@ -19,15 +18,23 @@ os.system("root -l -q -b makePlots_csctf.C")
 print "made plots"
 
 #make the web page
-os.system("mkdir -p /afs/cern.ch/cms/CAF/CMSCOMM/COMM_CSC/CSCVAL/results/results/runRUNNUMBER/STREAM/Site")
-os.system("cp -r TEMPLATEDIR/web/* /afs/cern.ch/cms/CAF/CMSCOMM/COMM_CSC/CSCVAL/results/results/runRUNNUMBER/STREAM")
-os.system("mv Summary.html /afs/cern.ch/cms/CAF/CMSCOMM/COMM_CSC/CSCVAL/results/results/runRUNNUMBER/STREAM/Site")
-#os.system("mv hot_wires.txt /afs/cern.ch/cms/CAF/CMSCOMM/COMM_CSC/CSCVAL/results/results/runRUNNUMBER/STREAM/Site/PNGS")
-#os.system("mv bad_TPE_chambers.txt /afs/cern.ch/cms/CAF/CMSCOMM/COMM_CSC/CSCVAL/results/results/runRUNNUMBER/STREAM/Site/PNGS")
-#os.system("mv TPEHists.root /afs/cern.ch/cms/CAF/CMSCOMM/COMM_CSC/CSCVAL/results/results/runRUNNUMBER/STREAM/Site/PNGS")
-#os.system("mv deadchamberlist.txt /afs/cern.ch/cms/CAF/CMSCOMM/COMM_CSC/CSCVAL/results/results/runRUNNUMBER/STREAM/Site/PNGS")
-os.system("cp CFGFILE /afs/cern.ch/cms/CAF/CMSCOMM/COMM_CSC/CSCVAL/results/results/runRUNNUMBER/STREAM/Site/PNGS/config.py")
-os.system("mv *.png /afs/cern.ch/cms/CAF/CMSCOMM/COMM_CSC/CSCVAL/results/results/runRUNNUMBER/STREAM/Site/PNGS")
+webloc = "/eos/cms/store/group/dpg_csc/comm_csc/cscval/www"
+
+os.system("mkdir -p {0}/results/runRUNNUMBER/STREAM/Site".format(webloc))
+os.system("cp -r TEMPLATEDIR/web/* {0}/results/runRUNNUMBER/STREAM".format(webloc))
+os.system("mv Summary.html {0}/results/runRUNNUMBER/STREAM/Site".format(webloc))
+#os.system("mv hot_wires.txt {0}/results/runRUNNUMBER/STREAM/Site/PNGS".format(webloc))
+#os.system("mv bad_TPE_chambers.txt {0}/results/runRUNNUMBER/STREAM/Site/PNGS".format(webloc))
+#os.system("mv TPEHists.root {0}/results/runRUNNUMBER/STREAM/Site/PNGS".format(webloc))
+#os.system("mv deadchamberlist.txt {0}/results/runRUNNUMBER/STREAM/Site/PNGS".format(webloc))
+os.system("cp CFGFILE {0}/results/runRUNNUMBER/STREAM/Site/PNGS/config.py".format(webloc))
+os.system("mv *.png {0}/results/runRUNNUMBER/STREAM/Site/PNGS".format(webloc))
+# os.system("chmod -R g+w {0}/results/runRUNNUMBER/".format(webloc))
+
+# Keep updating the website on AFS
+afsloc = "/afs/cern.ch/cms/CAF/CMSCOMM/COMM_CSC/CSCVAL/results"
+os.system("mkdir -p {0}/results/runRUNNUMBER/".format(afsloc))
+os.system("cp -r {0}/results/runRUNNUMBER/STREAM/ {1}/results/runRUNNUMBER/STREAM/".format(webloc, afsloc))
 
 print "individual triggers"
 
