@@ -1,6 +1,7 @@
 #!/bin/bash
 
-runDir=/afs/cern.ch/cms/CAF/CMSCOMM/COMM_CSC/CSCVAL/results/results
+# runDir=/afs/cern.ch/cms/CAF/CMSCOMM/COMM_CSC/CSCVAL/results/results
+runDir=${1:-/eos/cms/store/group/dpg_csc/comm_csc/cscval/www/results}
 allRuns=$runDir/run[0-9][0-9][0-9][0-9][0-9][0-9]
 #allRuns=$runDir/run207[0-9][0-9][0-9]
 echo "var runData = {"
@@ -16,12 +17,12 @@ do
     run=${run:3:${#run}}
 
     datasets="$runPath/*"
-    skipRun=false
+    skipRun=true
     for datasetPath in $datasets
     do
-        if [ ! -f $datasetPath/Site/PNGS/hORecHitsSerial.png ] ; then
+        if [ -f $datasetPath/Site/PNGS/hORecHitsSerial.png ] ; then
             # no CSCs in run, don't show
-            skipRun=true
+            skipRun=false
         fi
     done
     if [ "$skipRun" = true ] ; then
