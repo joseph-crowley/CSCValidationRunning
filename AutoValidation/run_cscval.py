@@ -259,7 +259,7 @@ def run_validation(dataset,globalTag,run,stream,eventContent,num,input_files,**k
                 sh.write('cp %s_%s /eos/cms/store/group/dpg_csc/comm_csc/cscval/batch_output/%s/run%s_%s/%s_%s\n' % (trigger, outFileName, stream, run, eventContent, trigger, outFileName))
             sh.write('cp %s /eos/cms/store/group/dpg_csc/comm_csc/cscval/batch_output/%s/run%s_%s/%s\n' % (inCSCTFName, stream, run, eventContent, outCSCTFName))
             sh.write('cp TPEHists_%i.root /eos/cms/store/group/dpg_csc/comm_csc/cscval/batch_output/%s/run%s_%s/TPEHists_%i.root\n' % (j, stream, run, eventContent, j))
-            sh.write('chmod g+w /eos/cms/store/group/dpg_csc/comm_csc/cscval/batch_output/%s/run%s_%s/\n' % (stream, run, eventContent))
+            # sh.write('chmod g+w /eos/cms/store/group/dpg_csc/comm_csc/cscval/batch_output/%s/run%s_%s/\n' % (stream, run, eventContent))
             sh.close()
 
             print "Submitting job %i of %i" % (j+1, numJobs)
@@ -452,13 +452,13 @@ def process_output(dataset,globalTag,**kwargs):
     return 0
 
 def build_runlist():
-    print "Building runlist"
-    curTime = time.strftime("%Y_%m_%d_%H_%M_%S", time.localtime())
-    os.system('bash generateRunList.sh /afs/cern.ch/cms/CAF/CMSCOMM/COMM_CSC/CSCVAL/results/results > %s_runlist.json' % (curTime))
-    os.system('mv %s_runlist.json /afs/cern.ch/cms/CAF/CMSCOMM/COMM_CSC/CSCVAL/results/js/runlist.json' % (curTime))
+    Time = time.strftime("%Y/%m/%d %H:%M:%S", time.localtime())
+    print "Building runlist for afs [%s]" % Time
+    os.system('bash generateRunList.sh /afs/cern.ch/cms/CAF/CMSCOMM/COMM_CSC/CSCVAL/results/results > temp_runlist.json')
+    os.system('mv temp_runlist.json /afs/cern.ch/cms/CAF/CMSCOMM/COMM_CSC/CSCVAL/results/js/runlist.json')
+    print "Building runlist for eos [%s]" % Time
     os.system('bash generateRunList.sh > /eos/cms/store/group/dpg_csc/comm_csc/cscval/www/js/runlist.json')
     # create last run json
-    Time=time.strftime("%Y/%m/%d %H:%M:%S", time.localtime())
     with open('lastrun.json','w') as file:
         file.write('var lastrun = {\n  "lastrun" : "%s"\n}\n' % Time)
     os.system('cat lastrun.json > /eos/cms/store/group/dpg_csc/comm_csc/cscval/www/js/lastrun.json')
