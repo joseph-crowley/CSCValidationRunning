@@ -343,6 +343,8 @@ def process_output(dataset,globalTag,**kwargs):
                 if file.startswith('%s_val' % trigger): valFiles[trigger] += [file]
             if file[0:5]=='csctf': csctfFiles += [file]
         nFiles = len(valFiles['All'])
+        if len(tpeFiles) == 0 or float(nFiles)/len(tpeFiles) < 0.7:
+            print "run%s need to be redo" % run
 
         # see if we need to remerge things
         processedString = '%s_%i' %(jobVersion, nFiles)
@@ -373,19 +375,23 @@ def process_output(dataset,globalTag,**kwargs):
         sh.write("cd - \n")
         if tpeFiles:
             print "Merging tpeHists"
+            sh.write("cd %s\n" % fileDir)
             tpeMergeString = 'hadd -f %s' % tpeOut
             for tpe in tpeFiles:
-                tpeMergeString += ' root://eoscms.cern.ch/%s/%s' % (fileDir, tpe)
+                # tpeMergeString += ' root://eoscms.cern.ch/%s/%s' % (fileDir, tpe)
+                tpeMergeString += ' %s' % tpe
             sh.write(tpeMergeString+" \n")
-            sh.write('cp %s /eos/cms/store/group/dpg_csc/comm_csc/cscval/batch_output/%s/run%s_%s/%s\n' % (tpeOut, stream, run, eventContent, tpeOut))
+            # sh.write('cp %s /eos/cms/store/group/dpg_csc/comm_csc/cscval/batch_output/%s/run%s_%s/%s\n' % (tpeOut, stream, run, eventContent, tpeOut))
         if valFiles['All']:
             print "Merging valHists"
+            sh.write("cd %s\n" % fileDir)
             valMergeString = 'hadd -f %s' % valOut['All']
             for val in valFiles['All']:
                 if val==valOut['All']: continue # skip previous merge
-                valMergeString += ' root://eoscms.cern.ch/%s/%s' % (fileDir, val)
+                # valMergeString += ' root://eoscms.cern.ch/%s/%s' % (fileDir, val)
+                valMergeString += ' %s' % val
             sh.write(valMergeString+" \n")
-            sh.write('cp %s /eos/cms/store/group/dpg_csc/comm_csc/cscval/batch_output/%s/run%s_%s/%s\n' % (valOut['All'], stream, run, eventContent, valOut['All']))
+            # sh.write('cp %s /eos/cms/store/group/dpg_csc/comm_csc/cscval/batch_output/%s/run%s_%s/%s\n' % (valOut['All'], stream, run, eventContent, valOut['All']))
         for trigger in triggers:
             if valFiles[trigger]:
                 print "Merging %s_valHists" % trigger
@@ -397,12 +403,15 @@ def process_output(dataset,globalTag,**kwargs):
                 sh.write('cp %s /eos/cms/store/group/dpg_csc/comm_csc/cscval/batch_output/%s/run%s_%s/%s\n' % (valOut[trigger], stream, run, eventContent, valOut[trigger]))
         if csctfFiles:
             print "Merging csctfHists"
+            sh.write("cd %s\n" % fileDir)
             csctfMergeString = 'hadd -f %s' % csctfOut
             for csctf in csctfFiles:
                 if csctf==csctfOut: continue # skip previous merge
-                csctfMergeString += ' root://eoscms.cern.ch/%s/%s' % (fileDir, csctf)
+                # csctfMergeString += ' root://eoscms.cern.ch/%s/%s' % (fileDir, csctf)
+                csctfMergeString += ' %s' % csctf
             sh.write(csctfMergeString+" \n")
-            sh.write('cp %s /eos/cms/store/group/dpg_csc/comm_csc/cscval/batch_output/%s/run%s_%s/%s\n' % (csctfOut, stream, run, eventContent, csctfOut))
+            # sh.write('cp %s /eos/cms/store/group/dpg_csc/comm_csc/cscval/batch_output/%s/run%s_%s/%s\n' % (csctfOut, stream, run, eventContent, csctfOut))
+        sh.write('cd %s\n' % rundir)
         sh.close()
         if not dryRun: subprocess.check_call("LSB_JOB_REPORT_MAIL=N bsub -q 8nh -J %s_%smerge < merge.sh" % (run,stream), shell=True)
 
@@ -453,10 +462,10 @@ def process_output(dataset,globalTag,**kwargs):
 
 def build_runlist():
     Time = time.strftime("%Y/%m/%d %H:%M:%S", time.localtime())
-    print "Building runlist for afs [%s]" % Time
+    print "[%s] Building runlist for afs" % Time
     os.system('bash generateRunList.sh /afs/cern.ch/cms/CAF/CMSCOMM/COMM_CSC/CSCVAL/results/results > temp_runlist.json')
     os.system('mv temp_runlist.json /afs/cern.ch/cms/CAF/CMSCOMM/COMM_CSC/CSCVAL/results/js/runlist.json')
-    print "Building runlist for eos [%s]" % Time
+    print "[%s] Building runlist for eos" % Time
     os.system('bash generateRunList.sh > /eos/cms/store/group/dpg_csc/comm_csc/cscval/www/js/runlist.json')
     # create last run json
     with open('lastrun.json','w') as file:
@@ -528,7 +537,6 @@ def process_dataset(dataset,globalTag,**kwargs):
             # get runs in block
             runs = dbsclient.listRuns(block_name=block['block_name'])
             updatedRuns.update(set(runs[0]['run_num']))
-
 
         # iterate over runs
         updatedRuns = sorted(updatedRuns)

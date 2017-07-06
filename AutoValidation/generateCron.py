@@ -29,9 +29,9 @@ def generate(userproxy=''):
         # '/Commissioning/Run2017A-v1/RAW' : {
         #     'globaltag' : 'auto:run2_data',
         # },
-        '/CommissioningMuons/Run2017A-v1/RAW' : {
-            'globaltag' : 'auto:run2_data',
-        },
+        # '/CommissioningMuons/Run2017A-v1/RAW' : {
+        #     'globaltag' : 'auto:run2_data',
+        # },
         # '/Cosmics/Run2017A-v1/RAW' : {
         #     'globaltag' : 'auto:run2_data',
         # },
@@ -381,8 +381,8 @@ def generate(userproxy=''):
         dummy, datasetName, periodName, eventContent = dataset.split('/')
         filename = '%s_%s-%s-%s' % (cronName, datasetName, periodName, eventContent)
         mergeFilename = '{0}_merge'.format(filename)
-        timeString  = 'echo "Initiate validation for %s at $(date)"\n' % (dataset)
-        timeString += 'echo "Initiate validation for %s at $(date)" >&2\n' % (dataset)
+        timeString  = 'echo "[$(date)] Initiate validation for %s"\n' % (dataset)
+        timeString += 'echo "[$(date)] Initiate validation for %s" >&2\n' % (dataset)
         runVal = './run_cscval.py %s %s\n' % (dataset, globaltag)
         commandToWrite = commandString + timeString + runVal
         runMerge = './run_cscval.py %s %s -ro\n' % (dataset, globaltag)

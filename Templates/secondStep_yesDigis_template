@@ -26,7 +26,7 @@ webloc = "/eos/cms/store/group/dpg_csc/comm_csc/cscval/www"
 print >> sys.stderr, datetime.datetime.now(), ": Start moving plots for runRUNNUMBER to eos"
 os.system("mkdir -p {0}/results/runRUNNUMBER/STREAM/Site".format(webloc))
 os.system("cp -r TEMPLATEDIR/web/* {0}/results/runRUNNUMBER/STREAM".format(webloc))
-os.system("mv Summary.html {0}/results/runRUNNUMBER/STREAM/Site".format(webloc))
+os.system("cp Summary.html {0}/results/runRUNNUMBER/STREAM/Site".format(webloc))
 #os.system("mv hot_wires.txt {0}/results/runRUNNUMBER/STREAM/Site/PNGS".format(webloc))
 #os.system("mv bad_TPE_chambers.txt {0}/results/runRUNNUMBER/STREAM/Site/PNGS".format(webloc))
 #os.system("mv TPEHists.root {0}/results/runRUNNUMBER/STREAM/Site/PNGS".format(webloc))
