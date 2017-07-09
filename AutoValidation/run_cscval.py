@@ -378,39 +378,32 @@ def process_output(dataset,globalTag,**kwargs):
             sh.write("cd %s\n" % fileDir)
             tpeMergeString = 'hadd -f %s' % tpeOut
             for tpe in tpeFiles:
-                # tpeMergeString += ' root://eoscms.cern.ch/%s/%s' % (fileDir, tpe)
                 tpeMergeString += ' %s' % tpe
             sh.write(tpeMergeString+" \n")
-            # sh.write('cp %s /eos/cms/store/group/dpg_csc/comm_csc/cscval/batch_output/%s/run%s_%s/%s\n' % (tpeOut, stream, run, eventContent, tpeOut))
         if valFiles['All']:
             print "Merging valHists"
             sh.write("cd %s\n" % fileDir)
             valMergeString = 'hadd -f %s' % valOut['All']
             for val in valFiles['All']:
                 if val==valOut['All']: continue # skip previous merge
-                # valMergeString += ' root://eoscms.cern.ch/%s/%s' % (fileDir, val)
                 valMergeString += ' %s' % val
             sh.write(valMergeString+" \n")
-            # sh.write('cp %s /eos/cms/store/group/dpg_csc/comm_csc/cscval/batch_output/%s/run%s_%s/%s\n' % (valOut['All'], stream, run, eventContent, valOut['All']))
         for trigger in triggers:
             if valFiles[trigger]:
                 print "Merging %s_valHists" % trigger
                 valMergeString = 'hadd -f %s' % valOut[trigger]
                 for val in valFiles[trigger]:
                     if val==valOut[trigger]: continue # skip previous merge
-                    valMergeString += ' root://eoscms.cern.ch/%s/%s' % (fileDir, val)
+                    valMergeString += ' %s' % val
                 sh.write(valMergeString+" \n")
-                sh.write('cp %s /eos/cms/store/group/dpg_csc/comm_csc/cscval/batch_output/%s/run%s_%s/%s\n' % (valOut[trigger], stream, run, eventContent, valOut[trigger]))
         if csctfFiles:
             print "Merging csctfHists"
             sh.write("cd %s\n" % fileDir)
             csctfMergeString = 'hadd -f %s' % csctfOut
             for csctf in csctfFiles:
                 if csctf==csctfOut: continue # skip previous merge
-                # csctfMergeString += ' root://eoscms.cern.ch/%s/%s' % (fileDir, csctf)
                 csctfMergeString += ' %s' % csctf
             sh.write(csctfMergeString+" \n")
-            # sh.write('cp %s /eos/cms/store/group/dpg_csc/comm_csc/cscval/batch_output/%s/run%s_%s/%s\n' % (csctfOut, stream, run, eventContent, csctfOut))
         sh.write('cd %s\n' % rundir)
         sh.close()
         if not dryRun: subprocess.check_call("LSB_JOB_REPORT_MAIL=N bsub -q 8nh -J %s_%smerge < merge.sh" % (run,stream), shell=True)

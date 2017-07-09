@@ -739,7 +739,7 @@ void CSCValidation::doWireDigis(edm::Handle<CSCWireDigiCollection> wires){
   // this way you can zero suppress but still store info on # events with no digis
   if (nWireGroupsTotal == 0) nWireGroupsTotal = -1;
 
-  histos->fill1DHist(nWireGroupsTotal,"hWirenGroupsTotal","Wires Fired Per Event",201,-0.5,200.5,"Digis");
+  histos->fill1DHist(nWireGroupsTotal,"hWirenGroupsTotal","Wires Fired Per Event",250,0,500,"Digis");
   
 }
 
@@ -780,7 +780,7 @@ void CSCValidation::doStripDigis(edm::Handle<CSCStripDigiCollection> strips){
 
   if (nStripsFired == 0) nStripsFired = -1;
 
-  histos->fill1DHist(nStripsFired,"hStripNFired","Fired Strips per Event",201,-0.5,200.5,"Digis");
+  histos->fill1DHist(nStripsFired,"hStripNFired","Fired Strips per Event",250,0,500,"Digis");
 
 }
 
