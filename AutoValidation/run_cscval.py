@@ -24,7 +24,7 @@ import errno
 import math
 from dbs.apis.dbsClient import DbsApi
 
-MINRUN = 296000 # test
+MINRUN = 297720 # test
 
 pipe = subprocess.PIPE
 Release = subprocess.Popen('echo $CMSSW_VERSION', shell=True, stdout=pipe).communicate()[0]
@@ -288,7 +288,7 @@ def process_output(dataset,globalTag,**kwargs):
 
     if force: print 'Forcing remerging'
     # get available runs in eos
-    for job in subprocess.Popen('/afs/cern.ch/project/eos/installation/0.3.84-aquamarine/bin/eos.select ls %s/%s' % (CRAB_PATH if runCrab else BATCH_PATH,stream), shell=True,stdout=pipe).communicate()[0].splitlines():
+    for job in subprocess.Popen('eos ls %s/%s' % (CRAB_PATH if runCrab else BATCH_PATH,stream), shell=True,stdout=pipe).communicate()[0].splitlines():
         # go to working area
         if runCrab:
             [type, runStr, runEventContent] = job.split('_')
@@ -323,7 +323,7 @@ def process_output(dataset,globalTag,**kwargs):
         if runCrab:
             # get last job (in case we reprocessed)
             jobVersion = ''
-            for jv in subprocess.Popen('/afs/cern.ch/project/eos/installation/0.3.84-aquamarine/bin/eos.select ls %s/%s/%s' % (CRAB_PATH,stream,job), shell=True,stdout=pipe).communicate()[0].splitlines():
+            for jv in subprocess.Popen('eos ls %s/%s/%s' % (CRAB_PATH,stream,job), shell=True,stdout=pipe).communicate()[0].splitlines():
                 jobVersion = jv
             fileDir = '%s/%s/%s/%s/0000' % (CRAB_PATH,stream,job,jobVersion)
         else:
@@ -335,7 +335,7 @@ def process_output(dataset,globalTag,**kwargs):
         csctfFiles = []
         for trigger in triggers:
             valFiles[trigger] = []
-        for file in subprocess.Popen('/afs/cern.ch/project/eos/installation/0.3.84-aquamarine/bin/eos.select ls %s' % (fileDir), shell=True,stdout=pipe).communicate()[0].splitlines():
+        for file in subprocess.Popen('eos ls %s' % (fileDir), shell=True,stdout=pipe).communicate()[0].splitlines():
             if file==tpeOut or file==valOut or file==csctfOut: continue
             if file[0:3]=='TPE': tpeFiles += [file]
             if file[0:3]=='val': valFiles['All'] += [file]
@@ -344,7 +344,7 @@ def process_output(dataset,globalTag,**kwargs):
             if file[0:5]=='csctf': csctfFiles += [file]
         nFiles = len(valFiles['All'])
         if len(tpeFiles) == 0 or float(nFiles)/len(tpeFiles) < 0.7:
-            print "run%s need to be redo" % run
+            print "run%s need to be redo as too less file get through" % run
 
         # see if we need to remerge things
         processedString = '%s_%i' %(jobVersion, nFiles)
@@ -387,7 +387,18 @@ def process_output(dataset,globalTag,**kwargs):
             for val in valFiles['All']:
                 if val==valOut['All']: continue # skip previous merge
                 valMergeString += ' %s' % val
-            sh.write(valMergeString+" \n")
+            sh.write(valMergeString+" > mergeout.txt 2>&1\n")
+            remergeString = '[ ! $? ] && echo "Merge failed, try remerging"\n' # debug
+            remergeString += 'failstr=$(grep "hadd exiting" mergeout.txt)\n'
+            remergeString += "while [[ $failstr ]]; do\n"
+            remergeString += "    badfile=$(echo $failstr | cut -c30-)\n"
+            remergeString += "    echo \"Removing bad file $badfile\" >&2\n"
+            remergeString += "    rm $badfile\n"
+            remergeString += "    target=$(echo $badfile | cut -d_ -f-3)\n"
+            remergeString += "    hadd -f ${target}.root ${target}_*.root > mergeout.txt 2>&1\n"
+            remergeString += "    failstr=$(grep \"hadd exiting\" mergeout.txt)\n"
+            remergeString += "done\n"
+            sh.write(remergeString)
         for trigger in triggers:
             if valFiles[trigger]:
                 print "Merging %s_valHists" % trigger
@@ -396,14 +407,14 @@ def process_output(dataset,globalTag,**kwargs):
                     if val==valOut[trigger]: continue # skip previous merge
                     valMergeString += ' %s' % val
                 sh.write(valMergeString+" \n")
-        if csctfFiles:
-            print "Merging csctfHists"
-            sh.write("cd %s\n" % fileDir)
-            csctfMergeString = 'hadd -f %s' % csctfOut
-            for csctf in csctfFiles:
-                if csctf==csctfOut: continue # skip previous merge
-                csctfMergeString += ' %s' % csctf
-            sh.write(csctfMergeString+" \n")
+        # if csctfFiles:
+        #     print "Merging csctfHists"
+        #     sh.write("cd %s\n" % fileDir)
+        #     csctfMergeString = 'hadd -f %s' % csctfOut
+        #     for csctf in csctfFiles:
+        #         if csctf==csctfOut: continue # skip previous merge
+        #         csctfMergeString += ' %s' % csctf
+        #     sh.write(csctfMergeString+" \n")
         sh.write('cd %s\n' % rundir)
         sh.close()
         if not dryRun: subprocess.check_call("LSB_JOB_REPORT_MAIL=N bsub -q 8nh -J %s_%smerge < merge.sh" % (run,stream), shell=True)
@@ -412,6 +423,7 @@ def process_output(dataset,globalTag,**kwargs):
 
         os.chdir('../')
 
+    updateRunlist = len(runsToPlot)
     # now plot the merges as they finish
     remainingJobs = runsToPlot
     while remainingJobs:
@@ -428,7 +440,7 @@ def process_output(dataset,globalTag,**kwargs):
             valOut['All'] = 'valHists_run%s_%s.root' % (run, stream)
             for trigger in triggers:
                 valOut[trigger] = '%s_valHists_run%s_%s.root' % (trigger, run, stream)
-            csctfOut = 'csctfHist_run%s_%s.root' % (run, stream)
+            # csctfOut = 'csctfHist_run%s_%s.root' % (run, stream)
 
             # wait for job to finish then copy over
             print("Waiting on run %s" % run)
@@ -441,7 +453,7 @@ def process_output(dataset,globalTag,**kwargs):
                 valRet = subprocess.call('cp /eos/cms/store/group/dpg_csc/comm_csc/cscval/batch_output/%s/run%s_%s/%s %s' % (stream, run, eventContent, valOut['All'], valOut['All']), shell=True)
                 for trigger in triggers:
                     trigRet = subprocess.call('cp /eos/cms/store/group/dpg_csc/comm_csc/cscval/batch_output/%s/run%s_%s/%s %s' % (stream, run, eventContent, valOut[trigger], valOut[trigger]), shell=True)
-                subprocess.call('cp /eos/cms/store/group/dpg_csc/comm_csc/cscval/batch_output/%s/run%s_%s/%s %s' % (stream, run, eventContent, csctfOut, csctfOut), shell=True)
+                # subprocess.call('cp /eos/cms/store/group/dpg_csc/comm_csc/cscval/batch_output/%s/run%s_%s/%s %s' % (stream, run, eventContent, csctfOut, csctfOut), shell=True)
                 if not valRet and not dryRun: os.system("./secondStep.py")
                 subprocess.call('rm *.root', shell=True)
 
@@ -449,16 +461,19 @@ def process_output(dataset,globalTag,**kwargs):
         
     os.chdir('../')
 
-    build_runlist()
+    if updateRunlist and not force:
+        build_runlist()
         
     return 0
 
 def build_runlist():
     Time = time.strftime("%Y/%m/%d %H:%M:%S", time.localtime())
+    tstamp = time.strftime("%H%M%S", time.localtime())
     print "[%s] Building runlist for afs" % Time
-    os.system('bash generateRunList.sh /afs/cern.ch/cms/CAF/CMSCOMM/COMM_CSC/CSCVAL/results/results > temp_runlist.json')
-    os.system('mv temp_runlist.json /afs/cern.ch/cms/CAF/CMSCOMM/COMM_CSC/CSCVAL/results/js/runlist.json')
-    print "[%s] Building runlist for eos" % Time
+    os.system('bash generateRunList.sh /afs/cern.ch/cms/CAF/CMSCOMM/COMM_CSC/CSCVAL/results/results > temp_afs_runlist_%s.json' % tstamp)
+    os.system('mv temp_afs_runlist_%s.json /afs/cern.ch/cms/CAF/CMSCOMM/COMM_CSC/CSCVAL/results/js/runlist.json' % tstamp)
+    print >> sys.stderr, "[%s] Building runlist for eos" % Time
+    # os.system('bash generateRunList.sh > temp_eos_runlist_%s.json' % tstamp)
     os.system('bash generateRunList.sh > /eos/cms/store/group/dpg_csc/comm_csc/cscval/www/js/runlist.json')
     # create last run json
     with open('lastrun.json','w') as file:

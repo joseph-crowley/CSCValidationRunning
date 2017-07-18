@@ -23,7 +23,10 @@ def generate(userproxy=''):
         # '/ExpressPhysics/Run2017A-Express-v3/FEVT' : {
         #     'globaltag' : 'auto:run2_data',
         # },
-        '/ExpressPhysics/Run2017B-Express-v1/FEVT' : {
+        # '/ExpressPhysics/Run2017B-Express-v1/FEVT' : {
+        #     'globaltag' : 'auto:run2_data',
+        # },
+        '/ExpressPhysics/Run2017B-Express-v2/FEVT' : {
             'globaltag' : 'auto:run2_data',
         },
         # '/Commissioning/Run2017A-v1/RAW' : {
@@ -357,6 +360,7 @@ def generate(userproxy=''):
     commandString = '#!/bin/bash\n'
     commandString += 'aklog\n'
     commandString += 'echo "Setup environment"\n'
+    commandString += 'source /etc/bashrc\n'
     commandString += 'source /afs/cern.ch/cms/cmsset_default.sh\n'
     commandString += 'cd %s/src/CSCValidationRunning/AutoValidation\n' % CMSSW_BASE
     commandString += 'eval `scramv1 runtime -sh`\n'
