@@ -11,7 +11,7 @@ from ROOT import TFile
 
 #make the plots
 curtime = time.strftime("[%Y/%m/%d %H:%M:%S]", time.localtime())
-print >> sys.stderr, curtime, " Start making plots for run RUNNUMBER"
+print >> sys.stderr, curtime, "Start making plots for run RUNNUMBER"
 os.system("date")
 os.system("root -l -q -b makePlots.C")
 # os.system("root -l -q -b makePlots_csctf.C")
@@ -24,7 +24,7 @@ print "made plots for run RUNNUMBER"
 #make the web page
 webloc = "/eos/cms/store/group/dpg_csc/comm_csc/cscval/www"
 
-print >> sys.stderr, curtime, " Start moving plots for runRUNNUMBER to eos"
+print >> sys.stderr, curtime, "Start moving plots for runRUNNUMBER to eos"
 os.system("mkdir -p {0}/results/runRUNNUMBER/STREAM/Site".format(webloc))
 os.system("cp -r TEMPLATEDIR/web/* {0}/results/runRUNNUMBER/STREAM".format(webloc))
 os.system("cp Summary.html {0}/results/runRUNNUMBER/STREAM/Site".format(webloc))
@@ -37,7 +37,7 @@ os.system("mv *.png {0}/results/runRUNNUMBER/STREAM/Site/PNGS".format(webloc))
 # os.system("chmod -R g+w {0}/results/runRUNNUMBER/".format(webloc))
 
 # Keep updating the website on AFS
-print >> sys.stderr, curtime, " Start moving plots for runRUNNUMBER to AFS"
+print >> sys.stderr, curtime, "Start moving plots for runRUNNUMBER to AFS"
 afsloc = "/afs/cern.ch/cms/CAF/CMSCOMM/COMM_CSC/CSCVAL/results"
 os.system("mkdir -p {0}/results/runRUNNUMBER/".format(afsloc))
 os.system("cp -r {0}/results/runRUNNUMBER/STREAM/ {1}/results/runRUNNUMBER/STREAM/".format(webloc, afsloc))
