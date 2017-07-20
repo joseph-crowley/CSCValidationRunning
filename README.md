@@ -5,8 +5,8 @@ Repository to setup the latest version of CSCValidation to be run automatically 
 
 Setup a new release
 ```
-cmsrel CMSSW_9_2_1 # or current CMSSW version
-cd CMSSW_9_2_1/src
+cmsrel CMSSW_9_2_6 # or current CMSSW version
+cd CMSSW_9_2_6/src
 cmsenv
 git cms-init
 ```
