@@ -811,11 +811,11 @@ void CSCValidation::doPedestalNoise(edm::Handle<CSCStripDigiCollection> strips){
       if (TotalADC > threshold) { thisStripFired = true;}
       if (!thisStripFired){
 	float ADC = thisSignal - thisPedestal;
-        histos->fill1DHist(ADC,"hStripPed","Pedestal Noise Distribution",50,-25.,25.,"PedestalNoise");
-        histos->fill1DHistByType(ADC,"hStripPedME","Pedestal Noise Distribution",id,50,-25.,25.,"PedestalNoise");
-        histos->fillProfile(chamberSerial(id),ADC,"hStripPedMEProfile","Wire TimeBin Fired",601,-0.5,600.5,-25,25,"PedestalNoise");
+        histos->fill1DHist(ADC,"hStripPed","Pedestal Noise Distribution",20,-10.,10.,"PedestalNoise");
+        histos->fill1DHistByType(ADC,"hStripPedME","Pedestal Noise Distribution",id,20,-10.,10.,"PedestalNoise");
+        histos->fillProfile(chamberSerial(id),ADC,"hStripPedMEProfile","Wire TimeBin Fired",601,-0.5,600.5,-10,10,"PedestalNoise");
         if (detailedAnalysis){
-          histos->fill1DHistByLayer(ADC,"hStripPedME","Pedestal Noise Distribution",id,50,-25.,25.,"PedestalNoiseByLayer");
+          histos->fill1DHistByLayer(ADC,"hStripPedME","Pedestal Noise Distribution",id,20,-10.,10.,"PedestalNoiseByLayer");
         }
       }
     }
@@ -928,7 +928,7 @@ void CSCValidation::doRecHits(edm::Handle<CSCRecHit2DCollection> recHits, edm::E
 
   if (nRecHits == 0) nRecHits = -1;
 
-  histos->fill1DHist(nRecHits,"hRHnrechits","recHits per Event (all chambers)",151,-0.5,150.5,"recHits");
+  histos->fill1DHist(nRecHits,"hRHnrechits","recHits per Event (all chambers)",401,-0.5,2000.5,"recHits");
 
 }
 
@@ -1323,6 +1323,7 @@ void CSCValidation::doEfficiencies(edm::Handle<CSCWireDigiCollection> wires, edm
   bool allWires[2][4][4][36][6];
   bool allStrips[2][4][4][36][6];
   bool AllRecHits[2][4][4][36][6];
+  std::vector<CSCRecHit2D> TheRecHits[2][4][4][36][6];
   bool AllSegments[2][4][4][36];
   
   //bool MultiSegments[2][4][4][36];
@@ -1385,6 +1386,7 @@ void CSCValidation::doEfficiencies(edm::Handle<CSCWireDigiCollection> wires, edm
     //CSCDetId idrec = (CSCDetId)(*recIt).cscDetId();
     CSCDetId  idrec = (CSCDetId)(*recEffIt).cscDetId();
     AllRecHits[idrec.endcap() -1][idrec.station() -1][idrec.ring() -1][idrec.chamber() -1][idrec.layer() -1] = true;
+    TheRecHits[idrec.endcap() -1][idrec.station() -1][idrec.ring() -1][idrec.chamber() -1][idrec.layer() -1].push_back(idrec);
 
   }
 
@@ -1476,12 +1478,20 @@ void CSCValidation::doEfficiencies(edm::Handle<CSCWireDigiCollection> wires, edm
     }
   }
 
+// // pick a segment only if there are no others in the station
+//   std::vector < std::pair <CSCDetId, CSCSegment> * > theSeg;
+//   if(1==seg_ME2[0]) theSeg.push_back(&theSegments[0]);
+//   if(1==seg_ME3[0]) theSeg.push_back(&theSegments[1]);
+//   if(1==seg_ME2[1]) theSeg.push_back(&theSegments[2]);
+//   if(1==seg_ME3[1]) theSeg.push_back(&theSegments[3]);
+
+// NJA XXX Allow a few hits in a station
 // pick a segment only if there are no others in the station
   std::vector < std::pair <CSCDetId, CSCSegment> * > theSeg;
-  if(1==seg_ME2[0]) theSeg.push_back(&theSegments[0]);
-  if(1==seg_ME3[0]) theSeg.push_back(&theSegments[1]);
-  if(1==seg_ME2[1]) theSeg.push_back(&theSegments[2]);
-  if(1==seg_ME3[1]) theSeg.push_back(&theSegments[3]);
+  if(seg_ME2[0]<10) theSeg.push_back(&theSegments[0]);
+  if(seg_ME3[0]<10) theSeg.push_back(&theSegments[1]);
+  if(seg_ME2[1]<10) theSeg.push_back(&theSegments[2]);
+  if(seg_ME3[1]<10) theSeg.push_back(&theSegments[3]);
 
   // Needed for plots
   // at the end the chamber types will be numbered as 1 to 18 
