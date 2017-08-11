@@ -117,7 +117,7 @@ def run_validation(dataset,globalTag,run,stream,eventContent,num,input_files,**k
     templatecrabFilePath = '%s/%s' % (TEMPLATE_PATH, crab)
     templateHTMLFilePath = '%s/html_template' % TEMPLATE_PATH
     templateRootMacroPath = '%s/makePlots.C' % TEMPLATE_PATH
-    templateRootMacroCSCTFPath = '%s/makePlots_csctf.C' % TEMPLATE_PATH
+    templateRootMacroEMTFPath = '%s/makePlots_emtf.C' % TEMPLATE_PATH
     templateSecondStepPath = '%s/%s' % (TEMPLATE_PATH, proc)
 
     # old HTML stuff, kept for backwards compatibility
@@ -128,10 +128,10 @@ def run_validation(dataset,globalTag,run,stream,eventContent,num,input_files,**k
     macroFileName['All'] = "makePlots.C"
     for trigger in triggers:
         macroFileName[trigger] = "%s_makePlots.C" % trigger
-    macroFileNameCSCTF = "makePlots_csctf.C"
+    macroFileNameEMTF = "makePlots_emtf.C"
     procFileName = "secondStep.py"
     outFileName='valHists_run%s_%s.root' % (run, stream)
-    outCSCTFName='csctfHist_run%s_%s.root' % (run, stream)
+    outEMTFName='emtfHist_run%s_%s.root' % (run, stream)
     Time=time.strftime("%Y/%m/%d %H:%M:%S", time.localtime())
 
     symbol_map_html = { 'RUNNUMBER':run, 'NEVENT':num, "DATASET":dataset, "CMSSWVERSION":Release, "GLOBALTAG":globalTag, "DATE":Time }
@@ -139,7 +139,7 @@ def run_validation(dataset,globalTag,run,stream,eventContent,num,input_files,**k
     symbol_map_macro['All'] = { 'FILENAME':outFileName, 'TEMPLATEDIR':TEMPLATE_PATH }
     for trigger in triggers:
         symbol_map_macro[trigger] = { 'FILENAME':trigger+'_'+outFileName, 'TEMPLATEDIR':TEMPLATE_PATH }
-    symbol_map_csctf = {'FILENAME': outCSCTFName, 'TEMPLATEDIR':TEMPLATE_PATH, 'RUNNUMBER':run}
+    symbol_map_emtf = {'FILENAME': outEMTFName, 'TEMPLATEDIR':TEMPLATE_PATH, 'RUNNUMBER':run}
     symbol_map_proc = { 'TEMPLATEDIR':TEMPLATE_PATH, 'OUTPUTFILE':outFileName, 'RUNNUMBER':run, 'NEWDIR':rundir, 'CFGFILE':cfgFileName, 'STREAM':stream }
     symbol_map_cfg = { 'NEVENT':num, 'GLOBALTAG':globalTag, "OUTFILE":outFileName, 'DATASET':dataset, 'RUNNUMBER':run}
     symbol_map_crab = { 'GLOBALTAG':globalTag, "OUTFILE":outFileName, 'DATASET':dataset, 'RUNNUMBER':run, 'STREAM':stream, 'EVENTCONTENT':eventContent}
@@ -162,7 +162,7 @@ def run_validation(dataset,globalTag,run,stream,eventContent,num,input_files,**k
     replace(symbol_map_macro['All'],templateRootMacroPath, macroFileName['All'])
     for trigger in triggers:
         replace(symbol_map_macro[trigger],templateRootMacroPath, macroFileName[trigger])
-    replace(symbol_map_csctf,templateRootMacroCSCTFPath, macroFileNameCSCTF)
+    replace(symbol_map_emtf,templateRootMacroEMTFPath, macroFileNameEMTF)
     replace(symbol_map_proc,templateSecondStepPath, procFileName, trigger_proc)
     replace(symbol_map_cfg,templatecfgFilePath, cfgFileName, trigger_cfg)
     replace(symbol_map_crab,templatecrabFilePath, crabFileName)
@@ -229,8 +229,8 @@ def run_validation(dataset,globalTag,run,stream,eventContent,num,input_files,**k
             fn = input_files[j*nf].split('/')[-1].split('.')[0]
             cfgFileName='validation_%s_%s_cfg.py' % (run, fn)
             outFileName='valHists_run%s_%s_%s.root' % (run, stream, fn)
-            inCSCTFName='DQM_V0001_YourSubsystem_R000%s.root' % run
-            outCSCTFName='csctfHist_run%s_%s_%s.root' % (run, stream, fn)
+            inEMTFName='DQM_V0001_YourSubsystem_R000%s.root' % run
+            outEMTFName='emtfHist_run%s_%s_%s.root' % (run, stream, fn)
 
             # create the config file
             fileListString = ''
@@ -257,7 +257,7 @@ def run_validation(dataset,globalTag,run,stream,eventContent,num,input_files,**k
             sh.write('cp %s /eos/cms/store/group/dpg_csc/comm_csc/cscval/batch_output/%s/run%s_%s/%s\n' % (outFileName, stream, run, eventContent, outFileName))
             for trigger in triggers:
                 sh.write('cp %s_%s /eos/cms/store/group/dpg_csc/comm_csc/cscval/batch_output/%s/run%s_%s/%s_%s\n' % (trigger, outFileName, stream, run, eventContent, trigger, outFileName))
-            sh.write('cp %s /eos/cms/store/group/dpg_csc/comm_csc/cscval/batch_output/%s/run%s_%s/%s\n' % (inCSCTFName, stream, run, eventContent, outCSCTFName))
+            sh.write('cp %s /eos/cms/store/group/dpg_csc/comm_csc/cscval/batch_output/%s/run%s_%s/%s\n' % (inEMTFName, stream, run, eventContent, outEMTFName))
             sh.write('cp TPEHists_%i.root /eos/cms/store/group/dpg_csc/comm_csc/cscval/batch_output/%s/run%s_%s/TPEHists_%i.root\n' % (j, stream, run, eventContent, j))
             # sh.write('chmod g+w /eos/cms/store/group/dpg_csc/comm_csc/cscval/batch_output/%s/run%s_%s/\n' % (stream, run, eventContent))
             sh.close()
@@ -316,7 +316,7 @@ def process_output(dataset,globalTag,**kwargs):
         tpeOut = 'TPEHists.root'
         valOut = {}
         valOut['All'] = 'valHists_run%s_%s.root' % (run, stream)
-        csctfOut = 'csctfHist_run%s_%s.root' % (run, stream)
+        emtfOut = 'emtfHist_run%s_%s.root' % (run, stream)
         for trigger in triggers:
             valOut[trigger] = '%s_valHists_run%s_%s.root' % (trigger, run, stream)
 
@@ -332,16 +332,16 @@ def process_output(dataset,globalTag,**kwargs):
         tpeFiles = []
         valFiles = {}
         valFiles['All'] = []
-        csctfFiles = []
+        emtfFiles = []
         for trigger in triggers:
             valFiles[trigger] = []
         for file in subprocess.Popen('eos ls %s' % (fileDir), shell=True,stdout=pipe).communicate()[0].splitlines():
-            if file==tpeOut or file==valOut or file==csctfOut: continue
+            if file==tpeOut or file==valOut or file==emtfOut: continue
             if file[0:3]=='TPE': tpeFiles += [file]
             if file[0:3]=='val': valFiles['All'] += [file]
             for trigger in triggers:
                 if file.startswith('%s_val' % trigger): valFiles[trigger] += [file]
-            if file[0:5]=='csctf': csctfFiles += [file]
+            if file[0:4]=='emtf': emtfFiles += [file]
         nFiles = len(valFiles['All'])
         if len(tpeFiles) == 0 or float(nFiles)/len(tpeFiles) < 0.7:
             print "run%s need to be redo as too less file get through" % run
@@ -407,14 +407,14 @@ def process_output(dataset,globalTag,**kwargs):
                     if val==valOut[trigger]: continue # skip previous merge
                     valMergeString += ' %s' % val
                 sh.write(valMergeString+" \n")
-        # if csctfFiles:
-        #     print "Merging csctfHists"
-        #     sh.write("cd %s\n" % fileDir)
-        #     csctfMergeString = 'hadd -f %s' % csctfOut
-        #     for csctf in csctfFiles:
-        #         if csctf==csctfOut: continue # skip previous merge
-        #         csctfMergeString += ' %s' % csctf
-        #     sh.write(csctfMergeString+" \n")
+        if emtfFiles:
+            print "Merging emtfHists"
+            sh.write("cd %s\n" % fileDir)
+            emtfMergeString = 'hadd -f %s' % emtfOut
+            for emtf in emtfFiles:
+                if emtf==emtfOut: continue # skip previous merge
+                emtfMergeString += ' %s' % emtf
+            sh.write(emtfMergeString+" \n")
         sh.write('cd %s\n' % rundir)
         sh.close()
         if not dryRun: subprocess.check_call("LSB_JOB_REPORT_MAIL=N bsub -q 8nh -J %s_%smerge < merge.sh" % (run,stream), shell=True)
@@ -440,7 +440,7 @@ def process_output(dataset,globalTag,**kwargs):
             valOut['All'] = 'valHists_run%s_%s.root' % (run, stream)
             for trigger in triggers:
                 valOut[trigger] = '%s_valHists_run%s_%s.root' % (trigger, run, stream)
-            # csctfOut = 'csctfHist_run%s_%s.root' % (run, stream)
+            emtfOut = 'emtfHist_run%s_%s.root' % (run, stream)
 
             # wait for job to finish then copy over
             print("Waiting on run %s" % run)
@@ -453,7 +453,7 @@ def process_output(dataset,globalTag,**kwargs):
                 valRet = subprocess.call('cp /eos/cms/store/group/dpg_csc/comm_csc/cscval/batch_output/%s/run%s_%s/%s %s' % (stream, run, eventContent, valOut['All'], valOut['All']), shell=True)
                 for trigger in triggers:
                     trigRet = subprocess.call('cp /eos/cms/store/group/dpg_csc/comm_csc/cscval/batch_output/%s/run%s_%s/%s %s' % (stream, run, eventContent, valOut[trigger], valOut[trigger]), shell=True)
-                # subprocess.call('cp /eos/cms/store/group/dpg_csc/comm_csc/cscval/batch_output/%s/run%s_%s/%s %s' % (stream, run, eventContent, csctfOut, csctfOut), shell=True)
+                subprocess.call('cp /eos/cms/store/group/dpg_csc/comm_csc/cscval/batch_output/%s/run%s_%s/%s %s' % (stream, run, eventContent, emtfOut, emtfOut), shell=True)
                 if not valRet and not dryRun: os.system("./secondStep.py")
                 subprocess.call('rm *.root', shell=True)
 
@@ -469,7 +469,7 @@ def process_output(dataset,globalTag,**kwargs):
 def build_runlist():
     Time = time.strftime("%Y/%m/%d %H:%M:%S", time.localtime())
     tstamp = time.strftime("%H%M%S", time.localtime())
-    print "[%s] Building runlist for afs" % Time
+    print >> sys.stderr, "[%s] Building runlist for afs" % Time
     os.system('bash generateRunList.sh /afs/cern.ch/cms/CAF/CMSCOMM/COMM_CSC/CSCVAL/results/results > temp_afs_runlist_%s.json' % tstamp)
     os.system('mv temp_afs_runlist_%s.json /afs/cern.ch/cms/CAF/CMSCOMM/COMM_CSC/CSCVAL/results/js/runlist.json' % tstamp)
     print >> sys.stderr, "[%s] Building runlist for eos" % Time
