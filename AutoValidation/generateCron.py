@@ -29,7 +29,13 @@ def generate(userproxy=''):
         # '/ExpressPhysics/Run2017B-Express-v2/FEVT' : {
         #     'globaltag' : 'auto:run2_data',
         # },
-        '/ExpressPhysics/Run2017C-Express-v1/FEVT' : {
+        #'/ExpressPhysics/Run2017C-Express-v2/FEVT' : {
+        #    'globaltag' : 'auto:run2_data',
+        #},
+        '/ExpressPhysics/Run2017C-Express-v3/FEVT' : {
+            'globaltag' : 'auto:run2_data',
+        },
+        '/ExpressPhysics/Run2017D-Express-v1/FEVT' : {
             'globaltag' : 'auto:run2_data',
         },
         # '/Commissioning/Run2017A-v1/RAW' : {
@@ -47,7 +53,9 @@ def generate(userproxy=''):
         '/Cosmics/Run2017C-v1/RAW' : {
             'globaltag' : 'auto:run2_data',
         },
-
+        '/Cosmics/Run2017D-v1/RAW' : {
+            'globaltag' : 'auto:run2_data',
+        },
         # Run2017 PromptReco
         # '/SingleMuon/Run2017A-v1/RAW' : {
         #     'globaltag' : 'auto:run2_data',
@@ -64,10 +72,15 @@ def generate(userproxy=''):
         '/SingleMuon/Run2017C-v1/RAW' : {
             'globaltag' : 'auto:run2_data',
         },
+        '/SingleMuon/Run2017D-v1/RAW' : {
+            'globaltag' : 'auto:run2_data',
+        },
         '/DoubleMuon/Run2017C-v1/RAW' : {
             'globaltag' : 'auto:run2_data',
         },
-
+        '/DoubleMuon/Run2017D-v1/RAW' : {
+            'globaltag' : 'auto:run2_data',
+        },
         # Run2015D Express v3
         #'/ExpressPhysics/Run2015D-Express-v3/FEVT' : {
         #    'globaltag' : '74X_dataRun2_Express_v1',
@@ -404,9 +417,9 @@ def generate(userproxy=''):
         runMerge = './run_cscval.py %s %s -ro\n' % (dataset, globaltag)
         mergeCommandToWrite = commandString + timeString + runMerge
         acrontabString = '1 3,15 * * * lxplus.cern.ch {0}/src/CSCValidationRunning/AutoValidation/{1}.sh >> {0}/src/CSCValidationRunning/AutoValidation/{1}.log 2>> {0}/src/CSCValidationRunning/AutoValidation/{1}.err\n'.format(CMSSW_BASE,filename)
-        acrontabMergeString = '31 6,18 * * * lxplus.cern.ch {0}/src/CSCValidationRunning/AutoValidation/{1}.sh >> {0}/src/CSCValidationRunning/AutoValidation/{1}.log 2>> {0}/src/CSCValidationRunning/AutoValidation/{1}.err\n'.format(CMSSW_BASE,mergeFilename)
+        acrontabMergeString = '31 7,19 * * * lxplus.cern.ch {0}/src/CSCValidationRunning/AutoValidation/{1}.sh >> {0}/src/CSCValidationRunning/AutoValidation/{1}.log 2>> {0}/src/CSCValidationRunning/AutoValidation/{1}.err\n'.format(CMSSW_BASE,mergeFilename)
         crontabString = '1 3,15 * * * {0}/src/CSCValidationRunning/AutoValidation/{1}.sh >> {0}/src/CSCValidationRunning/AutoValidation/{1}.log 2>> {0}/src/CSCValidationRunning/AutoValidation/{1}.err\n'.format(CMSSW_BASE,filename)
-        crontabMergeString = '31 6,18 * * * {0}/src/CSCValidationRunning/AutoValidation/{1}.sh >> {0}/src/CSCValidationRunning/AutoValidation/{1}.log 2>> {0}/src/CSCValidationRunning/AutoValidation/{1}.err\n'.format(CMSSW_BASE,mergeFilename)
+        crontabMergeString = '31 7,19 * * * {0}/src/CSCValidationRunning/AutoValidation/{1}.sh >> {0}/src/CSCValidationRunning/AutoValidation/{1}.log 2>> {0}/src/CSCValidationRunning/AutoValidation/{1}.err\n'.format(CMSSW_BASE,mergeFilename)
         with open('{0}.sh'.format(filename),'w') as f:
             f.write(commandToWrite)
         with open('{0}.sh'.format(cronName),'a') as f:

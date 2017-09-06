@@ -24,7 +24,7 @@ import errno
 import math
 from dbs.apis.dbsClient import DbsApi
 
-MINRUN = 297720 # test
+MINRUN = 301500 # test
 
 pipe = subprocess.PIPE
 Release = subprocess.Popen('echo $CMSSW_VERSION', shell=True, stdout=pipe).communicate()[0]
