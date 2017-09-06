@@ -1,4 +1,4 @@
-include "TEMPLATEDIR/myFunctions.C"
+#include "TEMPLATEDIR/myFunctions.C"
 
 void makePlots_emtf() {
     
