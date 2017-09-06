@@ -528,6 +528,7 @@ void Draw2DEfficiency(std::string histo, TFile* f1, std::string title, std::stri
   c->SetFillStyle(4000);
   gStyle->SetStatColor(0);
   gStyle->SetTitleFillColor(0);
+  gStyle->SetOptStat(10);
 
   TH2F *num  = (TH2F*)f1->Get(histo.c_str());
   TH2F *denom = (TH2F*)f1->Get("Efficiency/hEffDenominator");
@@ -536,7 +537,7 @@ void Draw2DEfficiency(std::string histo, TFile* f1, std::string title, std::stri
 
   if (num && denom) plot->Divide(num,denom,1.,1.,"B");
 
-  plot->SetStats(kFALSE);
+  //plot->SetStats(kFALSE);
   
   plot->GetYaxis()->SetBinLabel(1,"ME- 4/2"); //jun28
   plot->GetYaxis()->SetBinLabel(2,"ME- 4/1");
@@ -594,10 +595,11 @@ void Draw2DTempPlot(std::string histo, TFile* f1, bool includeME11, std::string 
   c->SetFillStyle(4000);
   gStyle->SetStatColor(0);
   gStyle->SetTitleFillColor(0);
+  gStyle->SetOptStat(10);
 
   TH2I *plot  = (TH2I*)f1->Get(histo.c_str());
 
-  plot->SetStats(kFALSE);
+  //plot->SetStats(kFALSE);
   
   if (!hasLabels) {
     if (includeME11){
@@ -817,7 +819,7 @@ void GlobalPosfromTree(std::string graphname, TFile* f1, int endcap, int station
  gStyle->SetTitleFillColor(0);
  gPad->SetFillColor(4000);
  c->SetFillStyle(4000);
- gStyle->SetOptStat(0);
+ gStyle->SetOptStat(10);
 
  graph1->GetXaxis()->SetLimits(-720,720);
  graph1->GetYaxis()->SetLimits(-720,720);
