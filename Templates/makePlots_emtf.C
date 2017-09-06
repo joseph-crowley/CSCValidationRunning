@@ -32,8 +32,8 @@ void makePlots_emtf() {
 
     //CSC Strips and Wires
     //06.09.2017 - For these "neighboring" hits in overlap of trigger sectors not counted
-    Draw2DTempPlot("DQMData/Run RUNNUMBER/L1T/Run summary/L1TStage2EMTF/CSCInput/cscChamberStripMENeg11a", f1, true, "cscStripm11.png", true);
-    Draw2DTempPlot("DQMData/Run RUNNUMBER/L1T/Run summary/L1TStage2EMTF/CSCInput/cscChamberStripMENeg11b", f1, true, "cscStripm11.png", true);
+    Draw2DTempPlot("DQMData/Run RUNNUMBER/L1T/Run summary/L1TStage2EMTF/CSCInput/cscChamberStripMENeg11a", f1, true, "cscStripm11a.png", true);
+    Draw2DTempPlot("DQMData/Run RUNNUMBER/L1T/Run summary/L1TStage2EMTF/CSCInput/cscChamberStripMENeg11b", f1, true, "cscStripm11b.png", true);
     Draw2DTempPlot("DQMData/Run RUNNUMBER/L1T/Run summary/L1TStage2EMTF/CSCInput/cscChamberStripMENeg12", f1, true, "cscStripm12.png", true);
     Draw2DTempPlot("DQMData/Run RUNNUMBER/L1T/Run summary/L1TStage2EMTF/CSCInput/cscChamberStripMENeg13", f1, true, "cscStripm13.png", true);
     Draw2DTempPlot("DQMData/Run RUNNUMBER/L1T/Run summary/L1TStage2EMTF/CSCInput/cscChamberStripMENeg21", f1, true, "cscStripm21.png", true);
@@ -42,8 +42,8 @@ void makePlots_emtf() {
     Draw2DTempPlot("DQMData/Run RUNNUMBER/L1T/Run summary/L1TStage2EMTF/CSCInput/cscChamberStripMENeg32", f1, true, "cscStripm32.png", true);
     Draw2DTempPlot("DQMData/Run RUNNUMBER/L1T/Run summary/L1TStage2EMTF/CSCInput/cscChamberStripMENeg41", f1, true, "cscStripm41.png", true);
     Draw2DTempPlot("DQMData/Run RUNNUMBER/L1T/Run summary/L1TStage2EMTF/CSCInput/cscChamberStripMENeg42", f1, true, "cscStripm42.png", true);
-    Draw2DTempPlot("DQMData/Run RUNNUMBER/L1T/Run summary/L1TStage2EMTF/CSCInput/cscChamberStripMEPos11a", f1, true, "cscStripp11.png", true);
-    Draw2DTempPlot("DQMData/Run RUNNUMBER/L1T/Run summary/L1TStage2EMTF/CSCInput/cscChamberStripMEPos11b", f1, true, "cscStripp11.png", true);
+    Draw2DTempPlot("DQMData/Run RUNNUMBER/L1T/Run summary/L1TStage2EMTF/CSCInput/cscChamberStripMEPos11a", f1, true, "cscStripp11a.png", true);
+    Draw2DTempPlot("DQMData/Run RUNNUMBER/L1T/Run summary/L1TStage2EMTF/CSCInput/cscChamberStripMEPos11b", f1, true, "cscStripp11b.png", true);
     Draw2DTempPlot("DQMData/Run RUNNUMBER/L1T/Run summary/L1TStage2EMTF/CSCInput/cscChamberStripMEPos12", f1, true, "cscStripp12.png", true);
     Draw2DTempPlot("DQMData/Run RUNNUMBER/L1T/Run summary/L1TStage2EMTF/CSCInput/cscChamberStripMEPos13", f1, true, "cscStripp13.png", true);
     Draw2DTempPlot("DQMData/Run RUNNUMBER/L1T/Run summary/L1TStage2EMTF/CSCInput/cscChamberStripMEPos21", f1, true, "cscStripp21.png", true);
@@ -53,8 +53,8 @@ void makePlots_emtf() {
     Draw2DTempPlot("DQMData/Run RUNNUMBER/L1T/Run summary/L1TStage2EMTF/CSCInput/cscChamberStripMEPos41", f1, true, "cscStripp41.png", true);
     Draw2DTempPlot("DQMData/Run RUNNUMBER/L1T/Run summary/L1TStage2EMTF/CSCInput/cscChamberStripMEPos42", f1, true, "cscStripp42.png", true);
 
-    Draw2DTempPlot("DQMData/Run RUNNUMBER/L1T/Run summary/L1TStage2EMTF/CSCInput/cscChamberWireMENeg11a", f1, true, "cscWirem11.png", true);
-    Draw2DTempPlot("DQMData/Run RUNNUMBER/L1T/Run summary/L1TStage2EMTF/CSCInput/cscChamberWireMENeg11b", f1, true, "cscWirem11.png", true);
+    Draw2DTempPlot("DQMData/Run RUNNUMBER/L1T/Run summary/L1TStage2EMTF/CSCInput/cscChamberWireMENeg11a", f1, true, "cscWirem11a.png", true);
+    Draw2DTempPlot("DQMData/Run RUNNUMBER/L1T/Run summary/L1TStage2EMTF/CSCInput/cscChamberWireMENeg11b", f1, true, "cscWirem11b.png", true);
     Draw2DTempPlot("DQMData/Run RUNNUMBER/L1T/Run summary/L1TStage2EMTF/CSCInput/cscChamberWireMENeg12", f1, true, "cscWirem12.png", true);
     Draw2DTempPlot("DQMData/Run RUNNUMBER/L1T/Run summary/L1TStage2EMTF/CSCInput/cscChamberWireMENeg13", f1, true, "cscWirem13.png", true);
     Draw2DTempPlot("DQMData/Run RUNNUMBER/L1T/Run summary/L1TStage2EMTF/CSCInput/cscChamberWireMENeg21", f1, true, "cscWirem21.png", true);
@@ -63,8 +63,8 @@ void makePlots_emtf() {
     Draw2DTempPlot("DQMData/Run RUNNUMBER/L1T/Run summary/L1TStage2EMTF/CSCInput/cscChamberWireMENeg32", f1, true, "cscWirem32.png", true);
     Draw2DTempPlot("DQMData/Run RUNNUMBER/L1T/Run summary/L1TStage2EMTF/CSCInput/cscChamberWireMENeg41", f1, true, "cscWirem41.png", true);
     Draw2DTempPlot("DQMData/Run RUNNUMBER/L1T/Run summary/L1TStage2EMTF/CSCInput/cscChamberWireMENeg42", f1, true, "cscWirem42.png", true);
-    Draw2DTempPlot("DQMData/Run RUNNUMBER/L1T/Run summary/L1TStage2EMTF/CSCInput/cscChamberWireMEPos11a", f1, true, "cscWirep11.png", true);
-    Draw2DTempPlot("DQMData/Run RUNNUMBER/L1T/Run summary/L1TStage2EMTF/CSCInput/cscChamberWireMEPos11b", f1, true, "cscWirep11.png", true);
+    Draw2DTempPlot("DQMData/Run RUNNUMBER/L1T/Run summary/L1TStage2EMTF/CSCInput/cscChamberWireMEPos11a", f1, true, "cscWirep11a.png", true);
+    Draw2DTempPlot("DQMData/Run RUNNUMBER/L1T/Run summary/L1TStage2EMTF/CSCInput/cscChamberWireMEPos11b", f1, true, "cscWirep11b.png", true);
     Draw2DTempPlot("DQMData/Run RUNNUMBER/L1T/Run summary/L1TStage2EMTF/CSCInput/cscChamberWireMEPos12", f1, true, "cscWirep12.png", true);
     Draw2DTempPlot("DQMData/Run RUNNUMBER/L1T/Run summary/L1TStage2EMTF/CSCInput/cscChamberWireMEPos13", f1, true, "cscWirep13.png", true);
     Draw2DTempPlot("DQMData/Run RUNNUMBER/L1T/Run summary/L1TStage2EMTF/CSCInput/cscChamberWireMEPos21", f1, true, "cscWirep21.png", true);
