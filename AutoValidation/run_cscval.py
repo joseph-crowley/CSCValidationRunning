@@ -473,8 +473,9 @@ def build_runlist():
     os.system('bash generateRunList.sh /afs/cern.ch/cms/CAF/CMSCOMM/COMM_CSC/CSCVAL/results/results > temp_afs_runlist_%s.json' % tstamp)
     os.system('mv temp_afs_runlist_%s.json /afs/cern.ch/cms/CAF/CMSCOMM/COMM_CSC/CSCVAL/results/js/runlist.json' % tstamp)
     print >> sys.stderr, "[%s] Building runlist for eos" % Time
-    # os.system('bash generateRunList.sh > temp_eos_runlist_%s.json' % tstamp)
-    os.system('bash generateRunList.sh > /eos/cms/store/group/dpg_csc/comm_csc/cscval/www/js/runlist.json')
+    os.system('bash generateRunList.sh > temp_eos_runlist_%s.json' % tstamp)
+    os.system('cat temp_eos_runlist_%s.json > /eos/cms/store/group/dpg_csc/comm_csc/cscval/www/js/runlist.json' % tstamp)
+    os.system('rm temp_eos_runlist_%s.json' % tstamp)
     # create last run json
     with open('lastrun.json','w') as file:
         file.write('var lastrun = {\n  "lastrun" : "%s"\n}\n' % Time)
