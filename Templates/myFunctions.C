@@ -822,7 +822,7 @@ void GlobalPosfromTree(std::string graphname, TFile* f1, int endcap, int station
  
  //asking to show the total number of entries for rechit and seg plots
  //i.e. SetOptStat(10), returns 0 entries for some reason
- gStyle->SetOptStat(kFalse);
+ gStyle->SetOptStat(0);
 
  graph1->GetXaxis()->SetLimits(-720,720);
  graph1->GetYaxis()->SetLimits(-720,720);
