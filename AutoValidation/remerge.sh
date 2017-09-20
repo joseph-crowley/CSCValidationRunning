@@ -6,7 +6,8 @@ for ds in ${datasets[@]}; do
     for i in $(ls "$ds"); do
         [[ ! ${i:0:3} == "run" ]] && continue
         j="run${i:4:6}"
-        testfile="$runDir/$j/$ds/Site/PNGS/Efficiency_hSEff.png"
+         testfile="$runDir/$j/$ds/Site/PNGS/Efficiency_hSEff.png"
+        #testfile="$runDir/$j/$ds/Site/PNGS/timeChamberByType-42.png"
         if [ ! -f $testfile ]; then
             # echo rm -r $ds/$i
             # echo rm -r $batchDir/$ds/${j}_RAW
