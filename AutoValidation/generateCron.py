@@ -35,7 +35,7 @@ def generate(userproxy=''):
         #'/ExpressPhysics/Run2017C-Express-v3/FEVT' : {
         #    'globaltag' : 'auto:run2_data',
         #},
-        '/ExpressPhysics/Run2017D-Express-v1/FEVT' : {
+        '/ExpressPhysics/Run2017E-Express-v1/FEVT' : {
             'globaltag' : 'auto:run2_data',
         },
         # '/Commissioning/Run2017A-v1/RAW' : {
@@ -53,7 +53,7 @@ def generate(userproxy=''):
         #'/Cosmics/Run2017C-v1/RAW' : {
         #    'globaltag' : 'auto:run2_data',
         #},
-        '/Cosmics/Run2017D-v1/RAW' : {
+        '/Cosmics/Run2017E-v1/RAW' : {
             'globaltag' : 'auto:run2_data',
         },
         # Run2017 PromptReco
@@ -72,13 +72,13 @@ def generate(userproxy=''):
         #'/SingleMuon/Run2017C-v1/RAW' : {
         #    'globaltag' : 'auto:run2_data',
         #},
-        '/SingleMuon/Run2017D-v1/RAW' : {
+        '/SingleMuon/Run2017E-v1/RAW' : {
             'globaltag' : 'auto:run2_data',
         },
         #'/DoubleMuon/Run2017C-v1/RAW' : {
         #    'globaltag' : 'auto:run2_data',
         #},
-        '/DoubleMuon/Run2017D-v1/RAW' : {
+        '/DoubleMuon/Run2017E-v1/RAW' : {
             'globaltag' : 'auto:run2_data',
         },
         # Run2015D Express v3
