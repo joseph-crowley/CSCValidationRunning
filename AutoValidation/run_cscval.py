@@ -24,7 +24,7 @@ import errno
 import math
 from dbs.apis.dbsClient import DbsApi
 
-MINRUN = 301500 # test
+MINRUN = 303400 # test
 
 pipe = subprocess.PIPE
 Release = subprocess.Popen('echo $CMSSW_VERSION', shell=True, stdout=pipe).communicate()[0]
@@ -336,7 +336,7 @@ def process_output(dataset,globalTag,**kwargs):
         for trigger in triggers:
             valFiles[trigger] = []
         for file in subprocess.Popen('eos ls %s' % (fileDir), shell=True,stdout=pipe).communicate()[0].splitlines():
-            if file==tpeOut or file==valOut or file==emtfOut: continue
+            if file==tpeOut or file==valOut['All'] or file==emtfOut: continue
             if file[0:3]=='TPE': tpeFiles += [file]
             if file[0:3]=='val': valFiles['All'] += [file]
             for trigger in triggers:
@@ -383,22 +383,35 @@ def process_output(dataset,globalTag,**kwargs):
         if valFiles['All']:
             print "Merging valHists"
             sh.write("cd %s\n" % fileDir)
-            valMergeString = 'hadd -f %s' % valOut['All']
-            for val in valFiles['All']:
-                if val==valOut['All']: continue # skip previous merge
-                valMergeString += ' %s' % val
-            sh.write(valMergeString+" > mergeout.txt 2>&1\n")
-            remergeString = '[ ! $? ] && echo "Merge failed, try remerging"\n' # debug
+            remergeString =  '[ ! $? ] && echo "Merge failed, try remerging"\n'
             remergeString += 'failstr=$(grep "hadd exiting" mergeout.txt)\n'
             remergeString += "while [[ $failstr ]]; do\n"
             remergeString += "    badfile=$(echo $failstr | cut -c30-)\n"
             remergeString += "    echo \"Removing bad file $badfile\" >&2\n"
             remergeString += "    rm $badfile\n"
-            remergeString += "    target=$(echo $badfile | cut -d_ -f-3)\n"
-            remergeString += "    hadd -f ${target}.root ${target}_*.root > mergeout.txt 2>&1\n"
+            remergeString += "    $valfiles=${valfile/$badfile/}\n"
+            remergeString += "    hadd -f $target $valfiles > mergeout.txt 2>&1\n"
             remergeString += "    failstr=$(grep \"hadd exiting\" mergeout.txt)\n"
             remergeString += "done\n"
-            sh.write(remergeString)
+
+            finalMergeStr = ""
+            nMerges = nFiles / 500 + 1
+            for imerge in range(0, nMerges):
+                finalMergeStr  += 'tempmerge_valHists_%s.root ' % imerge
+                valfiles = valFiles['All'][imerge*500 : (imerge+1)*500]
+                valMergeString  = 'target=tempmerge_valHists_%s.root\n' % imerge
+                valMergeString += 'valfiles="'
+                for val in valfiles:
+                    valMergeString += ' %s' % val
+                valMergeString += '"\n'
+                valMergeString += 'hadd -f $target $valfiles > mergeout.txt 2>&1\n'
+                sh.write(valMergeString)
+                sh.write(remergeString)
+            if nMerges > 1:
+                sh.write('hadd -f %s %s\n' % (valOut['All'], finalMergeStr))
+                sh.write('rm %s\n' % finalMergeStr)
+            else:
+                sh.write('mv %s %s\n' % (finalMergeStr, valOut['All']))
         for trigger in triggers:
             if valFiles[trigger]:
                 print "Merging %s_valHists" % trigger
