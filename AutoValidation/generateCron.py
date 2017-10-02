@@ -29,12 +29,15 @@ def generate(userproxy=''):
         # '/ExpressPhysics/Run2017B-Express-v2/FEVT' : {
         #     'globaltag' : 'auto:run2_data',
         # },
-        #'/ExpressPhysics/Run2017C-Express-v2/FEVT' : {
+        # '/ExpressPhysics/Run2017C-Express-v2/FEVT' : {
         #    'globaltag' : 'auto:run2_data',
-        #},
-        #'/ExpressPhysics/Run2017C-Express-v3/FEVT' : {
+        # },
+        # '/ExpressPhysics/Run2017C-Express-v3/FEVT' : {
         #    'globaltag' : 'auto:run2_data',
-        #},
+        # },
+        # '/ExpressPhysics/Run2017D-Express-v1/FEVT' : {
+        #     'globaltag' : 'auto:run2_data',
+        # },
         '/ExpressPhysics/Run2017E-Express-v1/FEVT' : {
             'globaltag' : 'auto:run2_data',
         },
@@ -50,9 +53,12 @@ def generate(userproxy=''):
         # '/Cosmics/Run2017B-v1/RAW' : {
         #     'globaltag' : 'auto:run2_data',
         # },
-        #'/Cosmics/Run2017C-v1/RAW' : {
+        # '/Cosmics/Run2017C-v1/RAW' : {
         #    'globaltag' : 'auto:run2_data',
-        #},
+        # },
+        # '/Cosmics/Run2017D-v1/RAW' : {
+        #     'globaltag' : 'auto:run2_data',
+        # },
         '/Cosmics/Run2017E-v1/RAW' : {
             'globaltag' : 'auto:run2_data',
         },
@@ -69,18 +75,25 @@ def generate(userproxy=''):
         # '/DoubleMuon/Run2017B-v1/RAW' : {
         #     'globaltag' : 'auto:run2_data',
         # },
-        #'/SingleMuon/Run2017C-v1/RAW' : {
+        # '/SingleMuon/Run2017C-v1/RAW' : {
         #    'globaltag' : 'auto:run2_data',
-        #},
+        # },
+        # '/DoubleMuon/Run2017C-v1/RAW' : {
+        #    'globaltag' : 'auto:run2_data',
+        # },
+        # '/SingleMuon/Run2017D-v1/RAW' : {
+        #     'globaltag' : 'auto:run2_data',
+        # },
+        # '/DoubleMuon/Run2017D-v1/RAW' : {
+        #     'globaltag' : 'auto:run2_data',
+        # },
         '/SingleMuon/Run2017E-v1/RAW' : {
             'globaltag' : 'auto:run2_data',
         },
-        #'/DoubleMuon/Run2017C-v1/RAW' : {
-        #    'globaltag' : 'auto:run2_data',
-        #},
         '/DoubleMuon/Run2017E-v1/RAW' : {
             'globaltag' : 'auto:run2_data',
         },
+
         # Run2015D Express v3
         #'/ExpressPhysics/Run2015D-Express-v3/FEVT' : {
         #    'globaltag' : '74X_dataRun2_Express_v1',

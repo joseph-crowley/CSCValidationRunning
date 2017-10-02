@@ -2,13 +2,19 @@ runDir=${1:-/eos/cms/store/group/dpg_csc/comm_csc/cscval/www/results}
 batchDir=${2:-/eos/cms/store/group/dpg_csc/comm_csc/cscval/batch_output}
 
 declare -a datasets=(ExpressPhysics DoubleMuon SingleMuon Cosmics)
+declare -a datasets=(DoubleMuon SingleMuon)
 for ds in ${datasets[@]}; do
     for i in $(ls "$ds"); do
         [[ ! ${i:0:3} == "run" ]] && continue
         j="run${i:4:6}"
-         testfile="$runDir/$j/$ds/Site/PNGS/Efficiency_hSEff.png"
-        #testfile="$runDir/$j/$ds/Site/PNGS/timeChamberByType-42.png"
-        if [ ! -f $testfile ]; then
+        # testfile="$runDir/$j/$ds/Site/PNGS/Efficiency_hSEff.png"
+        # testfile="$runDir/$j/$ds/Site/PNGS/timeChamberByType-42.png"
+        # testfile="$runDir/$j/$ds/Site/PNGS/Sglobal_station_+2.png"
+        # testfile="$runDir/$j/$ds/Site/PNGS/cscLCTOccupancy.png"
+        # if [ ! -f $testfile ]; then
+        nPlots=`ls -l $runDir/$j/$ds/Site/PNGS/ | wc -l`
+        echo Checked $runDir/$j/$ds/Site/PNGS/ , has $nPlots
+        if [ $nPlots != 448 ]; then
             # echo rm -r $ds/$i
             # echo rm -r $batchDir/$ds/${j}_RAW
             # rm -r $ds/$i
@@ -18,7 +24,26 @@ for ds in ${datasets[@]}; do
             [[ $njob == "job_0" ]] || [[ $njob == "" ]] && continue
             echo $ds/$i/out.txt
             # cat $ds/$i/out.txt
-            echo "job_0" > $ds/$i/out.txt
+            # echo "job_0" > $ds/$i/out.txt
+        fi
+    done
+done
+
+declare -a datasets=(DoubleMuon SingleMuon)
+for ds in ${datasets[@]}; do
+    for i in $(ls "$ds"); do
+        [[ ! ${i:0:3} == "run" ]] && continue
+        j="run${i:4:6}_RAW"
+        auxfile="$batchDir/$ds/$j/core.*"
+        if auxfile=`ls $auxfile 2> /dev/null` ; then
+            echo rm $auxfile
+            # rm $auxfile
+            [ -f $ds/$i/out.txt ] || continue
+            njob=`cat $ds/$i/out.txt`
+            [[ $njob == "job_0" ]] || [[ $njob == "" ]] && continue
+            echo $ds/$i/out.txt
+            # cat $ds/$i/out.txt
+            # echo "job_0" > $ds/$i/out.txt
         fi
     done
 done            

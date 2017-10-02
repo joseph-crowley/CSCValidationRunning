@@ -5,10 +5,10 @@ Repository to setup the latest version of CSCValidation to be run automatically 
 
 Setup a new release
 ```
-cmsrel CMSSW_9_2_6 # or current CMSSW version
-cd CMSSW_9_2_6/src
+cmsrel CMSSW_9_3_1 # or current CMSSW version
+cd CMSSW_9_3_1/src
 cmsenv
-git cms-init
+git cms-init # make sure this happens before checking out this repository
 ```
 
 Clone the repository
@@ -56,3 +56,12 @@ The script checks the local folder for what runs have been processed: `AutoValid
 ## Templates
 
 Templates for producing the scripts to submit to bash are found in the [Templates](Templates) directory.
+
+
+## Some tips
+
+* To make the stderr output files `*_merge.err` more readable, one can put the following line
+```
+Root.ErrorIgnoreLevel: Error
+```
+into their `~/.rootrc` , to suppress the infinite "TCanvas::Print" statments.
