@@ -335,6 +335,9 @@ def process_output(dataset,globalTag,**kwargs):
         emtfFiles = []
         for trigger in triggers:
             valFiles[trigger] = []
+
+        # clean fileDir for files under 512 first, but skip TPEHists
+        subprocess.check_call("find . -name \"%s/*run*.root\" -size -1b -delete\n" % fileDir)
         for file in subprocess.Popen('eos ls %s' % (fileDir), shell=True,stdout=pipe).communicate()[0].splitlines():
             if file==tpeOut or file==valOut['All'] or file==emtfOut: continue
             if file[0:3]=='TPE': tpeFiles += [file]
@@ -363,6 +366,19 @@ def process_output(dataset,globalTag,**kwargs):
         with open(fname,'w') as file:
             file.write(processedString)
 
+        # prepare remerge string
+        remergeString =  '[ ! $? ] && echo "Merge failed, try remerging"\n'
+        remergeString += 'failstr=$(grep "hadd exiting" mergeout.txt)\n'
+        remergeString += 'while [[ $failstr ]]; do\n'
+        remergeString += '    badfile=$(echo $failstr | cut -c30-)\n'
+        remergeString += '    echo "Removing bad file $badfile" >&2\n'
+        remergeString += '    rm $badfile\n'
+        remergeString += '    $valfiles=${valfile/$badfile/}\n'
+        remergeString += '    mv mergeout.txt $baseDir/mergeout_$(date +"%H%M%S").txt\n'
+        remergeString += '    hadd -f $target $valfiles > mergeout.txt 2>&1\n'
+        remergeString += '    failstr=$(grep "hadd exiting" mergeout.txt)\n'
+        remergeString += 'done\n'
+
         # and merge them
         sh = open("merge.sh", "w")
         sh.write("#!/bin/bash \n")
@@ -373,27 +389,11 @@ def process_output(dataset,globalTag,**kwargs):
         sh.write("cd "+rundir+" \n")
         sh.write("eval `scramv1 runtime -sh` \n")
         sh.write("cd - \n")
-        if tpeFiles:
-            print "Merging tpeHists"
-            sh.write("cd %s\n" % fileDir)
-            tpeMergeString = 'hadd -f %s' % tpeOut
-            for tpe in tpeFiles:
-                tpeMergeString += ' %s' % tpe
-            sh.write(tpeMergeString+" \n")
+        sh.write("baseDir=%s\n" % rundir)
+        sh.write("cd %s\n" % fileDir)
         if valFiles['All']:
             print "Merging valHists"
             sh.write("cd %s\n" % fileDir)
-            remergeString =  '[ ! $? ] && echo "Merge failed, try remerging"\n'
-            remergeString += 'failstr=$(grep "hadd exiting" mergeout.txt)\n'
-            remergeString += "while [[ $failstr ]]; do\n"
-            remergeString += "    badfile=$(echo $failstr | cut -c30-)\n"
-            remergeString += "    echo \"Removing bad file $badfile\" >&2\n"
-            remergeString += "    rm $badfile\n"
-            remergeString += "    $valfiles=${valfile/$badfile/}\n"
-            remergeString += "    hadd -f $target $valfiles > mergeout.txt 2>&1\n"
-            remergeString += "    failstr=$(grep \"hadd exiting\" mergeout.txt)\n"
-            remergeString += "done\n"
-
             finalMergeStr = ""
             nMerges = nFiles / 500 + 1
             for imerge in range(0, nMerges):
@@ -405,29 +405,37 @@ def process_output(dataset,globalTag,**kwargs):
                     valMergeString += ' %s' % val
                 valMergeString += '"\n'
                 valMergeString += 'hadd -f $target $valfiles > mergeout.txt 2>&1\n'
-                sh.write(valMergeString)
+                sh.write(valMergeString+'\n')
                 sh.write(remergeString)
             if nMerges > 1:
                 sh.write('hadd -f %s %s\n' % (valOut['All'], finalMergeStr))
                 sh.write('rm %s\n' % finalMergeStr)
             else:
                 sh.write('mv %s %s\n' % (finalMergeStr, valOut['All']))
-        for trigger in triggers:
-            if valFiles[trigger]:
-                print "Merging %s_valHists" % trigger
-                valMergeString = 'hadd -f %s' % valOut[trigger]
-                for val in valFiles[trigger]:
-                    if val==valOut[trigger]: continue # skip previous merge
-                    valMergeString += ' %s' % val
-                sh.write(valMergeString+" \n")
         if emtfFiles:
             print "Merging emtfHists"
-            sh.write("cd %s\n" % fileDir)
-            emtfMergeString = 'hadd -f %s' % emtfOut
+            emtfMergeString  = 'target=%s\n' % emtfOut
+            emtfMergeString += 'valfiles="'
             for emtf in emtfFiles:
-                if emtf==emtfOut: continue # skip previous merge
                 emtfMergeString += ' %s' % emtf
-            sh.write(emtfMergeString+" \n")
+            emtfMergeString += '"\n'
+            emtfMergeString += 'hadd -f $target $valfiles > mergeout.txt 2>&1\n'
+            sh.write(emtfMergeString+'\n')
+            sh.write(remergeString)
+        # for trigger in triggers:
+        #     if valFiles[trigger]:
+        #         print "Merging %s_valHists" % trigger
+        #         valMergeString = 'hadd -f %s' % valOut[trigger]
+        #         for val in valFiles[trigger]:
+        #             if val==valOut[trigger]: continue # skip previous merge
+        #             valMergeString += ' %s' % val
+        #         sh.write(valMergeString+" \n")
+        # if tpeFiles:
+        #     print "Merging tpeHists"
+        #     sh.write("cd %s\n" % fileDir)
+        #     tpeMergeString = 'hadd -f %s TPEHists_*.root' % tpeOut
+        #     sh.write(tpeMergeString+" \n")
+
         sh.write('cd %s\n' % rundir)
         sh.close()
         if not dryRun: subprocess.check_call("LSB_JOB_REPORT_MAIL=N bsub -q 8nh -J %s_%smerge < merge.sh" % (run,stream), shell=True)
@@ -462,7 +470,7 @@ def process_output(dataset,globalTag,**kwargs):
                 remainingJobs += [[run,job]]
             else:
                 print("Run %s merged" % run) 
-                subprocess.call('cp /eos/cms/store/group/dpg_csc/comm_csc/cscval/batch_output/%s/run%s_%s/%s %s' % (stream, run, eventContent, tpeOut, tpeOut), shell=True)
+                # subprocess.call('cp /eos/cms/store/group/dpg_csc/comm_csc/cscval/batch_output/%s/run%s_%s/%s %s' % (stream, run, eventContent, tpeOut, tpeOut), shell=True)
                 valRet = subprocess.call('cp /eos/cms/store/group/dpg_csc/comm_csc/cscval/batch_output/%s/run%s_%s/%s %s' % (stream, run, eventContent, valOut['All'], valOut['All']), shell=True)
                 for trigger in triggers:
                     trigRet = subprocess.call('cp /eos/cms/store/group/dpg_csc/comm_csc/cscval/batch_output/%s/run%s_%s/%s %s' % (stream, run, eventContent, valOut[trigger], valOut[trigger]), shell=True)
