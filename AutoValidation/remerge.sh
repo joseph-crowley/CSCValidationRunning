@@ -25,6 +25,9 @@ for ds in ${datasets[@]}; do
             echo $ds/$i/out.txt
             # cat $ds/$i/out.txt
             # echo "job_0" > $ds/$i/out.txt
+        else
+            echo Run $ds/$i is finished, removing all config files 
+            # rm -r $ds/$i LSFJOB* *_cfg.py
         fi
     done
 done

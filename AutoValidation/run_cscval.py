@@ -337,7 +337,7 @@ def process_output(dataset,globalTag,**kwargs):
             valFiles[trigger] = []
 
         # clean fileDir for files under 512 first, but skip TPEHists
-        subprocess.check_call("find . -name \"%s/*run*.root\" -size -1b -delete\n" % fileDir)
+        subprocess.check_call("find %s -name \"*run*.root\" -size -1b -delete" % fileDir, shell=True)
         for file in subprocess.Popen('eos ls %s' % (fileDir), shell=True,stdout=pipe).communicate()[0].splitlines():
             if file==tpeOut or file==valOut['All'] or file==emtfOut: continue
             if file[0:3]=='TPE': tpeFiles += [file]
