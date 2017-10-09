@@ -13,6 +13,7 @@ for ds in ${datasets[@]}; do
         # testfile="$runDir/$j/$ds/Site/PNGS/Sglobal_station_+2.png"
         # testfile="$runDir/$j/$ds/Site/PNGS/cscLCTOccupancy.png"
         # if [ ! -f $testfile ]; then
+        [[ ! -d $runDir/$j/$ds/Site/ ]] && continue
         nPlots=`ls -l $runDir/$j/$ds/Site/PNGS/ | wc -l`
         # echo Checked $runDir/$j/$ds/Site/PNGS/ , has $nPlots
         if [ $nPlots != 448 ]; then
@@ -25,7 +26,7 @@ for ds in ${datasets[@]}; do
             [[ $njob == "job_0" ]] || [[ $njob == "" ]] && continue
             echo To redo $ds/$i, has $nPlots plots
             # cat $ds/$i/out.txt
-            echo "job_0" > $ds/$i/out.txt
+            # echo "job_0" > $ds/$i/out.txt
         # else
             # echo Run $ds/$i is finished, removing all config files 
             # rm -r $ds/$i LSFJOB* *_cfg.py
@@ -42,10 +43,10 @@ for ds in ${datasets[@]}; do
         auxfile="$batchDir/$ds/$j/core.*"
         if auxfile=`ls $auxfile 2> /dev/null` ; then
             echo rm $j/core.*
-            rm $auxfile
+            # rm $auxfile
             echo $ds/$i/out.txt
             # cat $ds/$i/out.txt
-            echo "job_0" > $ds/$i/out.txt
+            # echo "job_0" > $ds/$i/out.txt
         fi
     done
 done            

@@ -370,7 +370,7 @@ def process_output(dataset,globalTag,**kwargs):
         finalMergeStr = ""
         nMerges = nFiles / 500 + 1
         for imerge in range(0, nMerges):
-
+            if imerge > 0: continue # temporary to see what happens
             # prepare remerge string
             remergeString =  '[[ ! $? ]] && echo "Merge failed, try remerging"\n'
             remergeString += 'failstr=$(grep "hadd exiting" mergeout_%s.txt)\n' % imerge
@@ -383,7 +383,8 @@ def process_output(dataset,globalTag,**kwargs):
             remergeString += '    hadd -k -n 100 -f $target $valfiles > mergeout_%s.txt 2>&1\n' % imerge
             remergeString += '    failstr=$(grep "hadd exiting" mergeout_%s.txt)\n' % imerge
             remergeString += 'done\n'
-            remergeString += 'failstr=$(grep "error reading all" mergeout_%s.txt)\n' % imerge
+            # remergeString += 'failstr=$(grep "error reading all" mergeout_%s.txt)\n' % imerge
+            remergeString += 'failstr=$(grep "error" mergeout_%s.txt)\n' % imerge
             remergeString += '[[ ! -z $failstr ]] && mv mergeout_{}.txt $baseDir/mergefailed_$(date +"%H%M%S").txt\n'.format(imerge)
 
             sh = open("merge_%s.sh" % imerge, "w")
@@ -414,7 +415,7 @@ def process_output(dataset,globalTag,**kwargs):
                 print "Merging emtfHists"
                 sh.write("cd %s\n" % fileDir)
                 emtffiles = emtfFiles[imerge*500 : (imerge+1)*500]
-                emtfMergeString  = 'target=merge_emtfHist_%s\n' % imerge
+                emtfMergeString  = 'target=merge_emtfHist_%s.root\n' % imerge
                 emtfMergeString += 'valfiles="'
                 for emtf in emtffiles:
                     emtfMergeString += ' %s' % emtf
@@ -424,8 +425,8 @@ def process_output(dataset,globalTag,**kwargs):
                 sh.write(emtfMergeString+'\n')
                 sh.write(remergeString)
 
-            sh.write('cp merge_valHists_?.root $baseDir\n')
-            sh.write('cp merge_emtfHist_?.root $baseDir\n')
+            sh.write('cp merge_valHists_%s.root $baseDir\n' % imerge)
+            sh.write('cp merge_emtfHist_%s.root $baseDir\n' % imerge)
             sh.write('cd %s\n' % rundir)
             sh.close()
             if not dryRun: subprocess.check_call("LSB_JOB_REPORT_MAIL=N bsub -q 8nh -J %s_%smerge_%s < merge_%s.sh" % (run,stream,imerge,imerge), shell=True)
@@ -460,10 +461,13 @@ def process_output(dataset,globalTag,**kwargs):
                 time.sleep(20)
                 remainingJobs += [[run,job,nMerges]]
             else:
+                if dryRun: continue
                 print("Run %s merged" % run) 
-                valRet = subprocess.call('hadd -k -f %s merge_valHists_?.root' % (valOut['All']), shell=True)
-                subprocess.call('hadd -k -f %s merge_emtfHist_?.root' % (emtfOut), shell=True)
-                if not valRet and not dryRun: os.system("./secondStep.py")
+                # valRet = subprocess.check_call('hadd -k -f %s merge_valHists_?.root' % (valOut['All']), shell=True)
+                # subprocess.check_call('hadd -k -f %s merge_emtfHist_?.root' % (emtfOut), shell=True)
+                valRet = subprocess.call('mv merge_valHists_0.root %s' % (valOut['All']), shell=True) # temporary
+                subprocess.call('mv merge_emtfHist_0.root %s' % (emtfOut), shell=True) # temporary
+                if not valRet: os.system("./secondStep.py")
                 subprocess.call('rm *.root', shell=True)
 
             os.chdir('../')
