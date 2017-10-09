@@ -290,6 +290,14 @@ private:
   TH2F *hEffDenominator;
   TH2F *hSensitiveAreaEvt;
 
+  TH1F *hSSTETight;
+  TH1F *hRHSTETight;
+  TH2F *hSSTE2Tight;
+  TH2F *hRHSTE2Tight;
+  TH2F *hStripSTE2Tight;
+  TH2F *hWireSTE2Tight;
+  TH2F *hEffDenominatorTight;
+
   // occupancy
   TH2I *hOWires;
   TH2I *hOStrips;

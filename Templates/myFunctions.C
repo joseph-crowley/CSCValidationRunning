@@ -532,6 +532,8 @@ void Draw2DEfficiency(std::string histo, TFile* f1, std::string title, std::stri
 
   TH2F *num  = (TH2F*)f1->Get(histo.c_str());
   TH2F *denom = (TH2F*)f1->Get("Efficiency/hEffDenominator");
+  if (histo.find("Tight") != std::string::npos)
+    denom = (TH2F*)f1->Get("Efficiency/hEffDenominatorTight");
 
   TH2F *plot = new TH2F("plot",title.c_str(),36,0.5,36.5,20,0.5,20.5);
 

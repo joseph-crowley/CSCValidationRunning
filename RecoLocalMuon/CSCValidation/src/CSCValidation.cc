@@ -120,7 +120,16 @@ CSCValidation::CSCValidation(const ParameterSet& pset){
   hWireEff2 = new TH2F("hWireEff2","wire Efficiency 2D",nChambers,nCH_min,nCh_max, nTypes, nT_min, nT_max);
 
   hSensitiveAreaEvt = new TH2F("hSensitiveAreaEvt","events in sensitive area",nChambers,nCH_min,nCh_max, nTypes, nT_min, nT_max);
+
+  hSSTETight = new TH1F("hSSTETight","hSSTE Tight",40,0,40);
+  hRHSTETight = new TH1F("hRHSTETight","hRHSTE Tight",40,0,40);
  
+  hSSTE2Tight = new TH2F("hSSTE2Tight","hSSTE2 Tight",nChambers,nCH_min,nCh_max, nTypes, nT_min, nT_max);
+  hRHSTE2Tight = new TH2F("hRHSTE2Tight","hRHSTE2 Tight",nChambers,nCH_min,nCh_max, nTypes, nT_min, nT_max);
+  hStripSTE2Tight = new TH2F("hStripSTE2Tight","hStripSTE2 Tight",nChambers,nCH_min,nCh_max, nTypes, nT_min, nT_max);
+  hWireSTE2Tight = new TH2F("hWireSTE2Tight","hWireSTE2 Tight",nChambers,nCH_min,nCh_max, nTypes, nT_min, nT_max);
+  hEffDenominatorTight = new TH2F("hEffDenominatorTight","hEffDenominator Tight",nChambers,nCH_min,nCh_max, nTypes, nT_min, nT_max);
+
   // setup trees to hold global position data for rechits and segments
   if (writeTreeToFile) histos->setupTrees();
 
@@ -139,6 +148,14 @@ CSCValidation::~CSCValidation(){
   hRHEff2->Divide(hRHSTE2,hEffDenominator,1.,1.,"B");
   hStripEff2->Divide(hStripSTE2,hEffDenominator,1.,1.,"B");
   hWireEff2->Divide(hWireSTE2,hEffDenominator,1.,1.,"B");
+
+  histos->insertPlot(hRHSTETight,"hRHSTETight","Efficiency");
+  histos->insertPlot(hSSTETight,"hSSTETight","Efficiency");
+  histos->insertPlot(hStripSTE2Tight,"hStripSTE2Tight","Efficiency");
+  histos->insertPlot(hWireSTE2Tight,"hWireSTE2Tight","Efficiency");
+  histos->insertPlot(hRHSTE2Tight,"hRHSTE2Tight","Efficiency");
+  histos->insertPlot(hSSTE2Tight,"hSSTE2Tight","Efficiency");
+  histos->insertPlot(hEffDenominatorTight,"hEffDenominatorTight","Efficiency");
 
   histos->insertPlot(hRHSTE,"hRHSTE","Efficiency");
   histos->insertPlot(hSSTE,"hSSTE","Efficiency");
@@ -1455,10 +1472,12 @@ void CSCValidation::doEfficiencies(edm::Handle<CSCWireDigiCollection> wires, edm
               //---- Efficient segment evenents
               //hSSTE->AddBinContent(bin);
               hSSTE->Fill(bin-0.5);
+              if(NumberOfLayers>3) hSSTETight->Fill(bin-0.5);
             }
             //---- All segment events (normalization)
             //hSSTE->AddBinContent(20+bin);
             hSSTE->Fill(20+bin-0.5);
+            if(NumberOfLayers>3) hSSTETight->Fill(20+bin-0.5);
             //}
           }
           if(AllSegments[iE][iS][iR][iC]){
@@ -1466,10 +1485,12 @@ void CSCValidation::doEfficiencies(edm::Handle<CSCWireDigiCollection> wires, edm
               //---- Efficient rechit events
               //hRHSTE->AddBinContent(bin);
               hRHSTE->Fill(bin-0.5);
+              hRHSTETight->Fill(bin-0.5);
             }
             //---- All rechit events (normalization)
             //hRHSTE->AddBinContent(20+bin);
             hRHSTE->Fill(20+bin-0.5);
+            if(NumberOfLayers>3) hRHSTETight->Fill(20+bin-0.5);
           }
         }
       }
@@ -1575,11 +1596,13 @@ void CSCValidation::doEfficiencies(edm::Handle<CSCWireDigiCollection> wires, edm
 	    //std::cout<<" verticalScale = "<<verticalScale<<" chType = "<<cscchamber->specs()->chamberTypeName()<<std::endl;
 	    // this is the denominator forr all efficiencies
 	    hEffDenominator->Fill(float(cscchamber->id().chamber()),verticalScale);
+            if(nRHLayers>3) hEffDenominatorTight->Fill(float(cscchamber->id().chamber()),verticalScale);
 	    // Segment efficiency
 	    if(AllSegments[cscchamber->id().endcap()-1]
 	       [cscchamber->id().station()-1]
 	       [cscchamber->id().ring()-1][cscchamber->id().chamber()-1]){
 	      hSSTE2->Fill(float(cscchamber->id().chamber()),float(verticalScale));
+              if(nRHLayers>3) hSSTE2Tight->Fill(float(cscchamber->id().chamber()),float(verticalScale));
 	    }
 	  
 	    for(int iL =0;iL<6;++iL){
@@ -1590,6 +1613,7 @@ void CSCValidation::doEfficiencies(edm::Handle<CSCWireDigiCollection> wires, edm
 		 [cscchamber->id().station()-1]
 		 [cscchamber->id().ring()-1][cscchamber->id().chamber()-1][iL]){
 		hRHSTE2->Fill(float(cscchamber->id().chamber()),float(verticalScale),weight);
+		if(nRHLayers>3) hRHSTE2Tight->Fill(float(cscchamber->id().chamber()),float(verticalScale),weight);
 	      }
               if (useDigis){
 	        // Wire efficiency
@@ -1598,6 +1622,7 @@ void CSCValidation::doEfficiencies(edm::Handle<CSCWireDigiCollection> wires, edm
 		  [cscchamber->id().ring()-1][cscchamber->id().chamber()-1][iL]){
 		  // one shold account for the weight in the efficiency...
 	 	  hWireSTE2->Fill(float(cscchamber->id().chamber()),float(verticalScale),weight);
+	 	  if(nRHLayers>3) hWireSTE2Tight->Fill(float(cscchamber->id().chamber()),float(verticalScale),weight);
 	        }
 	        // Strip efficiency
 	        if(allStrips[cscchamber->id().endcap()-1]
@@ -1605,6 +1630,7 @@ void CSCValidation::doEfficiencies(edm::Handle<CSCWireDigiCollection> wires, edm
 		  [cscchamber->id().ring()-1][cscchamber->id().chamber()-1][iL]){
 		  // one shold account for the weight in the efficiency...
 		  hStripSTE2->Fill(float(cscchamber->id().chamber()),float(verticalScale),weight);
+		  if(nRHLayers>3) hStripSTE2Tight->Fill(float(cscchamber->id().chamber()),float(verticalScale),weight);
 	        }
               }
 	    }

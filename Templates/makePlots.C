@@ -296,6 +296,12 @@ void makePlots() {
   //Draw2DTempPlot("Efficiency/hSensitiveAreaEvt", f1, false, "Efficiency_hEvts2.png");
   Draw2DEfficiency("Efficiency/hSensitiveAreaEvt", f1, "Events in Sensitive Area", "Efficiency_hEvts2.png");
   
+  makeEffGif("Efficiency/hRHSTETight", f1, "RecHit Efficiecy Tight", "Efficiency_hRHEff_tight.png");
+  makeEffGif("Efficiency/hSSTETight", f1, "Segment Efficiecy Tight", "Efficiency_hSEff_tight.png");
+  Draw2DEfficiency("Efficiency/hRHSTE2Tight", f1, "RecHit Efficiency 2D Tight", "Efficiency_hRHEff2_tight.png");
+  Draw2DEfficiency("Efficiency/hSSTE2Tight", f1, "Segment Efficiency 2D Tight", "Efficiency_hSEff2_tight.png");
+  Draw2DEfficiency("Efficiency/hWireSTE2Tight", f1, "Wire Efficiency 2D Tight", "Efficiency_hWireEff2_tight.png");
+  Draw2DEfficiency("Efficiency/hStripSTE2Tight", f1, "Strip Efficiency 2D Tight", "Efficiency_hStripEff2_tight.png");
   
   //Draw2DTempPlot2("Efficiency/hRHSTE2", f1, true, "Efficiency_hRHEff2.png");
   //Draw2DTempPlot2("Efficiency/hSSTE2", f1, true, "Efficiency_hSEff2.png");

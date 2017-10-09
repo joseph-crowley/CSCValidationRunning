@@ -16,7 +16,7 @@ for ds in ${datasets[@]}; do
         [[ ! -d $runDir/$j/$ds/Site/ ]] && continue
         nPlots=`ls -l $runDir/$j/$ds/Site/PNGS/ | wc -l`
         # echo Checked $runDir/$j/$ds/Site/PNGS/ , has $nPlots
-        if [ $nPlots != 448 ]; then
+        if [[ $nPlots -lt 448 ]]; then
             # echo rm -r $ds/$i
             # echo rm -r $batchDir/$ds/${j}_RAW
             # rm -r $ds/$i
