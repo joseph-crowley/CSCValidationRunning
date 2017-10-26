@@ -44,6 +44,10 @@ BATCH_PATH = '/eos/cms/store/group/dpg_csc/comm_csc/cscval/batch_output'
 #####################
 ##### Utilities #####
 #####################
+def fix_stream(dataset):
+    _,stream,version,_ = dataset.split("/")
+    return stream+version.replace("_","")
+
 def python_mkdir(dir):
     '''A function to make a unix directory as well as subdirectories'''
     try:
@@ -86,6 +90,7 @@ def run_validation(dataset,globalTag,run,stream,eventContent,num,input_files,**k
     os.chdir(rundir)
     
     # open appropriate config and crab submit files
+    if "GEN" in eventContent: eventContent = "RAW"
     paramMap = {
         'RECO' : {
             'digis': False,
@@ -280,6 +285,7 @@ def process_output(dataset,globalTag,**kwargs):
     triggers = kwargs.pop('triggers',[])
     dryRun = kwargs.pop('dryRun',False)
     [filler, stream, version, eventContent] = dataset.split('/')
+    if "GEN" in dataset: stream = fix_stream(dataset)
     os.chdir(stream)
 
     runCrab = False
@@ -516,6 +522,7 @@ def process_dataset(dataset,globalTag,**kwargs):
 
     # get stream info
     [filler, stream, version, eventContent] = dataset.split('/')
+    if "GEN" in dataset: stream = fix_stream(dataset)
 
     # setup working directory for stream
     python_mkdir(stream)
@@ -565,12 +572,14 @@ def process_dataset(dataset,globalTag,**kwargs):
         fileRunMap = {}
         eventRunMap = {}
         files = dbsclient.listFiles(dataset=dataset, run_num=updatedRuns, validFileOnly=1, detail=True)
+        if "GEN" in dataset: updatedRuns = [1]
         for run in updatedRuns:
             eventRunMap[run] = sum([f['event_count'] for f in files if f['run_num']==run])
             fileRunMap[run] = [f['logical_file_name'] for f in files if f['run_num']==run]
 
 
         runsToUpdate = [run for run in updatedRuns if fileRunMap[run] and eventRunMap[run]>25000]
+        if "GEN" in dataset: runsToUpdate = [run for run in updatedRuns if fileRunMap[run]]
 
         print 'Runs to update:'
         for run in runsToUpdate:
