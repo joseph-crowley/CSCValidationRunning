@@ -88,7 +88,7 @@ def run_validation(dataset,globalTag,run,stream,eventContent,num,input_files,**k
     rundir = 'run_%s' % run
     python_mkdir(rundir)
     os.chdir(rundir)
-    
+
     # open appropriate config and crab submit files
     if "GEN" in eventContent: eventContent = "RAW"
     paramMap = {
@@ -104,7 +104,7 @@ def run_validation(dataset,globalTag,run,stream,eventContent,num,input_files,**k
             'digis': True,
             'standalone': False,
         },
-    } 
+    }
     # TODO: eventually add options for custom configs
     if paramMap[eventContent]['digis']:
         cfg  = 'cfg_yesDigis_%s_template' % eventContent
@@ -219,7 +219,7 @@ def run_validation(dataset,globalTag,run,stream,eventContent,num,input_files,**k
             procFiles = file.readlines()
         procFiles = [x.rstrip() for x in procFiles]
 
-        for j in range(numJobs):
+        for j in range(min(600,numJobs)):
             doJob = force
             for f in input_files[j*nf:j*nf+nf]:
                 if f not in procFiles:
@@ -298,7 +298,7 @@ def process_output(dataset,globalTag,**kwargs):
         # go to working area
         if runCrab:
             [type, runStr, runEventContent] = job.split('_')
-        else: 
+        else:
             [runStr,runEventContent] = job.split('_')
         run = runStr[3:]
         if runN:
@@ -363,7 +363,7 @@ def process_output(dataset,globalTag,**kwargs):
             oldProcessedString = file.readline().rstrip()
 
         if not force:
-            if oldProcessedString == processedString: 
+            if oldProcessedString == processedString:
                 os.chdir('../')
                 continue
 
@@ -373,10 +373,10 @@ def process_output(dataset,globalTag,**kwargs):
             file.write(processedString)
 
         # and merge them
-        finalMergeStr = ""
-        nMerges = nFiles / 500 + 1
+        maxJobSize = 300
+        nMerges = nFiles / maxJobSize + 1
         for imerge in range(0, nMerges):
-            if imerge > 0: continue # temporary to see what happens
+            if imerge > 1: continue
             # prepare remerge string
             remergeString =  '[[ ! $? ]] && echo "Merge failed, try remerging"\n'
             remergeString += 'failstr=$(grep "hadd exiting" mergeout_%s.txt)\n' % imerge
@@ -393,49 +393,59 @@ def process_output(dataset,globalTag,**kwargs):
             remergeString += 'failstr=$(grep "error" mergeout_%s.txt)\n' % imerge
             remergeString += '[[ ! -z $failstr ]] && mv mergeout_{}.txt $baseDir/mergefailed_$(date +"%H%M%S").txt\n'.format(imerge)
 
-            sh = open("merge_%s.sh" % imerge, "w")
-            sh.write("#!/bin/bash \n")
-            sh.write("aklog \n")
-            sh.write('source /afs/cern.ch/cms/cmsset_default.sh \n')
+            mergeScriptStr  = "#!/bin/bash \n"
+            mergeScriptStr += "aklog \n"
+            mergeScriptStr += 'source /afs/cern.ch/cms/cmsset_default.sh \n'
             rundir = subprocess.Popen("pwd", shell=True,stdout=pipe).communicate()[0]
             rundir = rundir.rstrip("\n")
-            sh.write("cd "+rundir+" \n")
-            sh.write("eval `scramv1 runtime -sh` \n")
-            sh.write("cd - \n")
-            sh.write("baseDir=%s\n" % rundir)
-            sh.write("cd %s\n" % fileDir)
+            mergeScriptStr += "cd "+rundir+" \n"
+            mergeScriptStr += "eval `scramv1 runtime -sh` \n"
+            mergeScriptStr += "cd - \n"
+            mergeScriptStr += "baseDir=%s\n" % rundir
+            mergeScriptStr += "cd %s\n" % fileDir
+
+            sh = open("merge_val_%s.sh" % imerge, "w")
+            sh.write(mergeScriptStr)
             if valFiles['All']:
                 print "Merging valHists"
                 sh.write("cd %s\n" % fileDir)
-                valfiles = valFiles['All'][imerge*500 : (imerge+1)*500]
+                valfiles = valFiles['All'][imerge*maxJobSize : (imerge+1)*maxJobSize]
                 valMergeString  = 'target=merge_valHists_%s.root\n' % imerge
                 valMergeString += 'valfiles="'
                 for val in valfiles:
                     valMergeString += ' %s' % val
                 valMergeString += '"\n'
-                valMergeString += 'hadd -k -n 100 -f $target $valfiles > mergeout_%s.txt 2>&1\n' % imerge
-                valMergeString += 'mv mergeout_{}.txt $baseDir/mergeout_$(date +"%H%M%S").txt\n'.format(imerge)
+                valMergeString += 'hadd -k -n 200 -cachesize 3g -f $target $valfiles > mergeout_%s.txt 2>&1\n' % imerge
+                # valMergeString += 'root -l -b -q replaceTreeWithGraphs.C"(\\"$target\\")" >> mergeout_%s.txt\n' % imerge
                 sh.write(valMergeString+'\n')
                 sh.write(remergeString)
+                sh.write('mv mergeout_{}.txt $baseDir/mergeout_$(date +"%H%M%S").txt\n'.format(imerge))
+
+            sh.write('cp merge_valHists_%s.root $baseDir\n' % imerge)
+            sh.write('cd %s\n' % rundir)
+            sh.close()
+            if not dryRun: subprocess.check_call("LSB_JOB_REPORT_MAIL=N bsub -R \"pool>3000\" -q 8nh -J %s_%smerge_%s < merge_val_%s.sh" % (run,stream,imerge,imerge), shell=True)
+
+            sh = open("merge_emtf_%s.sh" % imerge, "w")
+            sh.write(mergeScriptStr)
             if emtfFiles:
                 print "Merging emtfHists"
                 sh.write("cd %s\n" % fileDir)
-                emtffiles = emtfFiles[imerge*500 : (imerge+1)*500]
+                emtffiles = emtfFiles[imerge*maxJobSize : (imerge+1)*maxJobSize]
                 emtfMergeString  = 'target=merge_emtfHist_%s.root\n' % imerge
                 emtfMergeString += 'valfiles="'
                 for emtf in emtffiles:
                     emtfMergeString += ' %s' % emtf
                 emtfMergeString += '"\n'
-                emtfMergeString += 'hadd -k -n 100 -f $target $valfiles > mergeout_%s.txt 2>&1\n' % imerge
-                emtfMergeString += 'mv mergeout_{}.txt $baseDir/mergeout_$(date +"%H%M%S").txt\n'.format(imerge)
+                emtfMergeString += 'hadd -k -n 200 -cachesize 1g -f $target $valfiles > mergeout_emtf_%s.txt 2>&1\n' % imerge
                 sh.write(emtfMergeString+'\n')
-                sh.write(remergeString)
+                # sh.write(remergeString)
+                sh.write('mv mergeout_emtf_{}.txt $baseDir/mergeout_emtf_$(date +"%H%M%S").txt\n'.format(imerge))
 
-            sh.write('cp merge_valHists_%s.root $baseDir\n' % imerge)
             sh.write('cp merge_emtfHist_%s.root $baseDir\n' % imerge)
             sh.write('cd %s\n' % rundir)
             sh.close()
-            if not dryRun: subprocess.check_call("LSB_JOB_REPORT_MAIL=N bsub -q 8nh -J %s_%smerge_%s < merge_%s.sh" % (run,stream,imerge,imerge), shell=True)
+            if not dryRun: subprocess.check_call("LSB_JOB_REPORT_MAIL=N bsub -R \"pool>3000\" -q 8nh -J %s_%smerge_emtf_%s < merge_emtf_%s.sh" % (run,stream,imerge,imerge), shell=True)
 
         runsToPlot += [[run,job,nMerges]]
 
@@ -468,21 +478,23 @@ def process_output(dataset,globalTag,**kwargs):
                 remainingJobs += [[run,job,nMerges]]
             else:
                 if dryRun: continue
-                print("Run %s merged" % run) 
-                # valRet = subprocess.check_call('hadd -k -f %s merge_valHists_?.root' % (valOut['All']), shell=True)
-                # subprocess.check_call('hadd -k -f %s merge_emtfHist_?.root' % (emtfOut), shell=True)
-                valRet = subprocess.call('mv merge_valHists_0.root %s' % (valOut['All']), shell=True) # temporary
-                subprocess.call('mv merge_emtfHist_0.root %s' % (emtfOut), shell=True) # temporary
+                print("Run %s merged" % run)
+                valRet = subprocess.call('hadd -k -f %s `ls merge_valHists_*.root` ' % (valOut['All']), shell=True)
+                subprocess.call('hadd -k -f %s `ls merge_emtfHist_*.root` ' % (emtfOut), shell=True)
+                # valRet = subprocess.call('mv merge_valHists_0.root %s' % (valOut['All']), shell=True) # temporary
+                # subprocess.call('mv merge_emtfHist_0.root %s' % (emtfOut), shell=True) # temporary
+                if valRet:
+                    valRet = subprocess.call('mv merge_valHists_0.root %s' % (valOut['All']), shell=True) # temporary
                 if not valRet: os.system("./secondStep.py")
                 subprocess.call('rm *.root', shell=True)
 
             os.chdir('../')
-        
+
     os.chdir('../')
 
     if updateRunlist and not force:
         build_runlist()
-        
+
     return 0
 
 def build_runlist():
@@ -501,7 +513,7 @@ def build_runlist():
     os.system('cat lastrun.json > /eos/cms/store/group/dpg_csc/comm_csc/cscval/www/js/lastrun.json')
     os.system('mv lastrun.json /afs/cern.ch/cms/CAF/CMSCOMM/COMM_CSC/CSCVAL/results/js/')
     return 0
-    
+
 
 def process_dataset(dataset,globalTag,**kwargs):
     '''
@@ -602,7 +614,7 @@ def process_dataset(dataset,globalTag,**kwargs):
 def parse_command_line(argv):
     parser = argparse.ArgumentParser(description="Run CSCValidation")
 
-    
+
     parser.add_argument('dataset', type=str, help='Select dataset (defines stream and event content)')
     parser.add_argument('globalTag', type=str, help='Define GlobalTag')
     parser.add_argument('-rn', '--runNumber', type=int, default=0, help='Process a specific run (defaults to all runs).')
@@ -612,6 +624,7 @@ def parse_command_line(argv):
     parser.add_argument('-dr', '--dryRun', action='store_true',help='Don\'t submit, just create the objects')
     parser.add_argument('-f','--force', action='store_true', help='Force a recipe (even if already processed).')
     parser.add_argument('-t','--triggers', nargs='*', help='Optionally run on additional triggers.')
+    parser.add_argument('-mj','--maxJobSize', type=int, default=500, help='Optionally run on additional triggers.')
 
     args = parser.parse_args(argv)
     return args
@@ -624,7 +637,7 @@ def main(argv=None):
     if not args.triggers: args.triggers = []
 
     ds = args.dataset.split('/')
-    if len(ds) != 4: 
+    if len(ds) != 4:
         print 'Invalid dataset. Argument should be in the form of a DAS query (/*/*/*).'
         return 0
 
@@ -640,7 +653,7 @@ def main(argv=None):
     #    return 0
 
     process_dataset(args.dataset, args.globalTag, run=args.runNumber, force=args.force,triggers=args.triggers,dryRun=args.dryRun)
-    
+
     return 0
 
 if __name__ == "__main__":
