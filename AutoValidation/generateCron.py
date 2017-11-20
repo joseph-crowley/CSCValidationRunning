@@ -93,10 +93,16 @@ def generate(userproxy=''):
         # '/DoubleMuon/Run2017E-v1/RAW' : {
         #     'globaltag' : 'auto:run2_data',
         # },
-        '/SingleMuon/Run2017F-v1/RAW' : {
+        # '/SingleMuon/Run2017F-v1/RAW' : {
+        #     'globaltag' : 'auto:run2_data',
+        # },
+        # '/DoubleMuon/Run2017F-v1/RAW' : {
+        #     'globaltag' : 'auto:run2_data',
+        # },
+        '/SingleMuon/Run2017G-v1/RAW' : {
             'globaltag' : 'auto:run2_data',
         },
-        '/DoubleMuon/Run2017F-v1/RAW' : {
+        '/DoubleMuon/Run2017G-v1/RAW' : {
             'globaltag' : 'auto:run2_data',
         },
 
