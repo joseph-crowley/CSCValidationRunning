@@ -29,6 +29,23 @@ void makePlots_emtf() {
     //From EMTFTrackCollection
     Draw2DTempPlot("DQMData/Run RUNNUMBER/L1T/Run summary/L1TStage2EMTF/emtfTrackOccupancy", f1, true, "emtfTrackOccupancies.png", true);
     Draw2DTempPlot("DQMData/Run RUNNUMBER/L1T/Run summary/L1TStage2EMTF/emtfTrackBX", f1, true, "emtfBx.png", true);
+   
+    //Introduced in CMSSW_10_0_0_pre3
+    Draw2DTempPlot("DQMData/Run RUNNUMBER/L1T/Run summary/L1TStage2EMTF/cscDQMOccupancy", f1, true, "cscDQMOccupancy.png", true);
+    //New timing plots --
+    Draw2DTempPlot("DQMData/Run RUNNUMBER/L1T/Run summary/L1TStage2EMTF/Timing/cscLCTTimingBX0", f1, true, "cscLCTTimingBX0.png", true);
+    Draw2DTempPlot("DQMData/Run RUNNUMBER/L1T/Run summary/L1TStage2EMTF/Timing/cscLCTTimingFracBX0", f1, true, "cscLCTTimingFracBX0.png", true);
+    Draw2DTempPlot("DQMData/Run RUNNUMBER/L1T/Run summary/L1TStage2EMTF/Timing/cscLCTTimingBXNeg1", f1, true, "cscLCTTimingBXNeg1.png", true);
+    Draw2DTempPlot("DQMData/Run RUNNUMBER/L1T/Run summary/L1TStage2EMTF/Timing/cscLCTTimingFracBXNeg1", f1, true, "cscLCTTimingFracBXNeg1.png", true);
+    Draw2DTempPlot("DQMData/Run RUNNUMBER/L1T/Run summary/L1TStage2EMTF/Timing/cscLCTTimingBXNeg2", f1, true, "cscLCTTimingBXNeg2.png", true);
+    Draw2DTempPlot("DQMData/Run RUNNUMBER/L1T/Run summary/L1TStage2EMTF/Timing/cscLCTTimingFracBXNeg2", f1, true, "cscLCTTimingFracBXNeg2.png", true);
+    Draw2DTempPlot("DQMData/Run RUNNUMBER/L1T/Run summary/L1TStage2EMTF/Timing/cscLCTTimingBXPos1", f1, true, "cscLCTTimingBXPos1.png", true);
+    Draw2DTempPlot("DQMData/Run RUNNUMBER/L1T/Run summary/L1TStage2EMTF/Timing/cscLCTTimingFracBXPos1", f1, true, "cscLCTTimingFracBXPos1.png", true);
+    Draw2DTempPlot("DQMData/Run RUNNUMBER/L1T/Run summary/L1TStage2EMTF/Timing/cscLCTTimingBXPos2", f1, true, "cscLCTTimingBXPos2.png", true);
+    Draw2DTempPlot("DQMData/Run RUNNUMBER/L1T/Run summary/L1TStage2EMTF/Timing/cscLCTTimingFracBXPos2", f1, true, "cscLCTTimingFracBXPos2.png", true);
+    
+
+    
 
     //CSC Strips and Wires
     //06.09.2017 - For these "neighboring" hits in overlap of trigger sectors not counted

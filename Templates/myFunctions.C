@@ -843,6 +843,80 @@ void GlobalPosfromTree(std::string graphname, TFile* f1, int endcap, int station
 
 } // end GlobalPosfromTree
 
+void GlobalPosfromChain(std::string graphname, TChain* ch1, int endcap, int station, std::string type, std::string savename, const int maxNumPoints = 10'000'000) {
+
+  struct posRecord {
+    int endcap;
+    int station;
+    int ring;
+    int chamber;
+    int layer;
+    float localx;
+    float localy;
+    float globalx;
+    float globaly;
+  } points;
+
+  if (type == "rechit")
+    ch1->SetBranchAddress("rHpos", &points);
+  else if (type == "segment")
+    ch1->SetBranchAddress("segpos", &points);
+
+  int n1 = ch1->GetEntries();
+  const int nevents1 = TMath::Min(n1, maxNumPoints);
+  TVectorF globx1(nevents1);
+  TVectorF globy1(nevents1);
+  int nstation1 = 0;
+  const int num_of_rings = 4;
+  const int num_of_chambers = 36;
+  int nchamber1[num_of_rings][num_of_chambers];
+  for (int i=0; i<num_of_rings; i++){
+    for (int j=0; j<num_of_chambers; j++){
+      nchamber1[i][j] = 0;
+    }
+  }
+
+  for (int i=0; i<nevents1; i++) {
+    ch1->GetEntry(i);
+    if (points.station == station && points.endcap == endcap){
+      globx1[nstation1] = points.globalx;
+      globy1[nstation1] = points.globaly;
+      nstation1++;
+      nchamber1[points.ring-1][points.chamber-1]++;
+    }
+  }
+
+  TCanvas *c = new TCanvas("c","my canvas",1);
+  c->SetCanvasSize(700,700);
+  gStyle->SetPalette(1,0);
+  gStyle->SetTitleW(0.9);
+  gStyle->SetTitleH(0.1);
+  gStyle->SetStatColor(0);
+  gStyle->SetTitleFillColor(0);
+  gPad->SetFillColor(4000);
+  c->SetFillStyle(4000);
+
+  //asking to show the total number of entries for rechit and seg plots
+  //i.e. SetOptStat(10), returns 0 entries for some reason
+  gStyle->SetOptStat(0);
+
+  TGraph *graph1 = new TGraph(globx1,globy1);
+  std::string name1 = graphname;
+  graph1->GetXaxis()->SetLimits(-720,720);
+  graph1->GetYaxis()->SetLimits(-720,720);
+  graph1->GetXaxis()->SetRangeUser(-720,720);
+  graph1->GetYaxis()->SetRangeUser(-720,720);
+
+  graph1->SetTitle(name1.c_str());
+  graph1->UseCurrentStyle();
+  graph1->Draw("AP");
+
+  drawColoredChamberLines(station,nchamber1);
+
+  c->Print(savename.c_str(),"png");
+
+} // end GlobalPosfromChain
+
 void drawChamberLines(int station){
 
   gStyle->SetLineWidth(2);

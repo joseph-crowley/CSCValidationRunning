@@ -13,6 +13,7 @@ from ROOT import TFile
 curtime = time.strftime("[%Y/%m/%d %H:%M:%S]", time.localtime())
 print >> sys.stderr, curtime, "Start making plots for run RUNNUMBER"
 os.system("root -l -q -b makePlots.C")
+os.system("root -l -q -b makeGraphs.C")
 os.system("root -l -q -b makePlots_emtf.C")
 #os.system("root -l -q -b TPEHists.root ../../templates/makePlots_emulator2.C")
 #os.system("root -l -q -b TPEHists.root ../../templates/plot_new.C >bad_TPE_chambers.txt") 
