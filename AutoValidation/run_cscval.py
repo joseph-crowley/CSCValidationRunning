@@ -379,10 +379,10 @@ def process_output(dataset,globalTag,**kwargs):
             file.write(processedString)
 
         # and merge them
-        maxJobSize = 600
+        maxJobSize = 400
         nMerges = nFiles / maxJobSize + 1
         for imerge in range(0, nMerges):
-            if imerge > 1: continue      # effectively set maximum files to 1*maxJobSize
+            if imerge > 1: continue      # effectively set maximum files to 2*maxJobSize
             # prepare remerge string
             remergeString =  '[[ ! $? ]] && echo "Merge failed, try remerging"\n'
             remergeString += 'failstr=$(grep "hadd exiting" mergeout_%s.txt)\n' % imerge
@@ -392,7 +392,7 @@ def process_output(dataset,globalTag,**kwargs):
             remergeString += '    rm $badfile\n'
             remergeString += '    $valfiles=${valfile/$badfile/}\n'
             remergeString += '    mv mergeout_{}.txt $baseDir/mergeout_$(date +"%H%M%S").txt\n'.format(imerge)
-            remergeString += '    hadd -T -k -j -n 100 -f $target $valfiles > mergeout_%s.txt 2>&1\n' % imerge
+            remergeString += '    hadd -T -k -n 100 -f $target $valfiles > mergeout_%s.txt 2>&1\n' % imerge
             remergeString += '    failstr=$(grep "hadd exiting" mergeout_%s.txt)\n' % imerge
             remergeString += 'done\n'
             # remergeString += 'failstr=$(grep "error reading all" mergeout_%s.txt)\n' % imerge
@@ -421,7 +421,7 @@ def process_output(dataset,globalTag,**kwargs):
                 for val in valfiles:
                     valMergeString += ' %s' % val
                 valMergeString += '"\n'
-                valMergeString += 'hadd -T -k -j -n 300 -f $target $valfiles > mergeout_%s.txt 2>&1\n' % imerge
+                valMergeString += 'hadd -T -k -j 4 -f $target $valfiles > mergeout_%s.txt 2>&1\n' % imerge
                 # valMergeString += 'root -l -b -q replaceTreeWithGraphs.C"(\\"$target\\")" >> mergeout_%s.txt\n' % imerge
                 sh.write(valMergeString+'\n')
                 sh.write(remergeString)
@@ -443,7 +443,7 @@ def process_output(dataset,globalTag,**kwargs):
                 for emtf in emtffiles:
                     emtfMergeString += ' %s' % emtf
                 emtfMergeString += '"\n'
-                emtfMergeString += 'hadd -T -k -j -n 300 -f $target $valfiles > mergeout_emtf_%s.txt 2>&1\n' % imerge
+                emtfMergeString += 'hadd -T -k -j 4 -f $target $valfiles > mergeout_emtf_%s.txt 2>&1\n' % imerge
                 sh.write(emtfMergeString+'\n')
                 # sh.write(remergeString)
                 sh.write('mv mergeout_emtf_{}.txt $baseDir/mergeout_emtf_$(date +"%H%M%S").txt\n'.format(imerge))
@@ -485,12 +485,11 @@ def process_output(dataset,globalTag,**kwargs):
             else:
                 if dryRun: continue
                 print("Run %s merged" % run)
-                valRet = subprocess.call('hadd -T -k -j 8 -f %s `ls merge_valHists_*.root` ' % (valOut['All']), shell=True)
-                subprocess.call('hadd -T -k -j 8 -f %s `ls merge_emtfHist_*.root` ' % (emtfOut), shell=True)
+                valRet = subprocess.call('hadd -k -f %s `ls merge_valHists_*.root` ' % (valOut['All']), shell=True)
+                subprocess.call('hadd -k -f %s `ls merge_emtfHist_*.root` ' % (emtfOut), shell=True)
                 # valRet = subprocess.call('mv merge_valHists_0.root %s' % (valOut['All']), shell=True) # temporary
                 # subprocess.call('mv merge_emtfHist_0.root %s' % (emtfOut), shell=True) # temporary
-                if valRet:
-                    valRet = subprocess.call('mv merge_valHists_0.root %s' % (valOut['All']), shell=True) # temporary
+                if valRet: valRet = subprocess.call('mv merge_valHists_0.root %s' % (valOut['All']), shell=True) # temporary
                 if not valRet: os.system("./secondStep.py")
                 subprocess.call('rm *.root', shell=True)
 
