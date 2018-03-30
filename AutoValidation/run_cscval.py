@@ -122,6 +122,7 @@ def run_validation(dataset,globalTag,run,stream,eventContent,num,input_files,**k
     templatecrabFilePath = '%s/%s' % (TEMPLATE_PATH, crab)
     templateHTMLFilePath = '%s/html_template' % TEMPLATE_PATH
     templateRootMacroPath = '%s/makePlots.C' % TEMPLATE_PATH
+    templateGraphMacroPath = '%s/makeGraphs.C' % TEMPLATE_PATH
     templateRootMacroEMTFPath = '%s/makePlots_emtf.C' % TEMPLATE_PATH
     templateSecondStepPath = '%s/%s' % (TEMPLATE_PATH, proc)
 
@@ -131,17 +132,21 @@ def run_validation(dataset,globalTag,run,stream,eventContent,num,input_files,**k
     htmlFileName = "Summary.html"
     macroFileName = {}
     macroFileName['All'] = "makePlots.C"
+    macroFileName['Graph'] = "makeGraphs.C"
     for trigger in triggers:
         macroFileName[trigger] = "%s_makePlots.C" % trigger
     macroFileNameEMTF = "makePlots_emtf.C"
     procFileName = "secondStep.py"
-    outFileName='valHists_run%s_%s.root' % (run, stream)
+    outFilePrefix='valHists_run%s_%s' % (run, stream)
+    outFileName='%s.root' % (outFilePrefix)
     outEMTFName='emtfHist_run%s_%s.root' % (run, stream)
+    outputPath = '%s/%s/run%s_%s' % (BATCH_PATH, stream, run, eventContent)
     Time=time.strftime("%Y/%m/%d %H:%M:%S", time.localtime())
 
     symbol_map_html = { 'RUNNUMBER':run, 'NEVENT':num, "DATASET":dataset, "CMSSWVERSION":Release, "GLOBALTAG":globalTag, "DATE":Time }
     symbol_map_macro = {}
     symbol_map_macro['All'] = { 'FILENAME':outFileName, 'TEMPLATEDIR':TEMPLATE_PATH }
+    symbol_map_macro['Graph'] = { 'INPUTDIR':outputPath, 'FILEPREFIX':outFilePrefix, 'TEMPLATEDIR':TEMPLATE_PATH }
     for trigger in triggers:
         symbol_map_macro[trigger] = { 'FILENAME':trigger+'_'+outFileName, 'TEMPLATEDIR':TEMPLATE_PATH }
     symbol_map_emtf = {'FILENAME': outEMTFName, 'TEMPLATEDIR':TEMPLATE_PATH, 'RUNNUMBER':run}
@@ -165,6 +170,7 @@ def run_validation(dataset,globalTag,run,stream,eventContent,num,input_files,**k
 
     replace(symbol_map_html,templateHTMLFilePath, htmlFileName)
     replace(symbol_map_macro['All'],templateRootMacroPath, macroFileName['All'])
+    replace(symbol_map_macro['Graph'],templateGraphMacroPath, macroFileName['Graph'])
     for trigger in triggers:
         replace(symbol_map_macro[trigger],templateRootMacroPath, macroFileName[trigger])
     replace(symbol_map_emtf,templateRootMacroEMTFPath, macroFileNameEMTF)
@@ -373,10 +379,10 @@ def process_output(dataset,globalTag,**kwargs):
             file.write(processedString)
 
         # and merge them
-        maxJobSize = 300
+        maxJobSize = 600
         nMerges = nFiles / maxJobSize + 1
         for imerge in range(0, nMerges):
-            if imerge > 1: continue
+            if imerge > 1: continue      # effectively set maximum files to 1*maxJobSize
             # prepare remerge string
             remergeString =  '[[ ! $? ]] && echo "Merge failed, try remerging"\n'
             remergeString += 'failstr=$(grep "hadd exiting" mergeout_%s.txt)\n' % imerge
@@ -386,7 +392,7 @@ def process_output(dataset,globalTag,**kwargs):
             remergeString += '    rm $badfile\n'
             remergeString += '    $valfiles=${valfile/$badfile/}\n'
             remergeString += '    mv mergeout_{}.txt $baseDir/mergeout_$(date +"%H%M%S").txt\n'.format(imerge)
-            remergeString += '    hadd -k -n 100 -f $target $valfiles > mergeout_%s.txt 2>&1\n' % imerge
+            remergeString += '    hadd -T -k -j -n 100 -f $target $valfiles > mergeout_%s.txt 2>&1\n' % imerge
             remergeString += '    failstr=$(grep "hadd exiting" mergeout_%s.txt)\n' % imerge
             remergeString += 'done\n'
             # remergeString += 'failstr=$(grep "error reading all" mergeout_%s.txt)\n' % imerge
@@ -415,7 +421,7 @@ def process_output(dataset,globalTag,**kwargs):
                 for val in valfiles:
                     valMergeString += ' %s' % val
                 valMergeString += '"\n'
-                valMergeString += 'hadd -k -n 200 -cachesize 3g -f $target $valfiles > mergeout_%s.txt 2>&1\n' % imerge
+                valMergeString += 'hadd -T -k -j -n 300 -f $target $valfiles > mergeout_%s.txt 2>&1\n' % imerge
                 # valMergeString += 'root -l -b -q replaceTreeWithGraphs.C"(\\"$target\\")" >> mergeout_%s.txt\n' % imerge
                 sh.write(valMergeString+'\n')
                 sh.write(remergeString)
@@ -437,7 +443,7 @@ def process_output(dataset,globalTag,**kwargs):
                 for emtf in emtffiles:
                     emtfMergeString += ' %s' % emtf
                 emtfMergeString += '"\n'
-                emtfMergeString += 'hadd -k -n 200 -cachesize 1g -f $target $valfiles > mergeout_emtf_%s.txt 2>&1\n' % imerge
+                emtfMergeString += 'hadd -T -k -j -n 300 -f $target $valfiles > mergeout_emtf_%s.txt 2>&1\n' % imerge
                 sh.write(emtfMergeString+'\n')
                 # sh.write(remergeString)
                 sh.write('mv mergeout_emtf_{}.txt $baseDir/mergeout_emtf_$(date +"%H%M%S").txt\n'.format(imerge))
@@ -479,8 +485,8 @@ def process_output(dataset,globalTag,**kwargs):
             else:
                 if dryRun: continue
                 print("Run %s merged" % run)
-                valRet = subprocess.call('hadd -k -f %s `ls merge_valHists_*.root` ' % (valOut['All']), shell=True)
-                subprocess.call('hadd -k -f %s `ls merge_emtfHist_*.root` ' % (emtfOut), shell=True)
+                valRet = subprocess.call('hadd -T -k -j 8 -f %s `ls merge_valHists_*.root` ' % (valOut['All']), shell=True)
+                subprocess.call('hadd -T -k -j 8 -f %s `ls merge_emtfHist_*.root` ' % (emtfOut), shell=True)
                 # valRet = subprocess.call('mv merge_valHists_0.root %s' % (valOut['All']), shell=True) # temporary
                 # subprocess.call('mv merge_emtfHist_0.root %s' % (emtfOut), shell=True) # temporary
                 if valRet:

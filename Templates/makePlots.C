@@ -11,7 +11,7 @@ void makePlots() {
   extern void make1DPlot(std::string histoname, TFile* f1, std::string histotitle, int statoption, std::string savename);
   extern void make1DPlot(std::string histoname, TFile* f1, std::string histotitle, std::string xtitle, std::string ytitle, int statoption, std::string savename);
   extern void printEmptyChambers(std::string histoname, std::string oname, TFile* f);
-  extern void GlobalPosfromTree(std::string graphname, TFile* f1, int endcap, int station, std::string type, std::string savename);
+  // extern void GlobalPosfromTree(std::string graphname, TFile* f1, int endcap, int station, std::string type, std::string savename);
   extern void NikolaiPlots(TFile *f_in, int flag);
   extern void makeEffGif(std::string histoname, TFile* f1, std::string histotitle, std::string savename);
   extern void Draw2DEfficiency(std::string histo, TFile* f1, std::string title, std::string savename);
@@ -258,26 +258,6 @@ void makePlots() {
   make1DPlot("STAMuons/trNormChi2",f1,"Normalized Chi^2 of STA Muons", 111110,"STAMuons_chi2.png");
   make1DPlot("STAMuons/trP",f1,"Momentum of STA Muons", 111110,"STAMuons_p.png");
   make1DPlot("STAMuons/trPT",f1,"Transverse Momentum of STA Muons", 111110,"STAMuons_pt.png");
-
-
-  //Make global position graphs from trees
-  GlobalPosfromTree("Global recHit positions ME+1", f1, 1, 1, "rechit", "rHglobal_station_+1.png");
-  GlobalPosfromTree("Global recHit positions ME+2", f1, 1, 2, "rechit", "rHglobal_station_+2.png");
-  GlobalPosfromTree("Global recHit positions ME+3", f1, 1, 3, "rechit", "rHglobal_station_+3.png");
-  GlobalPosfromTree("Global recHit positions ME+4", f1, 1, 4, "rechit", "rHglobal_station_+4.png");
-  GlobalPosfromTree("Global recHit positions ME-1", f1, 2, 1, "rechit", "rHglobal_station_-1.png");
-  GlobalPosfromTree("Global recHit positions ME-2", f1, 2, 2, "rechit", "rHglobal_station_-2.png");
-  GlobalPosfromTree("Global recHit positions ME-3", f1, 2, 3, "rechit", "rHglobal_station_-3.png");
-  GlobalPosfromTree("Global recHit positions ME-4", f1, 2, 4, "rechit", "rHglobal_station_-4.png");
-  GlobalPosfromTree("Global Segment positions ME+1", f1, 1, 1, "segment", "Sglobal_station_+1.png");
-  GlobalPosfromTree("Global Segment positions ME+2", f1, 1, 2, "segment", "Sglobal_station_+2.png");
-  GlobalPosfromTree("Global Segment positions ME+3", f1, 1, 3, "segment", "Sglobal_station_+3.png");
-  GlobalPosfromTree("Global Segment positions ME+4", f1, 1, 4, "segment", "Sglobal_station_+4.png");
-  GlobalPosfromTree("Global Segment positions ME-1", f1, 2, 1, "segment", "Sglobal_station_-1.png");
-  GlobalPosfromTree("Global Segment positions ME-2", f1, 2, 2, "segment", "Sglobal_station_-2.png");
-  GlobalPosfromTree("Global Segment positions ME-3", f1, 2, 3, "segment", "Sglobal_station_-3.png");
-  GlobalPosfromTree("Global Segment positions ME-4", f1, 2, 4, "segment", "Sglobal_station_-4.png");
-
 
   //Nikolai's plots
   NikolaiPlots(f1,1);
