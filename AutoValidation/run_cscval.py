@@ -24,7 +24,9 @@ import errno
 import math
 from dbs.apis.dbsClient import DbsApi
 
-MINRUN = 302029 # test
+# No run numbers below MINRUN will be processed
+# This parameter is ignored if the "-rn" option is specified on the command line
+MINRUN = 300576 # test
 
 pipe = subprocess.PIPE
 Release = subprocess.Popen('echo $CMSSW_VERSION', shell=True, stdout=pipe).communicate()[0]
@@ -76,7 +78,7 @@ def replace(map, fileInName, fileOutName, moreLines=[]):
 ################################
 ##### Validation functions #####
 ################################
-def run_validation(dataset,globalTag,run,stream,eventContent,num,input_files,**kwargs):
+def run_validation(dataset,globalTag,run,maxJobNum,stream,eventContent,num,input_files,**kwargs):
     '''
     The primary validation routine. Creates working directories and submits jobs to crab.
     '''
@@ -84,12 +86,15 @@ def run_validation(dataset,globalTag,run,stream,eventContent,num,input_files,**k
     triggers = kwargs.pop('triggers',[])
     dryRun = kwargs.pop('dryRun',False)
     runCrab = False
-    # create run working directory
+
+    # Create working directory for specific run number
     rundir = 'run_%s' % run
     python_mkdir(rundir)
     os.chdir(rundir)
 
-    # open appropriate config and crab submit files
+    # Use appropriate cfg files in Templates directory for
+    # first, running the validation to get CSC DQM & EMTF plots and
+    # second, merging the resultant files to create plots, and push them to the EOS website
     if "GEN" in eventContent: eventContent = "RAW"
     paramMap = {
         'RECO' : {
@@ -116,7 +121,8 @@ def run_validation(dataset,globalTag,run,stream,eventContent,num,input_files,**k
         crab = 'crab_noDigis_%s_template' % eventContent
         proc = 'secondStep_noDigis_template'
 
-    print "Will run with options: digis: %r standalone: %r" % (paramMap[eventContent]['digis'], paramMap[eventContent]['standalone'])
+    print "Will run with options --- \nDigis: %r \nStandalone: %r" % (paramMap[eventContent]['digis'], paramMap[eventContent]['standalone'])
+    print "\nUsing the following cfg template files --- \ncfg: "+cfg+"\ncrab: "+crab+"\nproc: "+proc
 
     templatecfgFilePath = '%s/%s' %(TEMPLATE_PATH, cfg)
     templatecrabFilePath = '%s/%s' % (TEMPLATE_PATH, crab)
@@ -196,8 +202,10 @@ def run_validation(dataset,globalTag,run,stream,eventContent,num,input_files,**k
     with open('runParams.json','w') as file:
         file.write(jsonStr)
 
+    # After renaming, etc. all of the appropriate cfg files, create the corresponding
+    # submission script (either for CRAB or lxbatch) and submit
     if runCrab:
-        # create a submission script
+        # If runCrab then do a crab submit for the crab cfg file
         sh = open("run.sh", "w")
         sh.write("#!/bin/bash \n")
         sh.write("aklog \n")
@@ -214,9 +222,20 @@ def run_validation(dataset,globalTag,run,stream,eventContent,num,input_files,**k
         # submit to crab
         print "Submitting to crab"
         subprocess.check_call("bash run.sh", shell=True)
+
     else:
+        #If runCrab is false, then need to create output directory on EOS,
+        #decide how many batch jobs to submit (depends on number of input files),
+        #modify the the cfg file template name for every individual file submitted,
+        #build a submission script for each of these input files that runs the Validation
+        #and copies the output rootfiles (for CSC DQM and EMTF) to the EOS folder,
+        #and then finally submits the job
         subprocess.check_call('mkdir -p /eos/cms/store/group/dpg_csc/comm_csc/cscval/batch_output/%s/run%s_%s' % (stream, run, eventContent), shell=True)
         nf = 1
+        # maxJobNum controls the maximum number of jobs to submit if numJobs is very large
+        #maxJobNum = 2
+        print "\nMaximum number of batch jobs submitted per run: "+str(maxJobNum)+"\n"
+        # numJobs is the parameter to decide how many batch jobs to submit for the total number of input files for a run
         numJobs = int(math.ceil(len(input_files)/float(nf)))
         # check files already run over
         fname = 'processedFiles.txt'
@@ -224,8 +243,8 @@ def run_validation(dataset,globalTag,run,stream,eventContent,num,input_files,**k
         with open(fname, 'r') as file:
             procFiles = file.readlines()
         procFiles = [x.rstrip() for x in procFiles]
-
-        for j in range(min(600,numJobs)):
+         
+        for j in range(min(maxJobNum, numJobs)):
             doJob = force
             for f in input_files[j*nf:j*nf+nf]:
                 if f not in procFiles:
@@ -273,7 +292,7 @@ def run_validation(dataset,globalTag,run,stream,eventContent,num,input_files,**k
             # sh.write('chmod g+w /eos/cms/store/group/dpg_csc/comm_csc/cscval/batch_output/%s/run%s_%s/\n' % (stream, run, eventContent))
             sh.close()
 
-            print "Submitting job %i of %i" % (j+1, numJobs)
+            print "Submitting job %i out of %i total files" % (j+1, numJobs)
             #queue = '1nh' if 'Express' in stream else '8nh'
             queue = '8nh'
             if not dryRun: subprocess.check_call("LSB_JOB_REPORT_MAIL=N bsub -q %s -J %s_%s_%i < run_%i.sh" % (queue, run, stream, j, j), shell=True)
@@ -286,13 +305,18 @@ def process_output(dataset,globalTag,**kwargs):
     '''
     Script to retrieve the output from EOS, merge the histograms, and create the images.
     '''
+    # Grab arguments specified as flags on the command line
     force = kwargs.pop('force',False)
     runN = kwargs.pop('run',0)
+    maxJobNum = kwargs.get('maxjobs', 300)
     triggers = kwargs.pop('triggers',[])
     dryRun = kwargs.pop('dryRun',False)
     [filler, stream, version, eventContent] = dataset.split('/')
     if "GEN" in dataset: stream = fix_stream(dataset)
     os.chdir(stream)
+  
+    if not maxJobNum:
+        maxJobNum = 300
 
     runCrab = False
 
@@ -300,13 +324,14 @@ def process_output(dataset,globalTag,**kwargs):
 
     if force: print 'Forcing remerging'
     # get available runs in eos
-    for job in subprocess.Popen('eos ls %s/%s' % (CRAB_PATH if runCrab else BATCH_PATH,stream), shell=True,stdout=pipe).communicate()[0].splitlines():
+    for job in subprocess.Popen('ls %s/%s' % (CRAB_PATH if runCrab else BATCH_PATH,stream), shell=True,stdout=pipe).communicate()[0].splitlines():
         # go to working area
         if runCrab:
             [type, runStr, runEventContent] = job.split('_')
         else:
             [runStr,runEventContent] = job.split('_')
         run = runStr[3:]
+        # runN is the run number if option "-rn" is specified
         if runN:
             if str(runN) != run: continue
         else:
@@ -359,7 +384,8 @@ def process_output(dataset,globalTag,**kwargs):
             if file[0:4]=='emtf': emtfFiles += [file]
         nFiles = len(valFiles['All'])
         if len(tpeFiles) == 0 or float(nFiles)/len(tpeFiles) < 0.7:
-            print "run%s need to be redo as too less file get through" % run
+            print "Less than 7/10 of Validation root files out of the total number of batch jobs got through"
+	    print "May need to re-do the validation for run #%s..." % run 
 
         # see if we need to remerge things
         processedString = '%s_%i' %(jobVersion, nFiles)
@@ -379,6 +405,7 @@ def process_output(dataset,globalTag,**kwargs):
             file.write(processedString)
 
         # and merge them
+        #nFiles is the total number of validation CSC DQM ROOT files
         maxJobSize = 400
         nMerges = nFiles / maxJobSize + 1
         for imerge in range(0, nMerges):
@@ -413,7 +440,7 @@ def process_output(dataset,globalTag,**kwargs):
             sh = open("merge_val_%s.sh" % imerge, "w")
             sh.write(mergeScriptStr)
             if valFiles['All']:
-                print "Merging valHists"
+                print "\nMerging valHists"
                 sh.write("cd %s\n" % fileDir)
                 valfiles = valFiles['All'][imerge*maxJobSize : (imerge+1)*maxJobSize]
                 valMergeString  = 'target=merge_valHists_%s.root\n' % imerge
@@ -491,7 +518,8 @@ def process_output(dataset,globalTag,**kwargs):
                 # subprocess.call('mv merge_emtfHist_0.root %s' % (emtfOut), shell=True) # temporary
                 if valRet: valRet = subprocess.call('mv merge_valHists_0.root %s' % (valOut['All']), shell=True) # temporary
                 if not valRet: os.system("./secondStep.py")
-                subprocess.call('rm *.root', shell=True)
+                #andrew -- comment out next line to keep merged rootfiles in work directory as well
+                #subprocess.call('rm *.root', shell=True)
 
             os.chdir('../')
 
@@ -532,7 +560,11 @@ def process_dataset(dataset,globalTag,**kwargs):
     singleRun = kwargs.pop('run',0)
     force = kwargs.pop('force',False)
     dryRun = kwargs.get('dryRun',False)
+    maxJobNum = kwargs.get('maxjobs', 300)
     curTime = time.time()
+
+    if not maxJobNum:
+        maxJobNum = 300
 
     url = 'https://cmsweb.cern.ch/dbs/prod/global/DBSReader'
     dbsclient = DbsApi(url)
@@ -563,16 +595,21 @@ def process_dataset(dataset,globalTag,**kwargs):
         procTimes = file.readlines()
     procTimes = [x.rstrip() for x in procTimes]
     prevTime = float(procTimes[-1]) - 12*60*60 if procTimes else float(time.time()) - 7*24*60*60 # default to 7 days before now or 12 hours before last run
-    print prevTime
+    print "prevTime = "+str(prevTime)
 
     # run each individual validation
     if singleRun:
         files = dbsclient.listFiles(dataset=dataset, run_num=singleRun, validFileOnly=1, detail=True)
         num = sum([f['event_count'] for f in files])
+        print "\nNumber of events in all files listed in DAS for this run/dataset: "+str(num)
         input_files = [f['logical_file_name'] for f in files]
+
+        #print "--> Printing the LFN of all input files for run #%s:" % str(singleRun)
+        #print input_files
+
         print "Processing run %s" % str(singleRun)
         if force: print "Forcing reprocessing"
-        run_validation(dataset,globalTag,str(singleRun),stream,eventContent,str(num),input_files,force=force,**kwargs)
+        run_validation(dataset, globalTag, str(singleRun), maxJobNum, stream, eventContent, str(num), input_files, force=force, **kwargs)
     else:
         # first get new blocks since a time
         blocks = dbsclient.listBlocks(dataset=dataset, min_cdate=int(prevTime))
@@ -605,7 +642,7 @@ def process_dataset(dataset,globalTag,**kwargs):
         for run in runsToUpdate:
             if int(run)<MINRUN: continue
             print "Processing run %s" % run
-            run_validation(dataset,globalTag,str(run),stream,eventContent,str(eventRunMap[run]),fileRunMap[run],force=force,**kwargs)
+            run_validation(dataset, globalTag, str(run), maxJobNum, stream, eventContent, str(eventRunMap[run]), fileRunMap[run], force=force, **kwargs)
 
     with open(timeFile, 'a') as file:
         if not dryRun: file.write('{0}\n'.format(curTime))
@@ -629,7 +666,7 @@ def parse_command_line(argv):
     parser.add_argument('-dr', '--dryRun', action='store_true',help='Don\'t submit, just create the objects')
     parser.add_argument('-f','--force', action='store_true', help='Force a recipe (even if already processed).')
     parser.add_argument('-t','--triggers', nargs='*', help='Optionally run on additional triggers.')
-    parser.add_argument('-mj','--maxJobSize', type=int, default=500, help='Optionally run on additional triggers.')
+    parser.add_argument('-mj','--maxJobNum', type=int, default=300, help='Can use to control the total number of batch jobs submitted out of all of the different files for a run (specified by LFN), as seen on DAS.')
 
     args = parser.parse_args(argv)
     return args
@@ -651,13 +688,23 @@ def main(argv=None):
         return 0
 
     if args.retrieveOutput:
-        process_output(args.dataset, args.globalTag, force=args.force, run=args.runNumber,triggers=args.triggers,dryRun=args.dryRun)
+        #process_output, done by checking the '-ro' option, is the "second step" in the validation routine
+        #responsible for merging all of the different output files from the first step,
+        #making PNGS for each of the different plots from these files,
+        #moving the PNGS to the www directory on EOS so they can be seen on the website,
+        #and then building the run list at the end using the function build_runlist
+        process_output(args.dataset, args.globalTag, force=args.force, run=args.runNumber, maxjobs=args.maxJobNum, triggers=args.triggers, dryRun=args.dryRun)
         return 0
 
     #if args.reprocessHistograms:
     #    return 0
 
-    process_dataset(args.dataset, args.globalTag, run=args.runNumber, force=args.force,triggers=args.triggers,dryRun=args.dryRun)
+    #process_dataset is the "first step" in the validation that pulls files using the Dbs client tool,
+    #creates all of the needed config files and ROOT scripts (using the templates in the Templates folder)
+    #and submits batch jobs (or CRAB jobs if runCrab) to run the Validation, yielding CSC DQM and EMTF files,
+    #and finally moves these output ROOT files to the batch_output folder on EOS
+    #Note: the function run_validation is utilized inside process_dataset
+    process_dataset(args.dataset, args.globalTag, force=args.force, run=args.runNumber, maxjobs=args.maxJobNum, triggers=args.triggers, dryRun=args.dryRun)
 
     return 0
 
