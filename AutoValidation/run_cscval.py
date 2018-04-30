@@ -308,7 +308,7 @@ def process_output(dataset,globalTag,**kwargs):
     # Grab arguments specified as flags on the command line
     force = kwargs.pop('force',False)
     runN = kwargs.pop('run',0)
-    maxJobNum = kwargs.get('maxjobs', 300)
+    maxJobNum = kwargs.get('maxjobs', 200)
     triggers = kwargs.pop('triggers',[])
     dryRun = kwargs.pop('dryRun',False)
     [filler, stream, version, eventContent] = dataset.split('/')
@@ -316,7 +316,7 @@ def process_output(dataset,globalTag,**kwargs):
     os.chdir(stream)
   
     if not maxJobNum:
-        maxJobNum = 300
+        maxJobNum = 200
 
     runCrab = False
 
@@ -560,11 +560,11 @@ def process_dataset(dataset,globalTag,**kwargs):
     singleRun = kwargs.pop('run',0)
     force = kwargs.pop('force',False)
     dryRun = kwargs.get('dryRun',False)
-    maxJobNum = kwargs.get('maxjobs', 300)
+    maxJobNum = kwargs.get('maxjobs', 200)
     curTime = time.time()
 
     if not maxJobNum:
-        maxJobNum = 300
+        maxJobNum = 200
 
     url = 'https://cmsweb.cern.ch/dbs/prod/global/DBSReader'
     dbsclient = DbsApi(url)
@@ -666,7 +666,7 @@ def parse_command_line(argv):
     parser.add_argument('-dr', '--dryRun', action='store_true',help='Don\'t submit, just create the objects')
     parser.add_argument('-f','--force', action='store_true', help='Force a recipe (even if already processed).')
     parser.add_argument('-t','--triggers', nargs='*', help='Optionally run on additional triggers.')
-    parser.add_argument('-mj','--maxJobNum', type=int, default=300, help='Can use to control the total number of batch jobs submitted out of all of the different files for a run (specified by LFN), as seen on DAS.')
+    parser.add_argument('-mj','--maxJobNum', type=int, default=200, help='Can use to control the total number of batch jobs submitted out of all of the different files for a run (specified by LFN), as seen on DAS.')
 
     args = parser.parse_args(argv)
     return args

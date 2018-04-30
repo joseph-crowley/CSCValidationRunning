@@ -48,7 +48,7 @@ It will then check whether a run has been processed yet and whether CSCs were in
 job to the CAF LSF batch queues. After the job is finished, the outputs are stored on EOS. You can then 
 produce the images and pass the output to the website with the `--retrieveOutput` option.
 
-If you only want to submit a certain number of batch jobs (at present 1 batch job per LFN), check the option `-mj JOBNUM`, where JOBNUM is an integer. If this option is not checked, the current default max number of batch jobs is 300.
+If you only want to submit a certain number of batch jobs (at present 1 batch job per LFN), check the option `-mj JOBNUM`, where JOBNUM is an integer. If this option is not checked, the current default max number of batch jobs is 200.
 
 The script checks the local folder for what runs have been processed: `AutoValidation/STREAMNAME`. The 
 `STREAMNAME` option can include `ExpressCosmics`, `Cosmics`, `SingleMu`, and `DoubleMu`.
