@@ -5,10 +5,10 @@ Repository to setup the latest version of CSCValidation to be run automatically 
 
 Setup a new release
 ```
-cmsrel CMSSW_10_0_0_pre3 # or current CMSSW version
-cd CMSSW_10_0_0_pre3/src
+cmsrel CMSSW_10_1_2_patch2 # to be updated with the current CMSSW version that data are made in
+cd CMSSW_10_1_2_patch2/src
 cmsenv
-git cms-init # make sure this happens before checking out this repository
+git cms-init # make sure this happens before checking out the CSCValidation repository
 ```
 
 Clone the repository
@@ -33,8 +33,9 @@ Note: DAS requires authentication.
 To run with acrontab, do a `voms-proxy-init` and copy the `/tmp/x509up_uXXXX` file to a private directory on afs.
 The /tmp directory will not be visible on all lxplus nodes (just the one you create it on).
 ```
-python generateCron.py /path/to/proxy
-acrontab <autoval.acron
+edit generateCron.py # add in the current dataset info
+python generateCron.py </absolute/path/to/proxy>
+acrontab < autoval.acron
 acrontab -l
 ```
 
@@ -48,7 +49,7 @@ It will then check whether a run has been processed yet and whether CSCs were in
 job to the CAF LSF batch queues. After the job is finished, the outputs are stored on EOS. You can then 
 produce the images and pass the output to the website with the `--retrieveOutput` option.
 
-If you only want to submit a certain number of batch jobs (at present 1 batch job per LFN), check the option `-mj JOBNUM`, where JOBNUM is an integer. If this option is not checked, the current default max number of batch jobs is 300.
+If you only want to submit a certain number of batch jobs (at present 1 batch job per LFN), check the option `-mj JOBNUM`, where JOBNUM is an integer. If this option is not checked, the current default max number of batch jobs is 600.
 
 The script checks the local folder for what runs have been processed: `AutoValidation/STREAMNAME`. The 
 `STREAMNAME` option can include `ExpressCosmics`, `Cosmics`, `SingleMu`, and `DoubleMu`.

@@ -26,7 +26,7 @@ from dbs.apis.dbsClient import DbsApi
 
 # No run numbers below MINRUN will be processed
 # This parameter is ignored if the "-rn" option is specified on the command line
-MINRUN = 300576 # test
+MINRUN = 313100 # test
 
 pipe = subprocess.PIPE
 Release = subprocess.Popen('echo $CMSSW_VERSION', shell=True, stdout=pipe).communicate()[0]
@@ -308,15 +308,12 @@ def process_output(dataset,globalTag,**kwargs):
     # Grab arguments specified as flags on the command line
     force = kwargs.pop('force',False)
     runN = kwargs.pop('run',0)
-    maxJobNum = kwargs.get('maxjobs', 300)
+    maxJobNum = kwargs.get('maxjobs', 600)
     triggers = kwargs.pop('triggers',[])
     dryRun = kwargs.pop('dryRun',False)
     [filler, stream, version, eventContent] = dataset.split('/')
     if "GEN" in dataset: stream = fix_stream(dataset)
     os.chdir(stream)
-  
-    if not maxJobNum:
-        maxJobNum = 300
 
     runCrab = False
 
@@ -329,7 +326,11 @@ def process_output(dataset,globalTag,**kwargs):
         if runCrab:
             [type, runStr, runEventContent] = job.split('_')
         else:
-            [runStr,runEventContent] = job.split('_')
+            try:
+                [runStr,runEventContent] = job.split('_')
+            except:
+                continue
+
         run = runStr[3:]
         # runN is the run number if option "-rn" is specified
         if runN:
@@ -406,7 +407,7 @@ def process_output(dataset,globalTag,**kwargs):
 
         # and merge them
         #nFiles is the total number of validation CSC DQM ROOT files
-        maxJobSize = 400
+        maxJobSize = 300
         nMerges = nFiles / maxJobSize + 1
         for imerge in range(0, nMerges):
             if imerge > 1: continue      # effectively set maximum files to 2*maxJobSize
@@ -519,7 +520,7 @@ def process_output(dataset,globalTag,**kwargs):
                 if valRet: valRet = subprocess.call('mv merge_valHists_0.root %s' % (valOut['All']), shell=True) # temporary
                 if not valRet: os.system("./secondStep.py")
                 #andrew -- comment out next line to keep merged rootfiles in work directory as well
-                #subprocess.call('rm *.root', shell=True)
+                subprocess.call('rm merge*.root', shell=True)
 
             os.chdir('../')
 
@@ -560,11 +561,8 @@ def process_dataset(dataset,globalTag,**kwargs):
     singleRun = kwargs.pop('run',0)
     force = kwargs.pop('force',False)
     dryRun = kwargs.get('dryRun',False)
-    maxJobNum = kwargs.get('maxjobs', 300)
+    maxJobNum = kwargs.get('maxjobs', 600)
     curTime = time.time()
-
-    if not maxJobNum:
-        maxJobNum = 300
 
     url = 'https://cmsweb.cern.ch/dbs/prod/global/DBSReader'
     dbsclient = DbsApi(url)
@@ -666,7 +664,7 @@ def parse_command_line(argv):
     parser.add_argument('-dr', '--dryRun', action='store_true',help='Don\'t submit, just create the objects')
     parser.add_argument('-f','--force', action='store_true', help='Force a recipe (even if already processed).')
     parser.add_argument('-t','--triggers', nargs='*', help='Optionally run on additional triggers.')
-    parser.add_argument('-mj','--maxJobNum', type=int, default=300, help='Can use to control the total number of batch jobs submitted out of all of the different files for a run (specified by LFN), as seen on DAS.')
+    parser.add_argument('-mj','--maxJobNum', type=int, default=600, help='Can use to control the total number of batch jobs submitted out of all of the different files for a run (specified by LFN), as seen on DAS.')
 
     args = parser.parse_args(argv)
     return args

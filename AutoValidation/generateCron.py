@@ -13,6 +13,25 @@ def generate(userproxy=''):
 
     cronName = 'autoval'
     datasets = {
+        # Run2018 Express, Commissioning & Cosmics
+        # '/ExpressPhysics/Commissioning2018-Express-v1/FEVT' : {
+        #     'globaltag' : 'auto:run2_data',
+        # },
+        '/ExpressPhysics/Run2018A-Express-v1/FEVT' : {
+            'globaltag' : 'auto:run2_data',
+        },
+        '/Cosmics/Run2018A-v1/RAW' : {
+            'globaltag' : 'auto:run2_data',
+        },
+
+        # Run2018 Collision PromptReco
+        '/SingleMuon/Run2018A-v1/RAW' : {
+            'globaltag' : 'auto:run2_data',
+        },
+        '/DoubleMuon/Run2018A-v1/RAW' : {
+            'globaltag' : 'auto:run2_data',
+        },
+
         # Run2017 Express, Commissioning & Cosmics
         # '/ExpressPhysics/Run2017A-Express-v1/FEVT' : {
         #     'globaltag' : 'auto:run2_data',
@@ -99,12 +118,12 @@ def generate(userproxy=''):
         # '/DoubleMuon/Run2017F-v1/RAW' : {
         #     'globaltag' : 'auto:run2_data',
         # },
-        '/SingleMuon/Run2017G-v1/RAW' : {
-            'globaltag' : 'auto:run2_data',
-        },
-        '/DoubleMuon/Run2017G-v1/RAW' : {
-            'globaltag' : 'auto:run2_data',
-        },
+        # '/SingleMuon/Run2017G-v1/RAW' : {
+        #     'globaltag' : 'auto:run2_data',
+        # },
+        # '/DoubleMuon/Run2017G-v1/RAW' : {
+        #     'globaltag' : 'auto:run2_data',
+        # },
 
         # Run2015D Express v3
         #'/ExpressPhysics/Run2015D-Express-v3/FEVT' : {
