@@ -563,7 +563,6 @@ def process_dataset(dataset,globalTag,**kwargs):
     dryRun = kwargs.get('dryRun',False)
     maxJobNum = kwargs.get('maxjobs', 600)
     curTime = time.time()
-
     url = 'https://cmsweb.cern.ch/dbs/prod/global/DBSReader'
     dbsclient = DbsApi(url)
 
