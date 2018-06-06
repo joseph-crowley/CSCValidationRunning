@@ -2635,8 +2635,8 @@ void CSCValidation::doADCTiming(const CSCRecHit2DCollection& rechitcltn) {
 		  adc_3_3_sum+=recIt->adcs(i,j);
 
 
-                // ADC weighted time bin
-                if(adc_3_3_sum > 100.0) {
+              // ADC weighted time bin
+              if(adc_3_3_sum > 100.0) {
                   
 
 		  int centerStrip=recIt->channels(1); //take central from 3 strips;
@@ -2669,7 +2669,7 @@ void CSCValidation::doADCTiming(const CSCRecHit2DCollection& rechitcltn) {
                  x=cfeb; y=adc_3_3_wtbin;
                  histos->fill2DHist(x,y,name.c_str(),title.c_str(),5,1.,6.,80,-8.,8.,"ADCTiming");                                     
                  } // end of if flag==0
-                } // end of if (adc_3_3_sum > 100.0)
+              } // end of if (adc_3_3_sum > 100.0)
             } // end of if if(m_strip.size()==3
        } // end of the  pass thru CSCRecHit2DCollection
      }  // end of if (rechitcltn.begin() != rechitcltn.end())
