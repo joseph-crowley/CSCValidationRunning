@@ -1764,19 +1764,19 @@ bool CSCValidation::withinSensitiveRegion(LocalPoint localPos, const std::array<
 	pass = true;
       }
     }
-    else if(1==ring){ //ME1/1b
-      deadZoneCenter[0]= -53.75;
-      deadZoneCenter[1] = 53.75;
+    else if(1==ring){ // ME1/1b
+      deadZoneCenter[0]= -31.5;
+      deadZoneCenter[1] = 86.0;
       if(localPos.y() > (yBorder) &&
-	 (localPos.y()> deadZoneCenter[0] + cutZone && localPos.y()< deadZoneCenter[1] - cutZone )){
+	 (localPos.y()> deadZoneCenter[0] && localPos.y()< deadZoneCenter[1] - cutZone )){
 	pass = true;
       }
     }
-    else{ //ME1/1a
-      deadZoneCenter[0]= -22.25;
-      deadZoneCenter[1] = 22.25;
+    else if(4==ring){ // ME1/1a
+      deadZoneCenter[0] = -86.0;
+      deadZoneCenter[1] = -31.5;
       if(localPos.y() > (yBorder) &&
-	 (localPos.y()> deadZoneCenter[0] + cutZone && localPos.y()< deadZoneCenter[1] - cutZone )){
+	 (localPos.y()> deadZoneCenter[0] + cutZone && localPos.y()< deadZoneCenter[1] )){
 	pass = true;
       }
     }
