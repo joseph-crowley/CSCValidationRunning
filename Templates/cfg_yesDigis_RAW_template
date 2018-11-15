@@ -2,11 +2,11 @@ import FWCore.ParameterSet.Config as cms
 import subprocess
 
 from Configuration.StandardSequences.Eras import eras
-process = cms.Process("TEST",eras.Run2_2016)
+process = cms.Process("TEST",eras.Run2_2018)
 
 process.load("Configuration/StandardSequences/GeometryDB_cff")
 process.load("Configuration/StandardSequences/MagneticField_cff")
-process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_condDBv2_cff')
+process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
 process.load("Configuration/StandardSequences/RawToDigi_Data_cff")
 process.load("Configuration.StandardSequences.Reconstruction_cff")
 
@@ -17,17 +17,16 @@ inputFiles = cms.untracked.vstring(
 FILELIST
 )
 
-
 process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(NEVENT) )
 process.options = cms.untracked.PSet( SkipEvent =
 cms.untracked.vstring('ProductNotFound') )
-readFiles = cms.untracked.vstring(
-
-)
+readFiles = cms.untracked.vstring()
 secFiles = cms.untracked.vstring()
 process.source = cms.Source ("PoolSource",
     fileNames = inputFiles
 )
+
+# process.load('FWCore.MessageService.MessageLogger_cfi')
 process.MessageLogger = cms.Service("MessageLogger",
     cout = cms.untracked.PSet(
         default = cms.untracked.PSet( limit = cms.untracked.int32(0) ),
@@ -35,23 +34,6 @@ process.MessageLogger = cms.Service("MessageLogger",
     ),
     categories = cms.untracked.vstring('FwkJob'),
     destinations = cms.untracked.vstring('cout')
-)
-
-
-"""Customise digi/reco geometry to use unganged ME1/a channels"""
-process.CSCGeometryESModule.useGangedStripsInME1a = False
-process.idealForDigiCSCGeometry.useGangedStripsInME1a = False
-
-
-# filter on trigger path
-process.triggerSelection = cms.EDFilter( "TriggerResultsFilter",
-    triggerConditions = cms.vstring(''),
-    hltResults = cms.InputTag( "TriggerResults", "", "HLT" ),
-    l1tResults = cms.InputTag( "gtDigis" ),
-    l1tIgnoreMask = cms.bool( False ),
-    l1techIgnorePrescales = cms.bool( False ),
-    daqPartitions = cms.uint32( 1 ),
-    throw = cms.bool( True )
 )
 
 process.cscValidation = cms.EDAnalyzer("CSCValidation",
@@ -64,7 +46,7 @@ process.cscValidation = cms.EDAnalyzer("CSCValidation",
     useQualityFilter = cms.untracked.bool(False),
     makeStandalonePlots = cms.untracked.bool(False),
     makeTimeMonitorPlots = cms.untracked.bool(True),
-    rawDataTag = cms.InputTag("rawDataCollector"),# FOR RAW RUNS
+    rawDataTag = cms.InputTag("rawDataRepacker"),# FOR RAW RUNS
     alctDigiTag = cms.InputTag("muonCSCDigis","MuonCSCALCTDigi"),
     clctDigiTag = cms.InputTag("muonCSCDigis","MuonCSCCLCTDigi"),
     corrlctDigiTag = cms.InputTag("muonCSCDigis","MuonCSCCorrelatedLCTDigi"),
@@ -80,16 +62,9 @@ process.cscValidation = cms.EDAnalyzer("CSCValidation",
     simHitTag = cms.InputTag("g4SimHits", "MuonCSCHits")
 )
 
-
 process.load("L1Trigger.CSCTriggerPrimitives.cscTriggerPrimitiveDigis_cfi")
 process.cscTriggerPrimitiveDigis.CSCComparatorDigiProducer = "muonCSCDigis:MuonCSCComparatorDigi"
 process.cscTriggerPrimitiveDigis.CSCWireDigiProducer = "muonCSCDigis:MuonCSCWireDigi"
-process.cscTriggerPrimitiveDigis.tmbParam.mpcBlockMe1a = 0
-process.load("L1TriggerConfig.L1CSCTPConfigProducers.L1CSCTriggerPrimitivesConfig_cff")
-process.l1csctpconf.alctParamMTCC2.alctNplanesHitPretrig = 3
-process.l1csctpconf.alctParamMTCC2.alctNplanesHitAccelPretrig = 3
-process.l1csctpconf.clctParam.clctNplanesHitPretrig = 3
-process.l1csctpconf.clctParam.clctHitPersist = 4
 
 process.lctreader = cms.EDAnalyzer("CSCTriggerPrimitivesReader",
     debug = cms.untracked.bool(False),
@@ -124,6 +99,11 @@ process.l1tRate.oracleDB = cms.string("oracle://cms_orcon_adg/CMS_COND_31X_L1T")
 process.l1tRate.pathCondDB = cms.string("/afs/cern.ch/cms/DB/conddb/ADG")
 process.l1tMonitorPath = cms.Path(process.emtfStage2Digis * process.l1tStage2Emtf)
 process.l1tMonitorClientPath = cms.Path(process.l1tStage2MonitorClient)
+
+# Update the input tag to be from rawDataCollector to rawDataRepacker
+process.muonCSCDigis.InputObjects = cms.InputTag("rawDataRepacker")
+process.emtfStage2Digis.InputLabel = cms.InputTag("rawDataRepacker")
+
 process.dqmEndPath = cms.EndPath(
                                  process.dqmEnv *
                                  process.dqmSaver

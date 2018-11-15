@@ -98,14 +98,26 @@ def generate(userproxy=''):
         # },
         # '/DoubleMuon/Run2017F-v1/RAW' : {
         #     'globaltag' : 'auto:run2_data',
+        # # },
+        # '/SingleMuon/Run2018A-v1/RAW' : {
+        #     'globaltag' : 'auto:run2_data',
         # },
-        '/SingleMuon/Run2018A-v1/RAW' : {
+        # '/DoubleMuon/Run2018A-v1/RAW' : {
+        #     'globaltag' : 'auto:run2_data',
+        # },
+        # '/ExpressPhysics/Run2018A-Express-v1/FEVT' : {
+        #     'globaltag' : 'auto:run2_data',
+        # },
+        # '/HIDoubleMuon/HIRun2018-v1/RAW' : {
+        #     'globaltag' : 'auto:run2_data',
+        # },
+        # '/HISingleMuon/HIRun2018-v1/RAW' : {
+        #     'globaltag' : 'auto:run2_data',
+        # },
+        '/HIDoubleMuon/HIRun2018A-v1/RAW' : {
             'globaltag' : 'auto:run2_data',
         },
-        '/DoubleMuon/Run2018A-v1/RAW' : {
-            'globaltag' : 'auto:run2_data',
-        },
-        '/ExpressPhysics/Run2018A-Express-v1/FEVT' : {
+        '/HISingleMuon/HIRun2018A-v1/RAW' : {
             'globaltag' : 'auto:run2_data',
         },
         

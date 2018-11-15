@@ -5,8 +5,8 @@ Repository to setup the latest version of CSCValidation to be run automatically 
 
 Setup a new release
 ```
-cmsrel CMSSW_10_0_0_pre3 # or current CMSSW version
-cd CMSSW_10_0_0_pre3/src
+cmsrel CMSSW_10_3_1 # or current CMSSW version
+cd CMSSW_10_3_1/src
 cmsenv
 git cms-init # make sure this happens before checking out this repository
 ```
@@ -15,6 +15,9 @@ Clone the repository
 ```
 git clone git@github.com:wsicheng/CSCValidationRunning.git
 ```
+
+Note that the master branch is now modified for CMSSW_10_3_X+, if you want to run on version of CMSSW that is 
+lower or equal to 10_2_X, please use the `for102X` branch.
 
 Run the setup script to add DQM/L1TMonitor 
 and source CRAB3 setup for DbsApi client
