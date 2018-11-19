@@ -46,7 +46,7 @@ process.cscValidation = cms.EDAnalyzer("CSCValidation",
     useQualityFilter = cms.untracked.bool(False),
     makeStandalonePlots = cms.untracked.bool(False),
     makeTimeMonitorPlots = cms.untracked.bool(True),
-    rawDataTag = cms.InputTag("rawDataRepacker"),# FOR RAW RUNS
+    rawDataTag = cms.InputTag("rawDataCollector"),# FOR RAW RUNS
     alctDigiTag = cms.InputTag("muonCSCDigis","MuonCSCALCTDigi"),
     clctDigiTag = cms.InputTag("muonCSCDigis","MuonCSCCLCTDigi"),
     corrlctDigiTag = cms.InputTag("muonCSCDigis","MuonCSCCorrelatedLCTDigi"),
@@ -100,9 +100,11 @@ process.l1tRate.pathCondDB = cms.string("/afs/cern.ch/cms/DB/conddb/ADG")
 process.l1tMonitorPath = cms.Path(process.emtfStage2Digis * process.l1tStage2Emtf)
 process.l1tMonitorClientPath = cms.Path(process.l1tStage2MonitorClient)
 
-# Update the input tag to be from rawDataCollector to rawDataRepacker
-process.muonCSCDigis.InputObjects = cms.InputTag("rawDataRepacker")
-process.emtfStage2Digis.InputLabel = cms.InputTag("rawDataRepacker")
+# Update the input tag to be from rawDataCollector to rawDataRepacker for Heavy Ion runs
+if 'HIRun' in inputFiles[0] and 'Cosmics' not in inputFiles[0]:
+    process.cscValidation.rawDataTag = cms.InputTag("rawDataRepacker")
+    process.muonCSCDigis.InputObjects = cms.InputTag("rawDataRepacker")
+    process.emtfStage2Digis.InputLabel = cms.InputTag("rawDataRepacker")
 
 process.dqmEndPath = cms.EndPath(
                                  process.dqmEnv *
