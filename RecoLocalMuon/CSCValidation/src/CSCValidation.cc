@@ -2995,7 +2995,7 @@ void CSCValidation::doTimeMonitoring(edm::Handle<CSCRecHit2DCollection> recHits,
   	    bool goodTMB=false;
   	    if (nclct&&cscData[iCSC].tmbData()) {
   	      if (cscData[iCSC].tmbHeader()->check()){
-  		if (cscData[iCSC].clctData()->check()) goodTMB=true; 
+  		if (cscData[iCSC].comparatorData()->check()) goodTMB=true; 
   	      }
   	    }  
       	      
