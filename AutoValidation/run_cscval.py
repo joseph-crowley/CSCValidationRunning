@@ -1,4 +1,4 @@
-#! /usr/bin/env python
+#! /usr/bin/env python3
 
 # CSC Validation submit script
 #   Primary submission script for CSCValidation processing. Outputs are available
@@ -22,7 +22,8 @@ import argparse
 import re
 import errno
 import math
-from dbs.apis.dbsClient import DbsApi
+#from dbs.apis.dbsClient import DbsApi
+import use_dbs
 
 # No run numbers below MINRUN will be processed
 # This parameter is ignored if the "-rn" option is specified on the command line
@@ -30,7 +31,7 @@ MINRUN = 300576 # test
 
 pipe = subprocess.PIPE
 Release = subprocess.Popen('echo $CMSSW_VERSION', shell=True, stdout=pipe).communicate()[0]
-Release = Release.rstrip("\n")
+Release = Release.decode('ascii').rstrip("\n")
 
 ########## Directories #############
 
@@ -39,6 +40,7 @@ RESULT_PATH = '/afs/cern.ch/cms/CAF/CMSCOMM/COMM_CSC/CSCVAL/results/results'
 WWW_PATH = '/afs/cern.ch/cms/CAF/CMSCOMM/COMM_CSC/CSCVAL/results'
 CRAB_PATH = '/eos/cms/store/group/dpg_csc/comm_csc/cscval/crab_output'
 BATCH_PATH = '/eos/cms/store/group/dpg_csc/comm_csc/cscval/batch_output'
+CONDOR_PATH = '/eos/cms/store/group/dpg_csc/comm_csc/cscval/condor_output' #GM
 
 ####################################
 
@@ -66,7 +68,7 @@ def replace(map, fileInName, fileOutName, moreLines=[]):
     with open(fileInName,'r') as filein:
         for line in filein:
             for old, new in replace_items:
-                line = string.replace(line, old, new)
+                line = line.replace(old, new)
             with open(fileOutName,'a') as fileout:
                 fileout.write(line)
     for line in moreLines:
@@ -86,6 +88,7 @@ def run_validation(dataset,globalTag,run,maxJobNum,stream,eventContent,num,input
     triggers = kwargs.pop('triggers',[])
     dryRun = kwargs.pop('dryRun',False)
     runCrab = False
+    runCondor = True #GM
 
     # Create working directory for specific run number
     rundir = 'run_%s' % run
@@ -121,8 +124,8 @@ def run_validation(dataset,globalTag,run,maxJobNum,stream,eventContent,num,input
         crab = 'crab_noDigis_%s_template' % eventContent
         proc = 'secondStep_noDigis_template'
 
-    print "Will run with options --- \nDigis: %r \nStandalone: %r" % (paramMap[eventContent]['digis'], paramMap[eventContent]['standalone'])
-    print "\nUsing the following cfg template files --- \ncfg: "+cfg+"\ncrab: "+crab+"\nproc: "+proc
+    print( "Will run with options --- \nDigis: %r \nStandalone: %r" % (paramMap[eventContent]['digis'], paramMap[eventContent]['standalone']))
+    print("\nUsing the following cfg template files --- \ncfg: "+cfg+"\ncrab: "+crab+"\nproc: "+proc)
 
     templatecfgFilePath = '%s/%s' %(TEMPLATE_PATH, cfg)
     templatecrabFilePath = '%s/%s' % (TEMPLATE_PATH, crab)
@@ -146,7 +149,7 @@ def run_validation(dataset,globalTag,run,maxJobNum,stream,eventContent,num,input
     outFilePrefix='valHists_run%s_%s' % (run, stream)
     outFileName='%s.root' % (outFilePrefix)
     outEMTFName='emtfHist_run%s_%s.root' % (run, stream)
-    outputPath = '%s/%s/run%s_%s' % (BATCH_PATH, stream, run, eventContent)
+    outputPath = '%s/%s/run%s_%s' % (CONDOR_PATH, stream, run, eventContent) #GM
     Time=time.strftime("%Y/%m/%d %H:%M:%S", time.localtime())
 
     symbol_map_html = { 'RUNNUMBER':run, 'NEVENT':num, "DATASET":dataset, "CMSSWVERSION":Release, "GLOBALTAG":globalTag, "DATE":Time }
@@ -166,7 +169,7 @@ def run_validation(dataset,globalTag,run,maxJobNum,stream,eventContent,num,input
         trigger_cfg += ["process.triggerSelection%s = process.triggerSelection.clone(triggerConditions=cms.vstring('%s'))\n" %(trigger, trigger)]
         trigger_cfg += ["process.cscValidation%s = process.cscValidation.clone(rootFileName=cms.untracked.string('%s_OUTFILE'))\n" % (trigger, trigger)]
         trigger_cfg += ["process.p%s = cms.Path(process.gtDigis * process.triggerSelection%s * process.muonCSCDigis * process.csc2DRecHits * process.cscSegments * process.cscValidation%s)\n" % (trigger, trigger, trigger)]
-        trigger_proc += ["print '%s'\n" % trigger]
+        trigger_proc += ["print('%s')\n" % trigger]
         trigger_proc += ['os.system("root -l -q -b %s_makePlots.C")\n' % trigger]
         trigger_proc += ['os.system("mkdir -p /eos/cms/store/group/dpg_csc/comm_csc/cscval/www/results/runRUNNUMBER/STREAM/Site/PNGS/%s")\n' % trigger ]
         trigger_proc += ['os.system("cp *.png /eos/cms/store/group/dpg_csc/comm_csc/cscval/www/results/runRUNNUMBER/STREAM/Site/PNGS/%s")\n' % trigger ]
@@ -220,8 +223,104 @@ def run_validation(dataset,globalTag,run,maxJobNum,stream,eventContent,num,input
         sh.close()
 
         # submit to crab
-        print "Submitting to crab"
+        print("Submitting to crab")
         subprocess.check_call("bash run.sh", shell=True)
+
+    elif runCondor: #GM
+        #If runCondor is true, then create submission files and submit jobs through Condor
+        subprocess.check_call('mkdir -p /eos/cms/store/group/dpg_csc/comm_csc/cscval/condor_output/%s/run%s_%s' % (stream, run, eventContent), shell=True)
+        nf = 1
+        # maxJobNum controls the maximum number of jobs to submit if numJobs is very large
+        #maxJobNum = 2
+        print( "\nMaximum number of batch jobs submitted per run: "+str(maxJobNum)+"\n")
+        # numJobs is the parameter to decide how many batch jobs to submit for the total number of input files for a run
+        numJobs = int(math.ceil(len(input_files)/float(nf)))
+        # check files already run over
+        fname = 'processedFiles.txt'
+        open(fname, 'a').close()
+        with open(fname, 'r') as file:
+            procFiles = file.readlines()
+        procFiles = [x.rstrip() for x in procFiles]
+
+        for j in range(min(maxJobNum, numJobs)):
+            doJob = force
+            for f in input_files[j*nf:j*nf+nf]:
+                if f not in procFiles:
+                    doJob = True
+                    if not dryRun:
+                        with open(fname, 'a') as file:
+                            file.write('%s\n'%f)
+
+            if not doJob: continue
+
+            # rename the file to unique
+            fn = input_files[j*nf].split('/')[-1].split('.')[0]
+            cfgFileName='validation_%s_%s_cfg.py' % (run, fn)
+            outFileName='valHists_run%s_%s_%s.root' % (run, stream, fn)
+            inEMTFName='DQM_V0001_YourSubsystem_R000%s.root' % run
+            outEMTFName='emtfHist_run%s_%s_%s.root' % (run, stream, fn)
+
+            # create the config file
+            fileListString = ''
+            numLumis = 0
+            numEvents = 0
+            for f in input_files[j*nf:j*nf+nf]:
+                if fileListString: fileListString += ',\n'
+                fileListString += "    '%s'" % f
+
+            symbol_map_cfg = { 'NEVENT':num, 'GLOBALTAG':globalTag, "OUTFILE":outFileName, 'DATASET':dataset, 'RUNNUMBER':run, 'FILELIST': fileListString, 'VERSION': str(j)}
+            replace(symbol_map_cfg,templatecfgFilePath, cfgFileName, trigger_cfg)
+
+            # create a submission script
+            sh = open("run_%i.sh" % j, "w")
+            sh.write("#!/bin/bash \n")
+            sh.write("aklog \n")
+            sh.write('source /afs/cern.ch/cms/cmsset_default.sh \n')
+            rundir = subprocess.Popen("pwd", shell=True,stdout=pipe).communicate()[0]
+            rundir = rundir.decode('ascii').rstrip("\n")
+            sh.write("cd "+rundir+" \n")
+            sh.write("eval `scramv1 runtime -sh` \n")
+            sh.write("cd - \n")
+            sh.write("export XRD_NETWORKSTACK=IPv4 \n")
+            sh.write('cmsRun %s/%s\n' % (rundir, cfgFileName))
+            sh.write('cp %s /eos/cms/store/group/dpg_csc/comm_csc/cscval/condor_output/%s/run%s_%s/%s\n' % (outFileName, stream, run, eventContent, outFileName))
+            for trigger in triggers:
+                sh.write('cp %s_%s /eos/cms/store/group/dpg_csc/comm_csc/cscval/condor_output/%s/run%s_%s/%s_%s\n' % (trigger, outFileName, stream, run, eventContent, trigger, outFileName))
+            sh.write('cp %s /eos/cms/store/group/dpg_csc/comm_csc/cscval/condor_output/%s/run%s_%s/%s\n' % (inEMTFName, stream, run, eventContent, outEMTFName))
+            sh.write('cp TPEHists_%i.root /eos/cms/store/group/dpg_csc/comm_csc/cscval/condor_output/%s/run%s_%s/TPEHists_%i.root\n' % (j, stream, run, eventContent, j))
+            # sh.write('chmod g+w /eos/cms/store/group/dpg_csc/comm_csc/cscval/batch_output/%s/run%s_%s/\n' % (stream, run, eventContent))
+            sh.close()
+
+            print("Submitting job %i out of %i total files" % (j+1, numJobs))
+
+            #Names of file to execute, store output, errors, and job log
+            tjobname     = 'run_' + str(j) + '.sh'
+            tjobname_out = 'run_' + str(j) + '.out'
+            tjobname_err = 'run_' + str(j) + '.err'
+            tjobname_log = 'run_' + str(j) + '.log'
+            #Name of condor job
+            cdjobname = 'job_' + str(j) + '.sub'
+
+            #Set condor options for sub file
+            cjob_to_write =  'executable  = ' + tjobname           + '\n'
+            cjob_to_write += 'arguments   = $(ClusterId)$(ProcId)' + '\n'
+            cjob_to_write += 'output      = ' + tjobname_out       + '\n'
+            cjob_to_write += 'error       = ' + tjobname_err       + '\n'
+            cjob_to_write += 'log         = ' + tjobname_log       + '\n'
+            cjob_to_write += '+JobFlavour = "tomorrow"'            + '\n'
+            cjob_to_write += 'queue \n'
+            os.system('chmod 755 '+tjobname)
+
+            #Write condor options to sub file
+            cjob = open(cdjobname,'w')
+            cjob.write(cjob_to_write)
+            cjob.close()
+
+            #Submit condor job (sub file)
+            condor_sub = 'condor_submit ' + cdjobname
+            print(condor_sub + '\n')
+            os.system(condor_sub)
+            os.system('sleep 1')
 
     else:
         #If runCrab is false, then need to create output directory on EOS,
@@ -234,7 +333,7 @@ def run_validation(dataset,globalTag,run,maxJobNum,stream,eventContent,num,input
         nf = 1
         # maxJobNum controls the maximum number of jobs to submit if numJobs is very large
         #maxJobNum = 2
-        print "\nMaximum number of batch jobs submitted per run: "+str(maxJobNum)+"\n"
+        print("\nMaximum number of batch jobs submitted per run: "+str(maxJobNum)+"\n")
         # numJobs is the parameter to decide how many batch jobs to submit for the total number of input files for a run
         numJobs = int(math.ceil(len(input_files)/float(nf)))
         # check files already run over
@@ -292,7 +391,7 @@ def run_validation(dataset,globalTag,run,maxJobNum,stream,eventContent,num,input
             # sh.write('chmod g+w /eos/cms/store/group/dpg_csc/comm_csc/cscval/batch_output/%s/run%s_%s/\n' % (stream, run, eventContent))
             sh.close()
 
-            print "Submitting job %i out of %i total files" % (j+1, numJobs)
+            print("Submitting job %i out of %i total files" % (j+1, numJobs))
             #queue = '1nh' if 'Express' in stream else '8nh'
             queue = '8nh'
             if not dryRun: subprocess.check_call("LSB_JOB_REPORT_MAIL=N bsub -q %s -J %s_%s_%i < run_%i.sh" % (queue, run, stream, j, j), shell=True)
@@ -322,9 +421,9 @@ def process_output(dataset,globalTag,**kwargs):
 
     runsToPlot = []
 
-    if force: print 'Forcing remerging'
+    if force: print('Forcing remerging')
     # get available runs in eos
-    for job in subprocess.Popen('ls %s/%s' % (CRAB_PATH if runCrab else BATCH_PATH,stream), shell=True,stdout=pipe).communicate()[0].splitlines():
+    for job in subprocess.Popen('ls %s/%s' % (CRAB_PATH if runCrab else CONDOR_PATH if runCondor else BATCH_PATH,stream), shell=True,stdout=pipe).communicate()[0].splitlines():
         # go to working area
         if runCrab:
             [type, runStr, runEventContent] = job.split('_')
@@ -339,11 +438,11 @@ def process_output(dataset,globalTag,**kwargs):
 
         # some job still running. skip.
         #if "Job <%s_%s*> is not found" % (run,stream) not in subprocess.Popen("unbuffer bjobs -J %s_%s*" % (run,stream), shell=True,stdout=pipe).communicate()[0].splitlines():
-        #    print 'Run %s %s not finished' % (run,stream)
+        #    print('Run %s %s not finished' % (run,stream))
         #    continue
         # dont rerun if current merge
         if "Job <%s_%smerge> is not found" % (run,stream) not in subprocess.Popen("unbuffer bjobs -J %s_%smerge" % (run,stream), shell=True,stdout=pipe).communicate()[0].splitlines():
-            print 'Run %s %s not finished' % (run,stream)
+            print('Run %s %s not finished' % (run,stream))
             continue
 
         rundir = 'run_%s' % run
@@ -363,6 +462,9 @@ def process_output(dataset,globalTag,**kwargs):
             for jv in subprocess.Popen('eos ls %s/%s/%s' % (CRAB_PATH,stream,job), shell=True,stdout=pipe).communicate()[0].splitlines():
                 jobVersion = jv
             fileDir = '%s/%s/%s/%s/0000' % (CRAB_PATH,stream,job,jobVersion)
+        elif runCondor:
+            jobVersion = 'job'
+            fileDir = '%s/%s/%s' % (CONDOR_PATH,stream,job)
         else:
             jobVersion = 'job'
             fileDir = '%s/%s/%s' % (BATCH_PATH,stream,job)
@@ -384,8 +486,8 @@ def process_output(dataset,globalTag,**kwargs):
             if file[0:4]=='emtf': emtfFiles += [file]
         nFiles = len(valFiles['All'])
         if len(tpeFiles) == 0 or float(nFiles)/len(tpeFiles) < 0.7:
-            print "Less than 7/10 of Validation root files out of the total number of batch jobs got through"
-	    print "May need to re-do the validation for run #%s..." % run 
+            print("Less than 7/10 of Validation root files out of the total number of batch jobs got through")
+            print("May need to re-do the validation for run #%s..." % run )
 
         # see if we need to remerge things
         processedString = '%s_%i' %(jobVersion, nFiles)
@@ -399,7 +501,7 @@ def process_output(dataset,globalTag,**kwargs):
                 os.chdir('../')
                 continue
 
-        print "Processing %s run %s" % (stream, run)
+        print("Processing %s run %s" % (stream, run))
 
         with open(fname,'w') as file:
             file.write(processedString)
@@ -430,7 +532,7 @@ def process_output(dataset,globalTag,**kwargs):
             mergeScriptStr += "aklog \n"
             mergeScriptStr += 'source /afs/cern.ch/cms/cmsset_default.sh \n'
             rundir = subprocess.Popen("pwd", shell=True,stdout=pipe).communicate()[0]
-            rundir = rundir.rstrip("\n")
+            rundir = rundir.decode('ascii').rstrip("\n")
             mergeScriptStr += "cd "+rundir+" \n"
             mergeScriptStr += "eval `scramv1 runtime -sh` \n"
             mergeScriptStr += "cd - \n"
@@ -440,7 +542,7 @@ def process_output(dataset,globalTag,**kwargs):
             sh = open("merge_val_%s.sh" % imerge, "w")
             sh.write(mergeScriptStr)
             if valFiles['All']:
-                print "\nMerging valHists"
+                print("\nMerging valHists")
                 sh.write("cd %s\n" % fileDir)
                 valfiles = valFiles['All'][imerge*maxJobSize : (imerge+1)*maxJobSize]
                 valMergeString  = 'target=merge_valHists_%s.root\n' % imerge
@@ -462,7 +564,7 @@ def process_output(dataset,globalTag,**kwargs):
             sh = open("merge_emtf_%s.sh" % imerge, "w")
             sh.write(mergeScriptStr)
             if emtfFiles:
-                print "Merging emtfHists"
+                print("Merging emtfHists")
                 sh.write("cd %s\n" % fileDir)
                 emtffiles = emtfFiles[imerge*maxJobSize : (imerge+1)*maxJobSize]
                 emtfMergeString  = 'target=merge_emtfHist_%s.root\n' % imerge
@@ -533,10 +635,10 @@ def process_output(dataset,globalTag,**kwargs):
 def build_runlist():
     Time = time.strftime("%Y/%m/%d %H:%M:%S", time.localtime())
     tstamp = time.strftime("%H%M%S", time.localtime())
-    print >> sys.stderr, "[%s] Building runlist for afs" % Time
+    print("[%s] Building runlist for afs" % Time, file=sys.stderr)
     os.system('bash generateRunList.sh /afs/cern.ch/cms/CAF/CMSCOMM/COMM_CSC/CSCVAL/results/results > temp_afs_runlist_%s.json' % tstamp)
     os.system('mv temp_afs_runlist_%s.json /afs/cern.ch/cms/CAF/CMSCOMM/COMM_CSC/CSCVAL/results/js/runlist.json' % tstamp)
-    print >> sys.stderr, "[%s] Building runlist for eos" % Time
+    print("[%s] Building runlist for eos" % Time, file=sys.stderr)
     os.system('bash generateRunList.sh > temp_eos_runlist_%s.json' % tstamp)
     os.system('cat temp_eos_runlist_%s.json > /eos/cms/store/group/dpg_csc/comm_csc/cscval/www/js/runlist.json' % tstamp)
     os.system('rm temp_eos_runlist_%s.json' % tstamp)
@@ -566,8 +668,9 @@ def process_dataset(dataset,globalTag,**kwargs):
     if not maxJobNum:
         maxJobNum = 200
 
-    url = 'https://cmsweb.cern.ch/dbs/prod/global/DBSReader'
-    dbsclient = DbsApi(url)
+    # removing dbs client because of dependencies ...
+    #url = 'https://cmsweb.cern.ch/dbs/prod/global/DBSReader'
+    #dbsclient = DbsApi(url)
 
     # get stream info
     [filler, stream, version, eventContent] = dataset.split('/')
@@ -578,71 +681,80 @@ def process_dataset(dataset,globalTag,**kwargs):
 
     # begin running
     start=time.strftime("%Y/%m/%d %H:%M:%S", time.localtime())
-    print "CSCVal job initiated at "+start
+    print("CSCVal job initiated at "+start)
     os.chdir(stream)
 
-    print "Reading previously processed runs"
+    print("Reading previously processed runs")
     procFile = 'processedRuns.txt'
     open(procFile, 'a').close()
     with open(procFile, 'r') as file:
         procRuns = file.readlines()
     procRuns = [x.rstrip() for x in procRuns] # format: RUNUM_NUMEVTS
 
-    print "Reading previous process time"
+    print("Reading previous process time")
     timeFile = 'processTime.txt'
     open(timeFile, 'a').close()
     with open(timeFile, 'r') as file:
         procTimes = file.readlines()
     procTimes = [x.rstrip() for x in procTimes]
     prevTime = float(procTimes[-1]) - 12*60*60 if procTimes else float(time.time()) - 7*24*60*60 # default to 7 days before now or 12 hours before last run
-    print "prevTime = "+str(prevTime)
+    print("prevTime = "+str(prevTime))
 
     # run each individual validation
+    singleRun = True
     if singleRun:
-        files = dbsclient.listFiles(dataset=dataset, run_num=singleRun, validFileOnly=1, detail=True)
-        num = sum([f['event_count'] for f in files])
-        print "\nNumber of events in all files listed in DAS for this run/dataset: "+str(num)
-        input_files = [f['logical_file_name'] for f in files]
+        ffiles = use_dbs.get_files(dataset=dataset)
+        files = []
+        ###########################################################################################
+        for f in ffiles:
+            try:
+                f['events']
+            except:
+                print(f)
+            else:
+                files.append(f)
+        ###########################################################################################
+        num = sum([sum(eval(f['events'])) for f in files])
+        print("\nNumber of events in all files listed in DAS for this run/dataset: "+str(num))
+        input_files = [f['file'] for f in files]
 
-        #print "--> Printing the LFN of all input files for run #%s:" % str(singleRun)
-        #print input_files
-
-        print "Processing run %s" % str(singleRun)
-        if force: print "Forcing reprocessing"
+        print("Processing run %s" % str(singleRun))
+        if force: print("Forcing reprocessing")
         run_validation(dataset, globalTag, str(singleRun), maxJobNum, stream, eventContent, str(num), input_files, force=force, **kwargs)
     else:
-        # first get new blocks since a time
-        blocks = dbsclient.listBlocks(dataset=dataset, min_cdate=int(prevTime))
+        print("unable to handle blocks currently." )
+        ## first get new blocks since a time
+        #blocks = dbsclient.listBlocks(dataset=dataset, min_cdate=int(prevTime))
 
-        # iterate over each block
-        updatedRuns = set()
-        for block in blocks:
-            # get runs in block
-            runs = dbsclient.listRuns(block_name=block['block_name'])
-            updatedRuns.update(set(runs[0]['run_num']))
+        ## iterate over each block
+        #updatedRuns = set()
+        #for block in blocks:
+        #    # get runs in block
+        #    runs = dbsclient.listRuns(block_name=block['block_name'])
+        #    updatedRuns.update(set(runs[0]['run_num']))
 
-        # iterate over runs
-        updatedRuns = sorted(updatedRuns)
-        fileRunMap = {}
-        eventRunMap = {}
-        files = dbsclient.listFiles(dataset=dataset, run_num=updatedRuns, validFileOnly=1, detail=True)
-        if "GEN" in dataset: updatedRuns = [1]
-        for run in updatedRuns:
-            eventRunMap[run] = sum([f['event_count'] for f in files if f['run_num']==run])
-            fileRunMap[run] = [f['logical_file_name'] for f in files if f['run_num']==run]
+        ## iterate over runs
+        #updatedRuns = sorted(updatedRuns)
+        #fileRunMap = {}
+        #eventRunMap = {}
+        #files = dbsclient.listFiles(dataset=dataset, run_num=updatedRuns, validFileOnly=1, detail=True)
+        #if "GEN" in dataset: updatedRuns = [1]
+        #for run in updatedRuns:
+        #    eventRunMap[run] = sum([f['event_count'] for f in files if f['run_num']==run])
+        #    fileRunMap[run] = [f['logical_file_name'] for f in files if f['run_num']==run]
 
 
-        runsToUpdate = [run for run in updatedRuns if fileRunMap[run] and eventRunMap[run]>25000]
-        if "GEN" in dataset: runsToUpdate = [run for run in updatedRuns if fileRunMap[run]]
+        #runsToUpdate = [run for run in updatedRuns if fileRunMap[run] and eventRunMap[run]>25000]
+        #if "GEN" in dataset: runsToUpdate = [run for run in updatedRuns if fileRunMap[run]]
 
-        print 'Runs to update:'
-        for run in runsToUpdate:
-            print '    Run {0}: {1} files, {2} events'.format(run,len(fileRunMap[run]),eventRunMap[run])
+        #print 'Runs to update:'
+        #for run in runsToUpdate:
+        #    print '    Run {0}: {1} files, {2} events'.format(run,len(fileRunMap[run]),eventRunMap[run])
 
-        for run in runsToUpdate:
-            if int(run)<MINRUN: continue
-            print "Processing run %s" % run
-            run_validation(dataset, globalTag, str(run), maxJobNum, stream, eventContent, str(eventRunMap[run]), fileRunMap[run], force=force, **kwargs)
+        #for run in runsToUpdate:
+        #    if int(run)<MINRUN: continue
+        #    print "Processing run %s" % run
+        #    run_validation(dataset, globalTag, str(run), maxJobNum, stream, eventContent, str(eventRunMap[run]), fileRunMap[run], force=force, **kwargs)
 
     with open(timeFile, 'a') as file:
         if not dryRun: file.write('{0}\n'.format(curTime))
@@ -650,7 +762,7 @@ def process_dataset(dataset,globalTag,**kwargs):
 
     # now finish up
     end=time.strftime("%Y/%m/%d %H:%M:%S", time.localtime())
-    print "CSCVal job finished at "+end
+    print("CSCVal job finished at "+end)
 
 
 def parse_command_line(argv):
@@ -680,7 +792,7 @@ def main(argv=None):
 
     ds = args.dataset.split('/')
     if len(ds) != 4:
-        print 'Invalid dataset. Argument should be in the form of a DAS query (/*/*/*).'
+        print('Invalid dataset. Argument should be in the form of a DAS query (/*/*/*).')
         return 0
 
     if args.buildRunlist:
