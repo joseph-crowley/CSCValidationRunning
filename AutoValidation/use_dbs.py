@@ -2,13 +2,13 @@ from cmseostools import cmsFileManip
 
 def get_files(dataset='', command=''):
     runner = cmsFileManip()
-    command = '/cvmfs/cms.cern.ch/common/dasgoclient --limit=0 --query="file,run,lumi,events dataset="' + str(dataset)
+    command = '/cvmfs/cms.cern.ch/common/dasgoclient --limit=0 --query="file,run,lumi,events dataset=' + str(dataset) +  '"'
     result = runner.runCommand(command)
     #print(f'result from runner: \n\n{result}\n\n')
     results = result[0].decode('ascii').split('\n')
     r_keys = "file,run,lumi,events,dataset".split(',')
     retval = []
-    for r in results[-1]:
+    for r in results[:-1]:
         retval.append(dict(zip(r_keys, r.split(' '))))
     return retval
     
