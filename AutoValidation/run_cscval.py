@@ -257,8 +257,8 @@ def run_validation(dataset,globalTag,run,maxJobNum,stream,eventContent,num,input
             fn = input_files[j*nf].split('/')[-1].split('.')[0]
             cfgFileName='validation_%s_%s_cfg.py' % (run, fn)
             outFileName='valHists_run%s_%s_%s.root' % (run, stream, fn)
-            inEMTFName='DQM_V0001_YourSubsystem_R000%s.root' % run
-            outEMTFName='emtfHist_run%s_%s_%s.root' % (run, stream, fn)
+            #inEMTFName='DQM_V0001_YourSubsystem_R000%s.root' % run
+            #outEMTFName='emtfHist_run%s_%s_%s.root' % (run, stream, fn)
 
             # create the config file
             fileListString = ''
@@ -275,12 +275,21 @@ def run_validation(dataset,globalTag,run,maxJobNum,stream,eventContent,num,input
             sh = open("run_%i.sh" % j, "w")
             sh.write("#!/bin/bash \n")
             sh.write("aklog \n")
-            sh.write('source /afs/cern.ch/cms/cmsset_default.sh \n')
             rundir = subprocess.Popen("pwd", shell=True,stdout=pipe).communicate()[0]
             rundir = rundir.decode('ascii').rstrip("\n")
-            sh.write("cd "+rundir+" \n")
+            #sh.write("cd "+rundir+" \n")
+
+            #sh.write('source /afs/cern.ch/cms/cmsset_default.sh \n')
+            sh.write('source /cvmfs/cms.cern.ch/cmsset_default.sh \n')
+
+            sh.write('scram p CMSSW CMSSW_12_4_9 \n')
+            sh.write('cd CMSSW_12_4_9/src \n')
             sh.write("eval `scramv1 runtime -sh` \n")
-            sh.write("cd - \n")
+
+            #sh.write("eval `scramv1 project CMSSW CMSSW_12_4_9` \n")
+            #sh.write("eval `scramv1 runtime -sh` \n")
+            #sh.write("cd - \n")
+            sh.write(" \n")
             sh.write("export XRD_NETWORKSTACK=IPv4 \n")
             sh.write('cmsRun %s/%s\n' % (rundir, cfgFileName))
             sh.write('cp %s /eos/cms/store/group/dpg_csc/comm_csc/cscval/condor_output/%s/run%s_%s/%s\n' % (outFileName, stream, run, eventContent, outFileName))
@@ -308,6 +317,7 @@ def run_validation(dataset,globalTag,run,maxJobNum,stream,eventContent,num,input
             cjob_to_write += 'error       = ' + tjobname_err       + '\n'
             cjob_to_write += 'log         = ' + tjobname_log       + '\n'
             cjob_to_write += '+JobFlavour = "tomorrow"'            + '\n'
+            #cjob_to_write += 'requirements = (OpSysAndVer =?= "SLCern7") \n'
             cjob_to_write += 'queue \n'
             os.system('chmod 755 '+tjobname)
 
@@ -706,7 +716,7 @@ def process_dataset(dataset,globalTag,**kwargs):
         ffiles = use_dbs.get_files(dataset=dataset)
         files = []
         ###########################################################################################
-        for f in ffiles:
+        for f in ffiles[:3]:
             try:
                 f['events']
             except:
