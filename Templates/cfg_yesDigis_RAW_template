@@ -66,18 +66,18 @@ process.load("L1Trigger.CSCTriggerPrimitives.cscTriggerPrimitiveDigis_cfi")
 process.cscTriggerPrimitiveDigis.CSCComparatorDigiProducer = "muonCSCDigis:MuonCSCComparatorDigi"
 process.cscTriggerPrimitiveDigis.CSCWireDigiProducer = "muonCSCDigis:MuonCSCWireDigi"
 
-process.lctreader = cms.EDAnalyzer("CSCTriggerPrimitivesReader",
-    debug = cms.untracked.bool(False),
-    dataLctsIn = cms.bool(True),
-    emulLctsIn = cms.bool(True),
-    isMTCCData = cms.bool(False),
-    printps = cms.bool(False),
-    CSCLCTProducerData = cms.untracked.string("muonCSCDigis"),
-    CSCLCTProducerEmul = cms.untracked.string("cscTriggerPrimitiveDigis"),
-    CSCSimHitProducer = cms.InputTag("g4SimHits", "MuonCSCHits"),  # Full sim.
-    CSCComparatorDigiProducer = cms.InputTag("simMuonCSCDigis","MuonCSCComparatorDigi"),
-    CSCWireDigiProducer = cms.InputTag("simMuonCSCDigis","MuonCSCWireDigi")
-)
+#process.lctreader = cms.EDAnalyzer("CSCTriggerPrimitivesReader",
+#    debug = cms.untracked.bool(False),
+#    dataLctsIn = cms.bool(True),
+#    emulLctsIn = cms.bool(True),
+#    isMTCCData = cms.bool(False),
+#    printps = cms.bool(False),
+#    CSCLCTProducerData = cms.untracked.string("muonCSCDigis"),
+#    CSCLCTProducerEmul = cms.untracked.string("cscTriggerPrimitiveDigis"),
+#    CSCSimHitProducer = cms.InputTag("g4SimHits", "MuonCSCHits"),  # Full sim.
+#    CSCComparatorDigiProducer = cms.InputTag("simMuonCSCDigis","MuonCSCComparatorDigi"),
+#    CSCWireDigiProducer = cms.InputTag("simMuonCSCDigis","MuonCSCWireDigi")
+#)
 
 ## EMTF stuff
 #process.load("DQMServices.Components.DQMEnvironment_cfi")
