@@ -6,6 +6,7 @@ def get_files(dataset='', command=''):
     result = runner.runCommand(command)
     #print(f'result from runner: \n\n{result}\n\n')
     results = result[0].decode('ascii').split('\n')
+    results = [r for r in results if "jsonparser" not in r and "error" not in r]
     r_keys = "file,run,lumi,events,dataset".split(',')
     retval = []
     for r in results[:-1]:
