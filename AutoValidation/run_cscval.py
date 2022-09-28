@@ -132,7 +132,7 @@ def run_validation(dataset,globalTag,run,maxJobNum,stream,eventContent,num,input
     templateHTMLFilePath = '%s/html_template' % TEMPLATE_PATH
     templateRootMacroPath = '%s/makePlots.C' % TEMPLATE_PATH
     templateGraphMacroPath = '%s/makeGraphs.C' % TEMPLATE_PATH
-    templateRootMacroEMTFPath = '%s/makePlots_emtf.C' % TEMPLATE_PATH
+    #templateRootMacroEMTFPath = '%s/makePlots_emtf.C' % TEMPLATE_PATH
     templateSecondStepPath = '%s/%s' % (TEMPLATE_PATH, proc)
 
     # old HTML stuff, kept for backwards compatibility
@@ -144,7 +144,7 @@ def run_validation(dataset,globalTag,run,maxJobNum,stream,eventContent,num,input
     macroFileName['Graph'] = "makeGraphs.C"
     for trigger in triggers:
         macroFileName[trigger] = "%s_makePlots.C" % trigger
-    macroFileNameEMTF = "makePlots_emtf.C"
+    #macroFileNameEMTF = "makePlots_emtf.C"
     procFileName = "secondStep.py"
     outFilePrefix='valHists_run%s_%s' % (run, stream)
     outFileName='%s.root' % (outFilePrefix)
