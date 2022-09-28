@@ -279,12 +279,12 @@ def run_validation(dataset,globalTag,run,maxJobNum,stream,eventContent,num,input
             rundir = rundir.decode('ascii').rstrip("\n")
             #sh.write("cd "+rundir+" \n")
 
-            #sh.write('source /afs/cern.ch/cms/cmsset_default.sh \n')
-            sh.write('source /cvmfs/cms.cern.ch/cmsset_default.sh \n')
+            sh.write("cd /cvmfs/cms.cern.ch/slc7_amd64_gcc10/cms/cmssw/CMSSW_12_4_9/ ; cmsenv ; cd - \n")
 
-            sh.write('scram p CMSSW CMSSW_12_4_9 \n')
-            sh.write('cd CMSSW_12_4_9/src \n')
-            sh.write("eval `scramv1 runtime -sh` \n")
+            #sh.write('source /cvmfs/cms.cern.ch/cmsset_default.sh \n')
+            #sh.write('scram p CMSSW CMSSW_12_4_9 \n')
+            #sh.write('cd CMSSW_12_4_9/src \n')
+            #sh.write("eval `scramv1 runtime -sh` \n")
 
             #sh.write("eval `scramv1 project CMSSW CMSSW_12_4_9` \n")
             #sh.write("eval `scramv1 runtime -sh` \n")
