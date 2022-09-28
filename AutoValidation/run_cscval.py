@@ -148,7 +148,7 @@ def run_validation(dataset,globalTag,run,maxJobNum,stream,eventContent,num,input
     procFileName = "secondStep.py"
     outFilePrefix='valHists_run%s_%s' % (run, stream)
     outFileName='%s.root' % (outFilePrefix)
-    outEMTFName='emtfHist_run%s_%s.root' % (run, stream)
+    #outEMTFName='emtfHist_run%s_%s.root' % (run, stream)
     outputPath = '%s/%s/run%s_%s' % (CONDOR_PATH, stream, run, eventContent) #GM
     Time=time.strftime("%Y/%m/%d %H:%M:%S", time.localtime())
 
@@ -158,7 +158,7 @@ def run_validation(dataset,globalTag,run,maxJobNum,stream,eventContent,num,input
     symbol_map_macro['Graph'] = { 'INPUTDIR':outputPath, 'FILEPREFIX':outFilePrefix, 'TEMPLATEDIR':TEMPLATE_PATH }
     for trigger in triggers:
         symbol_map_macro[trigger] = { 'FILENAME':trigger+'_'+outFileName, 'TEMPLATEDIR':TEMPLATE_PATH }
-    symbol_map_emtf = {'FILENAME': outEMTFName, 'TEMPLATEDIR':TEMPLATE_PATH, 'RUNNUMBER':run}
+    #symbol_map_emtf = {'FILENAME': outEMTFName, 'TEMPLATEDIR':TEMPLATE_PATH, 'RUNNUMBER':run}
     symbol_map_proc = { 'TEMPLATEDIR':TEMPLATE_PATH, 'OUTPUTFILE':outFileName, 'RUNNUMBER':run, 'NEWDIR':rundir, 'CFGFILE':cfgFileName, 'STREAM':stream }
     symbol_map_cfg = { 'NEVENT':num, 'GLOBALTAG':globalTag, "OUTFILE":outFileName, 'DATASET':dataset, 'RUNNUMBER':run}
     symbol_map_crab = { 'GLOBALTAG':globalTag, "OUTFILE":outFileName, 'DATASET':dataset, 'RUNNUMBER':run, 'STREAM':stream, 'EVENTCONTENT':eventContent}
@@ -182,7 +182,7 @@ def run_validation(dataset,globalTag,run,maxJobNum,stream,eventContent,num,input
     replace(symbol_map_macro['Graph'],templateGraphMacroPath, macroFileName['Graph'])
     for trigger in triggers:
         replace(symbol_map_macro[trigger],templateRootMacroPath, macroFileName[trigger])
-    replace(symbol_map_emtf,templateRootMacroEMTFPath, macroFileNameEMTF)
+    #replace(symbol_map_emtf,templateRootMacroEMTFPath, macroFileNameEMTF)
     replace(symbol_map_proc,templateSecondStepPath, procFileName, trigger_proc)
     replace(symbol_map_cfg,templatecfgFilePath, cfgFileName, trigger_cfg)
     replace(symbol_map_crab,templatecrabFilePath, crabFileName)
@@ -295,7 +295,7 @@ def run_validation(dataset,globalTag,run,maxJobNum,stream,eventContent,num,input
             sh.write('cp %s /eos/cms/store/group/dpg_csc/comm_csc/cscval/condor_output/%s/run%s_%s/%s\n' % (outFileName, stream, run, eventContent, outFileName))
             for trigger in triggers:
                 sh.write('cp %s_%s /eos/cms/store/group/dpg_csc/comm_csc/cscval/condor_output/%s/run%s_%s/%s_%s\n' % (trigger, outFileName, stream, run, eventContent, trigger, outFileName))
-            sh.write('cp %s /eos/cms/store/group/dpg_csc/comm_csc/cscval/condor_output/%s/run%s_%s/%s\n' % (inEMTFName, stream, run, eventContent, outEMTFName))
+            #sh.write('cp %s /eos/cms/store/group/dpg_csc/comm_csc/cscval/condor_output/%s/run%s_%s/%s\n' % (inEMTFName, stream, run, eventContent, outEMTFName))
             sh.write('cp TPEHists_%i.root /eos/cms/store/group/dpg_csc/comm_csc/cscval/condor_output/%s/run%s_%s/TPEHists_%i.root\n' % (j, stream, run, eventContent, j))
             # sh.write('chmod g+w /eos/cms/store/group/dpg_csc/comm_csc/cscval/batch_output/%s/run%s_%s/\n' % (stream, run, eventContent))
             sh.close()
@@ -368,8 +368,8 @@ def run_validation(dataset,globalTag,run,maxJobNum,stream,eventContent,num,input
             fn = input_files[j*nf].split('/')[-1].split('.')[0]
             cfgFileName='validation_%s_%s_cfg.py' % (run, fn)
             outFileName='valHists_run%s_%s_%s.root' % (run, stream, fn)
-            inEMTFName='DQM_V0001_YourSubsystem_R000%s.root' % run
-            outEMTFName='emtfHist_run%s_%s_%s.root' % (run, stream, fn)
+            #inEMTFName='DQM_V0001_YourSubsystem_R000%s.root' % run
+            #outEMTFName='emtfHist_run%s_%s_%s.root' % (run, stream, fn)
 
             # create the config file
             fileListString = ''
@@ -396,7 +396,7 @@ def run_validation(dataset,globalTag,run,maxJobNum,stream,eventContent,num,input
             sh.write('cp %s /eos/cms/store/group/dpg_csc/comm_csc/cscval/batch_output/%s/run%s_%s/%s\n' % (outFileName, stream, run, eventContent, outFileName))
             for trigger in triggers:
                 sh.write('cp %s_%s /eos/cms/store/group/dpg_csc/comm_csc/cscval/batch_output/%s/run%s_%s/%s_%s\n' % (trigger, outFileName, stream, run, eventContent, trigger, outFileName))
-            sh.write('cp %s /eos/cms/store/group/dpg_csc/comm_csc/cscval/batch_output/%s/run%s_%s/%s\n' % (inEMTFName, stream, run, eventContent, outEMTFName))
+            #sh.write('cp %s /eos/cms/store/group/dpg_csc/comm_csc/cscval/batch_output/%s/run%s_%s/%s\n' % (inEMTFName, stream, run, eventContent, outEMTFName))
             sh.write('cp TPEHists_%i.root /eos/cms/store/group/dpg_csc/comm_csc/cscval/batch_output/%s/run%s_%s/TPEHists_%i.root\n' % (j, stream, run, eventContent, j))
             # sh.write('chmod g+w /eos/cms/store/group/dpg_csc/comm_csc/cscval/batch_output/%s/run%s_%s/\n' % (stream, run, eventContent))
             sh.close()
