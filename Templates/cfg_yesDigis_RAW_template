@@ -2,7 +2,7 @@ import FWCore.ParameterSet.Config as cms
 import subprocess
 
 from Configuration.StandardSequences.Eras import eras
-process = cms.Process("TEST",eras.Run2_2018)
+process = cms.Process("TEST",eras.Run3)
 
 process.load("Configuration/StandardSequences/GeometryDB_cff")
 process.load("Configuration/StandardSequences/MagneticField_cff")
@@ -79,26 +79,26 @@ process.lctreader = cms.EDAnalyzer("CSCTriggerPrimitivesReader",
     CSCWireDigiProducer = cms.InputTag("simMuonCSCDigis","MuonCSCWireDigi")
 )
 
-# EMTF stuff
-process.load("DQMServices.Components.DQMEnvironment_cfi")
-process.load("DQMServices.Core.DQM_cfg")
-process.dqmSaver.convention = 'Online'
-process.dqmSaver.referenceHandling = 'all'
-process.dqmSaver.dirName = '.'
-process.dqmSaver.producer = 'DQM'
-process.dqmSaver.saveByLumiSection = -1
-process.dqmSaver.saveByRun = 1
-process.dqmSaver.saveAtJobEnd = True
-process.load("DQM.Integration.config.dqmPythonTypes")
-es_prefer_GlobalTag = cms.ESPrefer('GlobalTag')
-process.load("DQM.L1TMonitor.L1TStage2_cff")
-process.load("DQM.L1TMonitor.L1TMonitor_cff")
-process.load("DQM.L1TMonitorClient.L1TMonitorClient_cff")
-process.load("DQM.L1TMonitorClient.L1TStage2MonitorClient_cff")
-process.l1tRate.oracleDB = cms.string("oracle://cms_orcon_adg/CMS_COND_31X_L1T")
-process.l1tRate.pathCondDB = cms.string("/afs/cern.ch/cms/DB/conddb/ADG")
-process.l1tMonitorPath = cms.Path(process.emtfStage2Digis * process.l1tStage2Emtf)
-process.l1tMonitorClientPath = cms.Path(process.l1tStage2MonitorClient)
+## EMTF stuff
+#process.load("DQMServices.Components.DQMEnvironment_cfi")
+#process.load("DQMServices.Core.DQM_cfg")
+#process.dqmSaver.convention = 'Online'
+#process.dqmSaver.referenceHandling = 'all'
+#process.dqmSaver.dirName = '.'
+#process.dqmSaver.producer = 'DQM'
+#process.dqmSaver.saveByLumiSection = -1
+#process.dqmSaver.saveByRun = 1
+#process.dqmSaver.saveAtJobEnd = True
+#process.load("DQM.Integration.config.dqmPythonTypes")
+#es_prefer_GlobalTag = cms.ESPrefer('GlobalTag')
+#process.load("DQM.L1TMonitor.L1TStage2_cff")
+#process.load("DQM.L1TMonitor.L1TMonitor_cff")
+#process.load("DQM.L1TMonitorClient.L1TMonitorClient_cff")
+#process.load("DQM.L1TMonitorClient.L1TStage2MonitorClient_cff")
+#process.l1tRate.oracleDB = cms.string("oracle://cms_orcon_adg/CMS_COND_31X_L1T")
+#process.l1tRate.pathCondDB = cms.string("/afs/cern.ch/cms/DB/conddb/ADG")
+#process.l1tMonitorPath = cms.Path(process.emtfStage2Digis * process.l1tStage2Emtf)
+#process.l1tMonitorClientPath = cms.Path(process.l1tStage2MonitorClient)
 
 # Update the input tag to be from rawDataCollector to rawDataRepacker for Heavy Ion runs
 if 'HIRun' in inputFiles[0] and 'Cosmics' not in inputFiles[0]:
@@ -106,14 +106,14 @@ if 'HIRun' in inputFiles[0] and 'Cosmics' not in inputFiles[0]:
     process.muonCSCDigis.InputObjects = cms.InputTag("rawDataRepacker")
     process.emtfStage2Digis.InputLabel = cms.InputTag("rawDataRepacker")
 
-process.dqmEndPath = cms.EndPath(
-                                 process.dqmEnv *
-                                 process.dqmSaver
-                                 )
-process.schedule = cms.Schedule(process.l1tMonitorPath,
-                                process.l1tMonitorClientPath,
-                                process.dqmEndPath
-                                )
+#process.dqmEndPath = cms.EndPath(
+#                                 process.dqmEnv *
+#                                 process.dqmSaver
+#                                 )
+#process.schedule = cms.Schedule(process.l1tMonitorPath,
+#                                process.l1tMonitorClientPath,
+#                                process.dqmEndPath
+#                                )
 
 process.TFileService = cms.Service("TFileService",
                                    fileName = cms.string('TPEHists_VERSION.root')
@@ -122,4 +122,4 @@ process.TFileService = cms.Service("TFileService",
 process.p = cms.Path(process.gtDigis * process.muonCSCDigis * process.csc2DRecHits * process.cscSegments * process.cscTriggerPrimitiveDigis * process.cscValidation)
 
 
-process.schedule.append(process.p)
+#process.schedule.append(process.p)
