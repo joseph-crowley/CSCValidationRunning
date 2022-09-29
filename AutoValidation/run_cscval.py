@@ -711,7 +711,7 @@ def process_dataset(dataset,globalTag,**kwargs):
     print("prevTime = "+str(prevTime))
 
     # run each individual validation
-    singleRun = True
+    singleRun = False
     if singleRun:
         ffiles = use_dbs.get_files(dataset=dataset)
         files = []
@@ -732,39 +732,45 @@ def process_dataset(dataset,globalTag,**kwargs):
         if force: print("Forcing reprocessing")
         run_validation(dataset, globalTag, str(singleRun), maxJobNum, stream, eventContent, str(num), input_files, force=force, **kwargs)
     else:
-        print("unable to handle blocks currently." )
         ## first get new blocks since a time
+        ##                 (TODO:not working yet)
+        blocks = use_dbs.get_blocks(dataset=dataset)
         #blocks = dbsclient.listBlocks(dataset=dataset, min_cdate=int(prevTime))
 
         ## iterate over each block
-        #updatedRuns = set()
-        #for block in blocks:
-        #    # get runs in block
-        #    runs = dbsclient.listRuns(block_name=block['block_name'])
-        #    updatedRuns.update(set(runs[0]['run_num']))
+        updatedRuns = set()
+        for block in blocks[:3]:
+            # get runs in block
+            runs = use_dbs.get_runs(block=block)
+            updatedRuns.update(set(runs))
+        #print(f'{updatedRuns = }')
 
-        ## iterate over runs
-        #updatedRuns = sorted(updatedRuns)
-        #fileRunMap = {}
-        #eventRunMap = {}
-        #files = dbsclient.listFiles(dataset=dataset, run_num=updatedRuns, validFileOnly=1, detail=True)
-        #if "GEN" in dataset: updatedRuns = [1]
-        #for run in updatedRuns:
-        #    eventRunMap[run] = sum([f['event_count'] for f in files if f['run_num']==run])
-        #    fileRunMap[run] = [f['logical_file_name'] for f in files if f['run_num']==run]
+        # iterate over runs
+        updatedRuns = sorted(updatedRuns)
+        #print(f'sorted {updatedRuns = }')
+        fileRunMap = {}
+        eventRunMap = {}
+        files = use_dbs.get_files(dataset=dataset, runs=updatedRuns)
+        #print(f'{files = }')
+        if "GEN" in dataset: updatedRuns = [1]
+        for run in updatedRuns:
+            eventRunMap[run] = sum([sum(eval(f['events'])) for f in files if int(f['run'])==run])
+            fileRunMap[run] = [f['file'] for f in files if int(f['run'])==run]
 
+        #print(eventRunMap)
+        #print(fileRunMap)
 
-        #runsToUpdate = [run for run in updatedRuns if fileRunMap[run] and eventRunMap[run]>25000]
-        #if "GEN" in dataset: runsToUpdate = [run for run in updatedRuns if fileRunMap[run]]
+        runsToUpdate = [run for run in updatedRuns if fileRunMap[run] and eventRunMap[run]>25000]
+        if "GEN" in dataset: runsToUpdate = [run for run in updatedRuns if fileRunMap[run]]
 
-        #print 'Runs to update:'
-        #for run in runsToUpdate:
-        #    print '    Run {0}: {1} files, {2} events'.format(run,len(fileRunMap[run]),eventRunMap[run])
+        print('Runs to update:')
+        for run in runsToUpdate:
+            print('    Run {0}: {1} files, {2} events'.format(run,len(fileRunMap[run]),eventRunMap[run]))
 
-        #for run in runsToUpdate:
-        #    if int(run)<MINRUN: continue
-        #    print "Processing run %s" % run
-        #    run_validation(dataset, globalTag, str(run), maxJobNum, stream, eventContent, str(eventRunMap[run]), fileRunMap[run], force=force, **kwargs)
+        for run in runsToUpdate:
+            if int(run)<MINRUN: continue
+            print("Processing run %s" % run)
+            run_validation(dataset, globalTag, str(run), maxJobNum, stream, eventContent, str(eventRunMap[run]), fileRunMap[run], force=force, **kwargs)
 
     with open(timeFile, 'a') as file:
         if not dryRun: file.write('{0}\n'.format(curTime))
