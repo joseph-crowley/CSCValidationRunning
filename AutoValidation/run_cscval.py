@@ -300,7 +300,10 @@ def run_validation(dataset,globalTag,run,maxJobNum,stream,eventContent,num,input
             # sh.write('chmod g+w /eos/cms/store/group/dpg_csc/comm_csc/cscval/batch_output/%s/run%s_%s/\n' % (stream, run, eventContent))
             sh.close()
 
-            print("Submitting job %i out of %i total files" % (j+1, numJobs))
+            jobdir = os.path.expandvars("${CMSSW_BASE}/src/CSCValidationRunning/AutoValidation/")
+            jobdir += stream + '/run_' + run
+            if not os.path.isdir(jobdir+"/Logs"):
+                os.makedirs(jobdir+"/Logs")
 
             #Names of file to execute, store output, errors, and job log
             tjobname     = 'run_' + str(j) + '.sh'
@@ -313,6 +316,7 @@ def run_validation(dataset,globalTag,run,maxJobNum,stream,eventContent,num,input
             #Set condor options for sub file
             cjob_to_write =  'executable  = ' + tjobname           + '\n'
             cjob_to_write += 'arguments   = $(ClusterId)$(ProcId)' + '\n'
+            cjob_to_write += 'Initialdir  = ' + jobdir             + '\n'
             cjob_to_write += 'output      = ' + tjobname_out       + '\n'
             cjob_to_write += 'error       = ' + tjobname_err       + '\n'
             cjob_to_write += 'log         = ' + tjobname_log       + '\n'
@@ -322,7 +326,7 @@ def run_validation(dataset,globalTag,run,maxJobNum,stream,eventContent,num,input
             os.system('chmod 755 '+tjobname)
 
             #Write condor options to sub file
-            cjob = open(cdjobname,'w')
+            cjob = open(jobdir + '/' + cdjobname,'w')
             cjob.write(cjob_to_write)
             cjob.close()
 
@@ -739,7 +743,7 @@ def process_dataset(dataset,globalTag,**kwargs):
 
         ## iterate over each block
         updatedRuns = set()
-        for block in blocks[:3]:
+        for block in blocks[:2]:
             # get runs in block
             runs = use_dbs.get_runs(block=block)
             updatedRuns.update(set(runs))
