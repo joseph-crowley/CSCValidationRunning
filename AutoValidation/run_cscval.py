@@ -715,7 +715,7 @@ def process_dataset(dataset,globalTag,**kwargs):
     print("prevTime = "+str(prevTime))
 
     # run each individual validation
-    singleRun = False
+    singleRun = True
     if singleRun:
         ffiles = use_dbs.get_files(dataset=dataset)
         files = []
